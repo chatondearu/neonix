@@ -8,7 +8,6 @@
   imports =
     [ # Include the results of the hardware scan.
       ./system/boot.nix
-      ./alias.nix
       ./hardware-configuration.nix
       ./system/network.nix
       ./system/gpu-2.nix
@@ -75,11 +74,6 @@
   #   enable = true;
   #   enableSSHSupport = true;
   # };
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

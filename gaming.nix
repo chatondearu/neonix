@@ -7,7 +7,6 @@
     vulkan-tools         # Vulkan utilities (vkcube, vulkaninfo) required by goverlay/vkbasalt
     heroic           # Native GOG, Epic, and Amazon Games Launcher for Linux, Windows and Mac
     joystickwake     # Joystick-aware screen waker
-    linuxKernel.packages.linux_6_18.hid-tmff2
     mangohud         # Vulkan and OpenGL overlay for monitoring FPS, temperatures, CPU/GPU load and more
     goverlay         # Graphical UI to configure MangoHud, vkBasalt and other Vulkan/OpenGL overlays
     vkbasalt         # Vulkan post-processing layer for effects like sharpening, color correction
@@ -142,6 +141,4 @@
     SUBSYSTEM=="usb", ATTRS{idVendor}=="2d40", MODE="0666"
     SUBSYSTEM=="usb_device", ATTRS{idVendor}=="2d40", MODE="0666"
   '';
-
-  # imports = [ ./nixpkgs-xr.nix ];
 }
