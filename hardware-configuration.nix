@@ -8,7 +8,7 @@
     [ (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
-  boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
+  boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usbhid" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ ];
   boot.extraModulePackages = [ ];
@@ -27,7 +27,7 @@
     };
 
   swapDevices =
-    [ { device = "/dev/mapper/luks-83f2f902-73e0-46cd-8cde-77d721c363b9"; }
+    [ { device = "/dev/mapper/dev-disk-byx2dpartuuid-da2c2ea6x2d323fx2d426ex2d9644x2d328248df2efa"; }
     ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";

@@ -7,8 +7,10 @@
     raleway oswald merriweather poppins source-sans-pro league-spartan
   ];
 
+  # Enable the X11 windowing system.
   services.xserver = {
     enable = true;
+    videoDrivers = [ "nvidia" ];
     excludePackages = [ pkgs.xterm ];
   };
 

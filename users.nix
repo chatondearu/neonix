@@ -9,7 +9,7 @@
   users.users.chaton = {
     isNormalUser = true;
     description = "Chaton";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "adbusers" ];
     packages = with pkgs; [
     #  thunderbird
       discord

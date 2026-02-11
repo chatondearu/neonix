@@ -8,9 +8,16 @@
   services.displayManager.sddm = {
     enable = true;
   
-  # To use Wayland (Experimental for SDDM)
+    # To use Wayland (Experimental for SDDM)
     wayland.enable = true;
     settings.General.DisplayServer = "wayland";
+  };
+
+  # Enable XDG Portal for Plasma
+  xdg.portal = {
+    enable = true;
+    extraPortals = [ pkgs.kdePackages.xdg-desktop-portal-kde ];
+    xdgOpenUsePortal = true;
   };
 
   environment.plasma6.excludePackages = with pkgs.kdePackages; [

@@ -8,10 +8,12 @@
   imports =
     [ # Include the results of the hardware scan.
       ./system/boot.nix
+      ./alias.nix
+      ./hardware-configuration.nix
       ./system/network.nix
+      ./system/gpu-2.nix
       ./system/system.nix
       ./system/devices.nix
-      ./hardware-configuration.nix
       ./envs/default.nix
       ./envs/desktop-plasma.nix
       ./gaming.nix
@@ -20,11 +22,6 @@
       ./zsh.nix
       ./users.nix
     ];
-
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-  services.xserver.videoDrivers = [ "nvidia" ];
-  hardware.nvidia.open = true; 
   
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -38,13 +35,38 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
+    # utils
     wget
     ghostty
-    kdePackages.partitionmanager
     vlc
+
+    # disk utilities
+    kdePackages.partitionmanager
+    testdisk
+    exfat
+    exfatprogs
+
+    # zip utilities
+    zip
+    unzip
+    p7zip
+    rar
+    unrar
+    gzip
+    xz
+
+    # apps
+    pciutils
+    usbutils
+    ffmpeg
+    ffmpegthumbnailer
   ];
+
+  # Enable AppImage
+  programs.appimage = {
+    enable = true;
+    binfmt = true;
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
