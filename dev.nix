@@ -1,5 +1,7 @@
 { pkgs, ... }:
-
+let
+  secrets = import ./secrets.nix;
+in
 {
 
   environment.systemPackages = with pkgs; [
@@ -14,8 +16,8 @@
     enable = true;
     config = {
       user = {
-        name  = "chatondearu";
-        email = "823314+chatondearu@users.noreply.github.com";
+        name  = secrets.githubUser;
+        email = secrets.githubEmail;
       };
       init.defaultBranch = "main";
     };

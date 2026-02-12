@@ -1,0 +1,19 @@
+# Secrets et données sensibles
+secrets.nix
+*.key
+*.pem
+*.p12
+*.pfx
+*.age
+*.gpg
+
+# Logs et temporaires
+*.log
+*.tmp
+result
+result-*
+
+# Backup files
+*~
+*.bak
+*.swp
