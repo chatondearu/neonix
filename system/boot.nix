@@ -1,12 +1,41 @@
-{ ... }:
+{ config, lib, pkgs, ... }:
 
 {
   # Bootloader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot = {
+    initrd = {
+      systemd.enable = true;
+    };
 
-  # Removing the swap partition from luks to make an auto generated encryption key
-  # boot.initrd.luks.devices."luks-83f2f902-73e0-46cd-8cde-77d721c363b9".device = "/dev/disk/by-uuid/83f2f902-73e0-46cd-8cde-77d721c363b9";
+    loader = {
+      # systemd-boot on UEFI
+      #systemd-boot.enable = true; # Disabled because it's not working with limine
+      efi.canTouchEfiVariables = true;
+
+      # Limine bootloader for UEFI
+      limine = {
+        enable = true;
+        efiSupport = true;
+        style.wallpapers = [pkgs.nixos-artwork.wallpapers.simple-dark-gray-bootloader.gnomeFilePath];
+        maxGenerations = 10;
+        secureBoot.enable = true;
+      };
+      systemd-boot.enable = lib.mkForce false; # Disable systemd-boot
+    };
+
+    tmp = {
+      useTmpfs = true;
+      cleanOnBoot = true;
+    };
+  };
+
+  environment.systemPackages = [pkgs.sbctl]; # Secure Boot Control Tool for limine
+
+  systemd.services.nix-daemon = {
+    environment = {
+      TMPDIR = "/var/tmp";
+    };
+  };
 
   # Configure console keymap
   console.keyMap = "us";

@@ -12,8 +12,10 @@
       ./system/network.nix
       ./system/gpu.nix
       ./system/system.nix
+      ./system/security.nix
       ./system/devices.nix
       ./system/update-notifier.nix
+      ./nix.nix
       ./envs/default.nix
       ./envs/desktop-plasma.nix
       ./gaming/default.nix
@@ -29,9 +31,6 @@
     layout = "us";
     variant = "alt-intl";
   };
-
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
