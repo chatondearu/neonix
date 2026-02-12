@@ -13,6 +13,7 @@
       ./system/gpu-2.nix
       ./system/system.nix
       ./system/devices.nix
+      ./system/update-notifier.nix
       ./envs/default.nix
       ./envs/desktop-plasma.nix
       ./gaming.nix

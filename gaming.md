@@ -17,8 +17,4 @@ journalctl --user --follow --unit monado.service
 
 ### WayVR
 
-to launch way vr with steam just use :
-
-```shell
-steam-run wlx-overlay-s --replace
-```
+see : https://github.com/wlx-team/wayvr?tab=readme-ov-file

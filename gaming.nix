@@ -1,5 +1,11 @@
 { pkgs, ... }:
 
+let
+  # Import unstable packages directly to avoid breaking binary cache
+  pkgs-unstable = import <nixpkgs-unstable> {
+    config.allowUnfree = true;
+  };
+in
 {
   environment.systemPackages = with pkgs; [
     # Gaming tools
@@ -29,9 +35,11 @@
     #  })
 
     ## VR
-    wlx-overlay-s # Overlay for WayVR
     wayvr-dashboard # Dashboard for WayVR
     android-tools # Android tools for debugging and development
+  ] ++ [
+    # Unstable packages (imported separately to preserve binary cache)
+    pkgs-unstable.wayvr # Using unstable version for latest features
   ];
 
   environment.variables = {
@@ -98,6 +106,8 @@
     enable = true;
     openFirewall = true; # Required for wireless streaming
     defaultRuntime = true;
+
+    package = (pkgs.wivrn.override { cudaSupport = true; });
   };
 
   # Monado is a runtime for VR devices
