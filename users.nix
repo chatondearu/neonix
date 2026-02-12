@@ -15,12 +15,17 @@ in
   users.users.chaton = {
     isNormalUser = true;
     description = "Chaton";
-    extraGroups = [ "networkmanager" "wheel" "adbusers" ];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "adbusers"
+    ];
     packages = with pkgs; [
     #  thunderbird
     ] ++ [
       # Using unstable for frequent updates
       pkgs-unstable.discord
+      pkgs-unstable.floorp-bin # Firefox fork
     ];
   };
   
