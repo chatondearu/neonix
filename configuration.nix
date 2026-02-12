@@ -10,13 +10,14 @@
       ./system/boot.nix
       ./hardware-configuration.nix
       ./system/network.nix
-      ./system/gpu-2.nix
+      ./system/gpu.nix
       ./system/system.nix
       ./system/devices.nix
       ./system/update-notifier.nix
       ./envs/default.nix
       ./envs/desktop-plasma.nix
-      ./gaming.nix
+      ./gaming/default.nix
+      ./gaming/vr.nix
       ./stream.nix
       ./dev.nix
       ./zsh.nix
