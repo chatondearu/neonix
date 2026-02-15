@@ -6,6 +6,7 @@
 
   # Essential Wayland packages for niri
   environment.systemPackages = with pkgs; [
+     # wayland
     xwayland-satellite
     xwayland-run
 
@@ -14,6 +15,7 @@
     grim # Screenshot tool
     slurp # Screenshot tool
     wl-clipboard # Clipboard manager
+    wf-recorder
     wlsunset # Screen color temperature
     thunar # File manager recommendation
     mako # Notification daemon
@@ -48,6 +50,4 @@
 
   # Optional: waybar systemd service
   # You can configure waybar in ~/.config/waybar/
-
-  home.file.".config/niri/config.kdl" = { source = ./config.kdl; };
 }

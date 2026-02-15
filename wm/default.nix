@@ -4,7 +4,8 @@
   imports =
     [
       #./niri/niri.nix
-      ./plasma/plasma.nix
+      #./plasma/plasma.nix
+      ./niri/niri-dank.nix
     ];
 
   fonts.packages = with pkgs; [
@@ -24,7 +25,4 @@
     videoDrivers = [ "nvidia" ];
     excludePackages = [ pkgs.xterm ];
   };
-
-  # XDG Portal configuration is now in desktop-specific files (plasma.nix, niri.nix)
-  # to avoid conflicts between different portal implementations
 }

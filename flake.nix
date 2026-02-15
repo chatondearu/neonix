@@ -6,16 +6,23 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    # Alejandra formatter
+    alejandra.url = "github:kamadorueda/alejandra/4.0.0";
+    alejandra.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Home Manager
-    home-manager.url = "github:nix-community/home-manager/release-25.11";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    # Dank Material Shell
+    dms.url = "github:AvengeMedia/DankMaterialShell/stable";
+    dms.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Niri
+    niri.url = "github:sodiboo/niri-flake";
+    niri.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { 
     self,
     nixpkgs,
-    home-manager,
+    alejandra,
     ...
   } @inputs: let
     system = "x86_64-linux";
@@ -26,16 +33,10 @@
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [
-          ./configuration.nix
-          home-manager.nixosModules.home-manager
           {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.chaton = ./home.nix;
-
-            # Optionally, use home-manager.extraSpecialArgs to pass
-            # arguments to home.nix
+            environment.systemPackages = [alejandra.defaultPackage.${system}];
           }
+          ./configuration.nix
         ];
       };
     };

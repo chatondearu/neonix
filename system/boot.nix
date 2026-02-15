@@ -45,9 +45,6 @@
     };
   };
 
-  # Configure console keymap
-  console.keyMap = "us";
-
   fileSystems."/games" = {
     device = "/dev/disk/by-partuuid/fac02d23-340d-499a-8a90-3c799fa1a3c6";
     fsType = "ntfs";

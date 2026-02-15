@@ -15,6 +15,7 @@
         unstable = unstable-pkgs; # Provides pkgs.unstable for convenience
 
         wivrn = unstable-pkgs.wivrn;
+        dgop = unstable-pkgs.dgop; # System monitoring widgets
       })
   ];
 }

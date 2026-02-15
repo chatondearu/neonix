@@ -1,10 +1,13 @@
 { lib, config, pkgs, ... }:
 
 {
+  documentation.nixos.enable = false;
+
   nix = {
     settings = {
       auto-optimise-store = true;
       builders-use-substitutes = true;
+      warn-dirty = false;
       experimental-features = [ "nix-command" "flakes" ];
       
       # Add niri cache to speed up builds

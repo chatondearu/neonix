@@ -18,6 +18,8 @@
     ];
     packages = with pkgs; [
       #thunderbird
+      unstable.discord
+      unstable.floorp-bin # Firefox fork
     ];
   };
   
