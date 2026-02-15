@@ -6,6 +6,9 @@
 
   # Essential Wayland packages for niri
   environment.systemPackages = with pkgs; [
+    xwayland-satellite
+    xwayland-run
+
     waybar # Status bar (simple and lightweight)
     fuzzel # Application launcher (simpler than anyrun)
     grim # Screenshot tool
@@ -45,4 +48,6 @@
 
   # Optional: waybar systemd service
   # You can configure waybar in ~/.config/waybar/
+
+  home.file.".config/niri/config.kdl" = { source = ./config.kdl; };
 }

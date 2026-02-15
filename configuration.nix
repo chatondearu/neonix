@@ -7,6 +7,8 @@
 {
   imports =
     [
+      ./nix.nix
+      ./unstable.nix
       ./system/boot.nix
       ./hardware-configuration.nix
       ./system/network.nix
@@ -16,7 +18,6 @@
       ./system/devices.nix
       ./system/update-notifier.nix
       ./system/debug.nix
-      ./nix.nix
       ./wm/default.nix
       ./gaming/default.nix
       ./stream.nix

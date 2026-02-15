@@ -3,7 +3,7 @@
 {
   imports =
     [
-      ./niri/niri.nix
+      #./niri/niri.nix
       ./plasma/plasma.nix
     ];
 

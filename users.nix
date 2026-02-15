@@ -15,10 +15,7 @@
       "adbusers"
     ];
     packages = with pkgs; [
-    #  thunderbird
-      # Flake uses nixos-unstable, so these are already unstable packages
-      #discord # discord seems to crash a lot at startup
-      floorp-bin # Firefox fork
+      #thunderbird
     ];
   };
   

@@ -26,7 +26,7 @@
 
   # Enable NVIDIA drivers
   hardware.nvidia = {
-    open = true;
+    open = true; # TODO try proprietary driver instead
     package = config.boot.kernelPackages.nvidiaPackages.stable;
     forceFullCompositionPipeline = true; # Force the use of the full composition pipeline for better performance
     nvidiaSettings = true; # Enable Nvidia settings
