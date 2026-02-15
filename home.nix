@@ -75,13 +75,4 @@
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
-
-  # Setting xdg.mime
-  xdg.mimeApps = {
-    enable = true;
-    defaultApplications = {
-      "inode/directory" = "pcmanfm.desktop";
-      "text/x-csharp" = "rider.desktop";
-    };
-  };
 }

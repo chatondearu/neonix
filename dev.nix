@@ -10,8 +10,8 @@ in
     lazygit
     android-tools # For ADB (uaccess handled by systemd 258)
     # Flake uses nixos-unstable, so these are already unstable packages
-    cursor-cli
-    code-cursor
+    unstable.cursor-cli
+    unstable.code-cursor
   ];
 
   programs.git = {
