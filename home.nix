@@ -34,8 +34,8 @@
 
 
     # Flake uses nixos-unstable, so these are already unstable packages
-    discord
-    floorp-bin # Firefox fork
+    unstable.discord
+    unstable.floorp-bin # Firefox fork
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
