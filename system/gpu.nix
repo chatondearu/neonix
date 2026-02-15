@@ -27,29 +27,26 @@
   # Enable NVIDIA drivers
   hardware.nvidia = {
     open = true;
-    nvidiaSettings = true;
-    modesetting.enable = true;
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    forceFullCompositionPipeline = true; # Force the use of the full composition pipeline for better performance
+    nvidiaSettings = true; # Enable Nvidia settings
+    modesetting.enable = true; # Enable modesetting
 
-    #dynamicBoost.enable = false;
-    #powerManagement.enable = true;
-    #powerManagement.finegrained = true; # Not working on Nvidia 3000
+    powerManagement = {
+      enable = false; # disable power management for nvidia because we don't hibernate
+      finegrained = false; # correct for RTX 3000 but we don't use it
+    };
   };
 
   environment.variables = {
-    __GL_SHADER_DISK_CACHE_SIZE = "12000000000";
+    ENERGY_PERF_BIAS = "performance";
+    GSK_RENDERER = "ngl"; # use the new gles renderer for better performance (GTK4)
+
+    __GL_SHADER_DISK_CACHE_SIZE = "12000000000"; # 12GB shader disk cache
   };
 
-  # Fix Nvidia 3000 Dec 2025
-  #boot.blacklistedKernelModules = ["nouveau" "nova_core"];
-
-  # Configuration modprobe
-  #boot.extraModprobeConfig = ''
-  #  options nvidia NVreg_PreserveVideoMemoryAllocations=0
-  #  options nvidia NVreg_TemporaryFilePath=/var/tmp
-  #'';
-
-  # Services systemd pour suspend/resume/hibernate
+  # Services systemd for suspend/resume/hibernate
   systemd.services.nvidia-suspend.enable = true;
   systemd.services.nvidia-resume.enable = true;
-  systemd.services.nvidia-hibernate.enable = true;
+  systemd.services.nvidia-hibernate.enable = false;
 }

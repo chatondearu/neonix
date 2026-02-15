@@ -1,11 +1,6 @@
 { pkgs, ... }:
 let
   secrets = import ./secrets.nix;
-
-  # Import unstable packages directly to avoid breaking binary cache
-  pkgs-unstable = import <nixpkgs-unstable> {
-    config.allowUnfree = true;
-  };
 in
 {
 
@@ -13,10 +8,10 @@ in
     git
     gh
     lazygit
-  ] ++ [
-    # Unstable packages (imported separately to preserve binary cache)
-    pkgs-unstable.cursor-cli
-    pkgs-unstable.code-cursor
+    android-tools # For ADB (uaccess handled by systemd 258)
+    # Flake uses nixos-unstable, so these are already unstable packages
+    cursor-cli
+    code-cursor
   ];
 
   programs.git = {
@@ -31,5 +26,5 @@ in
   };
 
   virtualisation.docker.enable = true;
-  programs.adb.enable = true;
+  # programs.adb no longer needed as systemd 258 handles uaccess rules automatically
 }

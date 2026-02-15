@@ -2,11 +2,11 @@
 
 {
   # Enable bluetooth
-  hardware.bluetooth.enable = true;
-  services.blueman.enable = true;
+  #hardware.bluetooth.enable = true;
+  #services.blueman.enable = true;
 
   # Enable printing
-  services.printing.enable = true;
+  services.printing.enable = false;
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;

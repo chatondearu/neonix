@@ -27,9 +27,15 @@
       useTmpfs = true;
       cleanOnBoot = true;
     };
+    
+    kernelParams = [
+      "nvidia.NVreg_PreserveVideoMemoryAllocations=0"  # Disable video memory preservation
+    ];
   };
 
-  environment.systemPackages = [pkgs.sbctl]; # Secure Boot Control Tool for limine
+  environment.systemPackages = with pkgs; [
+    sbctl # Secure Boot Control Tool for limine
+  ];
 
   systemd.services.nix-daemon = {
     environment = {

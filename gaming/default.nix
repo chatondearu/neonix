@@ -1,11 +1,5 @@
 { pkgs, ... }:
 
-let
-  # Import unstable packages directly to avoid breaking binary cache
-  pkgs-unstable = import <nixpkgs-unstable> {
-    config.allowUnfree = true;
-  };
-in
 {
   environment.systemPackages = with pkgs; [
     # Gaming tools
@@ -30,25 +24,17 @@ in
     heroic           # Native GOG, Epic, and Amazon Games Launcher for Linux, Windows and Mac
     umu-launcher     # Unified launcher for Windows games on Linux using the Steam Linux Runtime and Tools
     faugus-launcher  # An umu based launcher for Windows games on Linux using the Steam Linux Runtime and Tools
-    #cartbridge       # Cartridge Bridge. A GTK4 + Libadwaita game launcher : https://codeberg.org/kramo/cartridges
-    lutris
+    #cartbridge      # Cartridge Bridge. A GTK4 + Libadwaita game launcher : https://codeberg.org/kramo/cartridges
+    #lutris          # Game launcher for Linux, Windows, and macOS
     # Lutris Config with additional libraries
-    #  (lutris.override {
-    #    extraLibraries = p: [ p.libadwaita p.gtk4 ];
-    #  })
-  ] ++ [
+    (lutris.override {
+      extraLibraries = p: [ p.libadwaita p.gtk4 ];
+    })
   ];
 
   environment.variables = {
     MESA_SHADER_CACHE_MAX_SIZE = "12G";
   };
-
-  # Hardware support for devices
-  hardware.steam-hardware.enable = true;
-  hardware.xone.enable = true; # Xbox One Controller
-  hardware.xpadneo.enable = true; # Xbox One Controller with wireless dongle
-  hardware.opentabletdriver.enable = true;
-  services.ratbagd.enable = true; # Ratbagd is a daemon for managing input devices like Logitech G502
 
   programs.gamemode.enable = true;
 
@@ -79,6 +65,13 @@ in
   # then in the steam console tab : 'library_folder_add /games/SteamLibrary'
   # issue solved : do not use exfat filesystem for the steam library !
 
+  # Hardware support for devices
+  #hardware.steam-hardware.enable = true; # implicitly enabled by steam package
+  hardware.xone.enable = true; # Xbox One Controller
+  hardware.xpadneo.enable = true; # Xbox One Controller with wireless dongle
+  hardware.opentabletdriver.enable = true;
+  services.ratbagd.enable = true; # Ratbagd is a daemon for managing input devices like Logitech G502
+
   # Create symlinks for goverlay to detect vkBasalt (hardcoded paths in /usr/ which don't exist on NixOS)
   system.activationScripts.vkbasalt-compat = ''
     # Create /usr/share/vulkan structure for goverlay detection
@@ -97,4 +90,9 @@ in
     # Steam Deck controllers
     SUBSYSTEM=="input", ATTRS{idVendor}=="2dc8", ATTRS{idProduct}=="3106", MODE="0660", GROUP="input"
   '';
+
+  imports =
+    [
+      ./vr/vr.nix
+    ];
 }

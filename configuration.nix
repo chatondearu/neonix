@@ -6,7 +6,7 @@
 
 {
   imports =
-    [ # Include the results of the hardware scan.
+    [
       ./system/boot.nix
       ./hardware-configuration.nix
       ./system/network.nix
@@ -15,16 +15,30 @@
       ./system/security.nix
       ./system/devices.nix
       ./system/update-notifier.nix
+      ./system/debug.nix
       ./nix.nix
-      ./envs/default.nix
-      ./envs/desktop-plasma.nix
+      ./wm/default.nix
       ./gaming/default.nix
-      ./gaming/vr.nix
       ./stream.nix
       ./dev.nix
       ./zsh.nix
       ./users.nix
     ];
+
+  # Select internationalisation properties.
+  i18n.defaultLocale = "en_US.UTF-8";
+
+  i18n.extraLocaleSettings = {
+    LC_ADDRESS = "fr_FR.UTF-8";
+    LC_IDENTIFICATION = "fr_FR.UTF-8";
+    LC_MEASUREMENT = "fr_FR.UTF-8";
+    LC_MONETARY = "fr_FR.UTF-8";
+    LC_NAME = "fr_FR.UTF-8";
+    LC_NUMERIC = "fr_FR.UTF-8";
+    LC_PAPER = "fr_FR.UTF-8";
+    LC_TELEPHONE = "fr_FR.UTF-8";
+    LC_TIME = "fr_FR.UTF-8";
+  };
   
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -37,7 +51,8 @@
   environment.systemPackages = with pkgs; [
     # utils
     wget
-    ghostty
+    ghostty # Terminal emulator
+    helix # Text editor in rust for the terminal
     vlc
 
     # disk utilities

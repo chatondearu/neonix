@@ -16,4 +16,10 @@
     };
     openFirewall = true;
   };
+
+  # Network Service Discovery for mDNS (avahi-daemon). Seems to be needed by mDNS.
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+  };
 }

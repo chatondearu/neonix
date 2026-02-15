@@ -21,5 +21,6 @@
     neo-upgrade = "sudo nix-channel --update && sudo nixos-rebuild switch --upgrade";
     neo-clean = "sudo nix-collect-garbage -d && sudo nix-store --optimise";
     neo-check = "nix-channel --list && echo '\nUpdates available:' && nix-env -u --dry-run";
+    neo-copy-lasg-debug = "journalctl -b -1 --no-pager &> ~/etc/nixos/journal.log";
   };
 }

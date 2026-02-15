@@ -1,22 +1,15 @@
 { pkgs, ... }:
 
-let
-  # Import unstable packages directly to avoid breaking binary cache
-  pkgs-unstable = import <nixpkgs-unstable> {
-    config.allowUnfree = true;
-  };
-in
 {
   environment.systemPackages = with pkgs; [
     android-tools # Android tools for debugging and development
-  ] ++ [
-    pkgs-unstable.wayvr # Great way to stream your desktop to your Quest
+    wayvr # Great way to stream your desktop to your Quest (from nixos-unstable)
   ];
 
    ## VR
 
-  # Enable ADB for Android development and Quest VR headset
-  programs.adb.enable = true;
+  # ADB no longer needs programs.adb.enable as systemd 258 handles uaccess rules automatically
+  # android-tools package is already in systemPackages above
 
   # WiVRn is a runtime for wireless VR devices
   services.wivrn = {
