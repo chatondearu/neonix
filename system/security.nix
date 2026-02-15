@@ -43,10 +43,10 @@
 
     ## Network performance optimizations
     # Increase network buffer sizes
-    "net.core.rmem_default" = 262144;
-    "net.core.rmem_max" = 134217728;
-    "net.core.wmem_default" = 262144;
+    "net.core.rmem_max" = 134217728;  # 128 MB
     "net.core.wmem_max" = 134217728;
+    "net.core.rmem_default" = 16777216;  # 16 MB
+    "net.core.wmem_default" = 16777216;
 
     # TCP buffer sizes
     "net.ipv4.tcp_rmem" = "4096 131072 134217728";

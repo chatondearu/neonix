@@ -30,6 +30,8 @@
     
     kernelParams = [
       "nvidia.NVreg_PreserveVideoMemoryAllocations=0"  # Disable video memory preservation
+      "nvidia-drm.modeset=1"  # Enable DRM kernel mode setting (important for Wayland)
+      "nvidia-drm.fbdev=1"    # Enable framebuffer device support
     ];
   };
 

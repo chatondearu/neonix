@@ -20,31 +20,7 @@
     package = (pkgs.wivrn.override { cudaSupport = true; });
   };
 
-  # Monado is a runtime for VR devices
-  #services.monado = {
-  #  enable = true;
-  #  defaultRuntime = true;
-  #};
-
-  #systemd.user.services.monado = {
-  #  environment = {
-  #    STEAMVR_LH_ENABLE = "1";
-  #    XRT_COMPOSITOR_COMPUTE = "1";
-  #    XRT_COMPOSITOR_FORCE_XCB = "1"; # Force the use of XCB
-   #   IPC_EXIT_ON_DISCONNECT = "1"; # Exit the application when the connection to the device is lost
-  #    U_PACING_COMP_MIN_TIME_MS = "5"; # Minimum time for the compositor to render the frame
-
-   #   DXRT_ENABLE_GPL = "1"; # Enable GPL
-   #   DXRT_BUILD_DRIVER_QUEST_LINK = "1"; # Build the driver question link
-
-   #   #WMR_HANDTRACKING = "0"; # Disable hand tracking
-  #  };
-
-  #  serviceConfig = {
-  #    Nice = 20; # Low priority for the service
-  #  };
-  #};
-
+  # Devicess rules for VR
   services.udev.extraRules = ''
     # Meta Quest VR headsets (Quest 1, 2, 3)
     # Vendor ID 2833 = Oculus/Meta
@@ -58,4 +34,46 @@
     SUBSYSTEM=="usb", ATTRS{idVendor}=="2d40", MODE="0666"
     SUBSYSTEM=="usb_device", ATTRS{idVendor}=="2d40", MODE="0666"
   '';
+
+  # Login limits for VR
+  security.pam.loginLimits = [
+    { domain = "@users"; item = "rtprio"; type = "-"; value = "99"; }
+    { domain = "@users"; item = "nice"; type = "-"; value = "-11"; }
+    { domain = "@users"; item = "memlock"; type = "-"; value = "unlimited"; }
+  ];
+
+  systemd.services.set-steam-vr-capabilities = {
+    description = "Set capabilities for SteamVR binaries";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "local-fs.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      # Attendre que Steam soit installé
+      sleep 2
+      # Trouver et configurer les binaries SteamVR
+      for user_home in /home/*; do
+        steamvr_path="$user_home/.local/share/Steam/steamapps/common/SteamVR"
+        if [ -d "$steamvr_path" ]; then
+          ${pkgs.libcap}/bin/setcap 'cap_sys_nice+eip' "$steamvr_path/bin/linux64/vrcompositor" 2>/dev/null || true
+          ${pkgs.libcap}/bin/setcap 'cap_sys_nice+eip' "$steamvr_path/bin/linux64/vrserver" 2>/dev/null || true
+        fi
+      done
+    '';
+  };
+
+  # Pipewire for audio and video for VR
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;  # Important pour Steam
+    pulse.enable = true;
+    wireplumber.enable = true;  # Gestionnaire de session
+  };
+  networking.firewall = {
+    allowedTCPPorts = [ 27062 ];  # SteamVR web interface
+    allowedUDPPorts = [ 10400 ];  # VRLink UDP
+  };
 }

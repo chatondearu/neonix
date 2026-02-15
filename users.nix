@@ -13,6 +13,8 @@
       "networkmanager"
       "wheel"
       "adbusers"
+      "video"
+      "input"
     ];
     packages = with pkgs; [
       #thunderbird

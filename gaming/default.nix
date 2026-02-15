@@ -54,6 +54,15 @@
     package = pkgs.steam.override {
       extraEnv = {
         OBS_VKCAPTURE = true;
+        # Add these for Wayland + NVIDIA:
+        ENABLE_VKBASALT = "1";
+        SDL_VIDEODRIVER = "wayland";
+        GBM_BACKEND = "nvidia-drm";
+        __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+
+        # For VR
+        VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.x86_64.json";
+        PRESSURE_VESSEL_FILESYSTEMS_RO = "/nix/store";
       };
     };
 
