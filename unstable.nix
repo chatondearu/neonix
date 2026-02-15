@@ -13,6 +13,8 @@
       in
       {
         unstable = unstable-pkgs; # Provides pkgs.unstable for convenience
+
+        wivrn = unstable-pkgs.wivrn;
       })
   ];
 }
