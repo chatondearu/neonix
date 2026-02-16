@@ -15,7 +15,13 @@
         unstable = unstable-pkgs; # Provides pkgs.unstable for convenience
 
         wivrn = unstable-pkgs.wivrn;
+
+        # Dank Material Shell
+        dms-shell = unstable-pkgs.dms-shell;
         dgop = unstable-pkgs.dgop; # System monitoring widgets
+
+        # Niri
+        niri = unstable-pkgs.niri;
       })
   ];
 }

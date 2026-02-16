@@ -1,11 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   imports =
     [
-      #./niri/niri.nix
-      #./plasma/plasma.nix
-      ./niri/niri-dank.nix
+      ./niri/niri.nix
     ];
 
   fonts.packages = with pkgs; [
