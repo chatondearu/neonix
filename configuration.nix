@@ -20,10 +20,10 @@
       ./system/update-notifier.nix
       ./system/debug.nix
       ./wm/default.nix
+      ./zsh.nix
+      ./dev/default.nix
       ./gaming/default.nix
       ./stream.nix
-      ./dev.nix
-      ./zsh.nix
       ./users.nix
     ];
 

@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  secrets = import ./secrets.nix;
+  secrets = import ./../secrets.nix;
 in
 {
 
@@ -9,6 +9,7 @@ in
     gh
     lazygit
     android-tools # For ADB (uaccess handled by systemd 258)
+
     # Flake uses nixos-unstable, so these are already unstable packages
     unstable.cursor-cli
     unstable.code-cursor
@@ -25,6 +26,9 @@ in
     };
   };
 
-  virtualisation.docker.enable = true;
-  # programs.adb no longer needed as systemd 258 handles uaccess rules automatically
+  imports = [
+    ./shell.nix
+    ./docker.nix
+    ./ollama.nix
+  ];
 }

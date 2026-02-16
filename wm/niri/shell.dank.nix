@@ -1,6 +1,8 @@
 { pkgs, inputs, ... }:
 
 {
+  # DANK LINUX - https://danklinux.com/docs/dankmaterialshell/nixos
+  
   imports = [
     # Import the dms-shell module from unstable
     "${inputs.nixpkgs-unstable}/nixos/modules/programs/wayland/dms-shell.nix"
