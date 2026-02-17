@@ -16,6 +16,14 @@
 
     # nix-maid
     nix-maid.url = "github:viperML/nix-maid";
+
+    # quickshell
+    quickshell.url = "git+https://git.outfoxxed.me/quickshell/quickshell";
+    quickshell.inputs.nixpkgs.follows = "nixpkgs";
+
+    # dms-plugin-registry
+    dms-plugin-registry.url = "github:AvengeMedia/dms-plugin-registry";
+    dms-plugin-registry.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { 
