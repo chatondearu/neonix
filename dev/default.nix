@@ -27,8 +27,7 @@ in
   };
 
   imports = [
-    ./shell.nix
     ./docker.nix
-    ./ia.nix
+    ./ai.nix
   ];
 }

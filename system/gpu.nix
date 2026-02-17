@@ -24,6 +24,9 @@
     ];
   };
 
+  # NVIDIA X11/XWayland video driver
+  services.xserver.videoDrivers = [ "nvidia" ];
+
   # Enable NVIDIA drivers
   hardware.nvidia = {
     open = false; # TODO try proprietary driver instead

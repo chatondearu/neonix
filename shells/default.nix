@@ -1,23 +1,22 @@
 { pkgs, ... }:
 
 {
-  # Default Shell (zsh)
-  programs.zsh = {
-    enable = true;
-  
-    syntaxHighlighting.enable = true;
-    enableCompletion = true;
-    autosuggestions.enable = true;
-    enableLsColors = true;
+  imports = [
+    ./zsh.nix
+    ./fish.nix
+  ];
+
+  # Available shells
+  environment = {
+    shells = with pkgs; [ fish zsh ];
+    pathsToLink = [ "/share/fish" "/share/zsh" ];
   };
 
-  users.defaultUserShell = pkgs.zsh;
-
-  # Shell aliases
+  # Common shell aliases (applied to all shells)
   environment.shellAliases = {
     # VR
     neo-monado = "systemctl --user start monado.service";
-    
+
     # System updates
     neo-update-channel = "sudo nix-channel --update && neo-switch";
     neo-upgrade-channel = "sudo nix-channel --update && neo-switch --upgrade";

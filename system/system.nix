@@ -1,7 +1,7 @@
 { lib, config, pkgs, ... }:
 
 {
-   # Additional security hardening for HSI compliance
+  # Security hardening for HSI compliance
   security = {
     forcePageTableIsolation = true;
     protectKernelImage = true;
@@ -11,14 +11,11 @@
     };
   };
 
-  services = {
-    # for SSD/NVME
-    fstrim.enable = true;
-  };
+  # SSD/NVMe TRIM
+  services.fstrim.enable = true;
 
   hardware = {
     enableRedistributableFirmware = true;
-    cpu.amd.updateMicrocode = true;
     i2c.enable = true;
   };
 
@@ -39,22 +36,20 @@
     }
   ];
 
-    # List packages installed in system profile. To search, run:
-  # $ nix search wget
   environment.systemPackages = with pkgs; [
-    # utils
+    # Utilities
     wget
-    ghostty # Terminal emulator
-    helix # Text editor in rust for the terminal
+    ghostty
+    helix
     vlc
 
-    # disk utilities
+    # Disk utilities
     kdePackages.partitionmanager
     testdisk
     exfat
     exfatprogs
 
-    # zip utilities
+    # Archive utilities
     zip
     unzip
     p7zip
@@ -63,7 +58,7 @@
     gzip
     xz
 
-    # apps
+    # Hardware info
     pciutils
     usbutils
     ffmpeg

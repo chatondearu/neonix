@@ -19,74 +19,47 @@
     xwayland-satellite
     xwayland-run
 
-    # Application launcher and UI
-    fuzzel # Application launcher
-    
+    # Application launcher
+    fuzzel
+
     # Screenshot tools
     grim
     slurp
     swappy # Screenshot editor
-    
-    # Clipboard and media
-    # wl-clipboard
-    # cliphist # Clipboard history
-    # wf-recorder
-    
-    # System utilities 
-    mako # Notification daemon
-    
+
     # Media control
     playerctl # Media player controller
     pavucontrol # PulseAudio volume control
-    
-    # Session management
-    wlogout # Logout menu
-    
-    # Terminal emulator (if not already in system.nix)
-    ghostty
 
     # Multi-display management
     wdisplays # GUI for display configuration
-    
-    # Screen locking and idle
-    swaylock # Screen locker
-    swayidle # Idle management
-    
-    # Color picker and tools
-    # grim
-    # slurp
-    # wl-color-picker
-    
+
     # File management
-    xfce.thunar # File manager
-    xfce.thunar-volman # Thunar volume manager
-    xfce.thunar-archive-plugin # Archive support for Thunar
+    xfce.thunar
+    xfce.thunar-volman
+    xfce.thunar-archive-plugin
     gvfs # Virtual filesystem (for network shares, etc.)
-    
+
     # Image viewer
     imv # Wayland image viewer
-    
+
     # PDF viewer
-    zathura # Minimal PDF viewer
-    
-    # GTK themes for better appearance
+    zathura
+
+    # GTK themes
     papirus-icon-theme
     adwaita-icon-theme
     gnome-themes-extra
-    
+
     # Network management GUI
     networkmanagerapplet
-    
-    # Color temperature with more features
-    # wlsunset is already installed, but gammastep offers more control
-    gammastep
   ];
 
   # XDG Portal configuration for Niri
   xdg.portal = {
     enable = true;
     xdgOpenUsePortal = true;
-    extraPortals = with pkgs; [ 
+    extraPortals = with pkgs; [
       xdg-desktop-portal-gnome
       xdg-desktop-portal-gtk
     ];
@@ -107,9 +80,6 @@
     NIXOS_OZONE_WL = "1"; # Enable Wayland support in Electron/Chrome apps
   };
 
-
-
   # GTK theme configuration for consistent appearance
   programs.dconf.enable = true;
-
 }

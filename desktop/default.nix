@@ -1,10 +1,9 @@
 { pkgs, ... }:
 
 {
-  imports =
-    [
-      ./niri/niri.nix
-    ];
+  imports = [
+    ./niri/niri.nix
+  ];
 
   fonts.packages = with pkgs; [
     noto-fonts noto-fonts-cjk-sans noto-fonts-color-emoji liberation_ttf
@@ -14,13 +13,9 @@
 
   services.displayManager.autoLogin.enable = false;
 
-  # Set the default session to niri
-  #services.displayManager.defaultSession = "niri";
-
-  # Enable the X11 windowing system specifically for Nvidia Driver and steam
+  # Enable X11 for XWayland support (videoDrivers configured in system/gpu.nix)
   services.xserver = {
     enable = true;
-    videoDrivers = [ "nvidia" ];
     excludePackages = [ pkgs.xterm ];
   };
 }
