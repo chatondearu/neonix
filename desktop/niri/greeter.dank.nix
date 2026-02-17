@@ -8,6 +8,7 @@
 
   services.displayManager.dms-greeter = {
     enable = true;
+    package = inputs.dms.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
     compositor = {
       name = "niri";

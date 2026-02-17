@@ -21,6 +21,10 @@
     quickshell.url = "git+https://git.outfoxxed.me/quickshell/quickshell";
     quickshell.inputs.nixpkgs.follows = "nixpkgs";
 
+    # dms
+    dms.url = "github:AvengeMedia/DankMaterialShell/stable";
+    dms.inputs.nixpkgs.follows = "nixpkgs";
+
     # dms-plugin-registry
     dms-plugin-registry.url = "github:AvengeMedia/dms-plugin-registry";
     dms-plugin-registry.inputs.nixpkgs.follows = "nixpkgs";
