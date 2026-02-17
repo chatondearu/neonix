@@ -8,16 +8,11 @@
     # Import the niri module from unstable
     "${inputs.nixpkgs-unstable}/nixos/modules/programs/wayland/niri.nix"
     ./shell.dank.nix
+    ./greeter.dank.nix
   ];
 
   # Enable niri compositor
   programs.niri.enable = true;
-
-  # Display manager configuration for Niri
-  services.displayManager.sddm = {
-    enable = true;
-    wayland.enable = true;
-  };
 
   environment.systemPackages = with pkgs; [
     # Wayland essentials
@@ -33,9 +28,9 @@
     swappy # Screenshot editor
     
     # Clipboard and media
-    wl-clipboard
-    cliphist # Clipboard history
-    wf-recorder
+    # wl-clipboard
+    # cliphist # Clipboard history
+    # wf-recorder
     
     # System utilities 
     mako # Notification daemon
@@ -59,9 +54,9 @@
     swayidle # Idle management
     
     # Color picker and tools
-    grim
-    slurp
-    wl-color-picker
+    # grim
+    # slurp
+    # wl-color-picker
     
     # File management
     xfce.thunar # File manager
@@ -76,14 +71,12 @@
     zathura # Minimal PDF viewer
     
     # GTK themes for better appearance
+    papirus-icon-theme
     adwaita-icon-theme
     gnome-themes-extra
     
     # Network management GUI
     networkmanagerapplet
-    
-    # System monitoring
-    btop # Better top
     
     # Color temperature with more features
     # wlsunset is already installed, but gammastep offers more control
@@ -112,11 +105,7 @@
     XDG_SESSION_TYPE = "wayland";
     XDG_CURRENT_DESKTOP = "niri";
     XDG_SESSION_DESKTOP = "niri";
-    QT_QPA_PLATFORM = "wayland";
-    QT_QPA_PLATFORMTHEME = "gtk3";
-    QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
     NIXOS_OZONE_WL = "1"; # Enable Wayland support in Electron/Chrome apps
-    ELECTRON_OZONE_PLATFORM_HINT = "auto";
   };
 
   # Automatic display configuration with kanshi
@@ -132,34 +121,34 @@
   };
 
   # Automatic screen locking with swayidle
-  systemd.user.services.swayidle = {
-    description = "Idle manager for Wayland";
-    wantedBy = [ "graphical-session.target" ];
-    partOf = [ "graphical-session.target" ];
-    serviceConfig = {
-      Type = "simple";
-      ExecStart = ''
-        ${pkgs.swayidle}/bin/swayidle -w \
-          timeout 300 '${pkgs.swaylock}/bin/swaylock -f' \
-          timeout 600 'niri msg action power-off-monitors' \
-          resume 'niri msg action power-on-monitors' \
-          before-sleep '${pkgs.swaylock}/bin/swaylock -f'
-      '';
-      Restart = "on-failure";
-    };
-  };
+  # systemd.user.services.swayidle = {
+  #   description = "Idle manager for Wayland";
+  #   wantedBy = [ "graphical-session.target" ];
+  #   partOf = [ "graphical-session.target" ];
+  #   serviceConfig = {
+  #     Type = "simple";
+  #     ExecStart = ''
+  #       ${pkgs.swayidle}/bin/swayidle -w \
+  #         timeout 300 '${pkgs.swaylock}/bin/swaylock -f' \
+  #         timeout 600 'niri msg action power-off-monitors' \
+  #         resume 'niri msg action power-on-monitors' \
+  #         before-sleep '${pkgs.swaylock}/bin/swaylock -f'
+  #     '';
+  #     Restart = "on-failure";
+  #   };
+  # };
 
   # Clipboard history daemon
-  systemd.user.services.cliphist = {
-    description = "Clipboard history daemon";
-    wantedBy = [ "graphical-session.target" ];
-    partOf = [ "graphical-session.target" ];
-    serviceConfig = {
-      Type = "simple";
-      ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --watch ${pkgs.cliphist}/bin/cliphist store";
-      Restart = "on-failure";
-    };
-  };
+  # systemd.user.services.cliphist = {
+  #   description = "Clipboard history daemon";
+  #   wantedBy = [ "graphical-session.target" ];
+  #   partOf = [ "graphical-session.target" ];
+  #   serviceConfig = {
+  #     Type = "simple";
+  #     ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --watch ${pkgs.cliphist}/bin/cliphist store";
+  #     Restart = "on-failure";
+  #   };
+  # };
 
   # GTK theme configuration for consistent appearance
   programs.dconf.enable = true;
@@ -174,22 +163,22 @@
   # };
 
   # Font configuration for better text rendering
-  fonts.fontconfig = {
-    enable = true;
-    defaultFonts = {
-      monospace = [ "Fira Code" "DejaVu Sans Mono" ];
-      sansSerif = [ "Roboto" "DejaVu Sans" ];
-      serif = [ "DejaVu Serif" ];
-    };
-    # Enable subpixel rendering
-    subpixel = {
-      rgba = "rgb";
-      lcdfilter = "default";
-    };
-    # Better hinting
-    hinting = {
-      enable = true;
-      style = "slight";
-    };
-  };
+  # fonts.fontconfig = {
+  #   enable = true;
+  #   defaultFonts = {
+  #     monospace = [ "Fira Code" "DejaVu Sans Mono" ];
+  #     sansSerif = [ "Roboto" "DejaVu Sans" ];
+  #     serif = [ "DejaVu Serif" ];
+  #   };
+  #   # Enable subpixel rendering
+  #   subpixel = {
+  #     rgba = "rgb";
+  #     lcdfilter = "default";
+  #   };
+  #   # Better hinting
+  #   hinting = {
+  #     enable = true;
+  #     style = "slight";
+  #   };
+  # };
 }

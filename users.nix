@@ -15,6 +15,7 @@
       "adbusers"
       "video"
       "input"
+      "greeter"
     ];
     packages = with pkgs; [
       #thunderbird

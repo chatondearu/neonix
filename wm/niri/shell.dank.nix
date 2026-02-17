@@ -10,10 +10,10 @@
   ];
 
   environment.systemPackages = with pkgs; [
-    dgop
-    matugen
-    cava
-    khal
+    dgop # System monitoring widgets
+    matugen # automatic color shemes generation from wallpaper on dms
+    cava # audio visualizer
+    khal # calendar integration
 
     linux-wallpaperengine # Wallpaper engine for plugin : https://github.com/sgtaziz/dms-wallpaperengine
   ];
@@ -51,7 +51,11 @@
     };
   };
 
-  # users.users.chaton.maid = {
-  #   # file.xdg_config."dms-shell/config.json".source = "{{home}}/etc/nixos/wm/niri/dms-shell/config.json";
-  # };
+  # Session variables for DMS
+  environment.sessionVariables = {
+    QT_QPA_PLATFORM = "wayland";
+    QT_QPA_PLATFORMTHEME = "gtk3";
+    QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
+    ELECTRON_OZONE_PLATFORM_HINT = "auto";
+  };
 }

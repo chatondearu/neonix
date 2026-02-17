@@ -18,6 +18,7 @@
 
         # Dank Material Shell
         dms-shell = unstable-pkgs.dms-shell;
+        dms-greeter = unstable-pkgs.dms-greeter;
         dgop = unstable-pkgs.dgop; # System monitoring widgets
 
         # Niri

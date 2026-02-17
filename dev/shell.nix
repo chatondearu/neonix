@@ -24,8 +24,14 @@
     fzf
     fishPlugins.grc
     grc
+    jq  # Required by fishPlugins.done for window focus detection
   
     # Use 3rd-party fish plugins manually packaged.
     #(pkgs.callPackage ../fish-colored-man.nix {buildFishPlugin = pkgs.fishPlugins.buildFishPlugin; } )
   ];
+
+  environment = {
+    shells = with pkgs; [ fish zsh ];
+    pathsToLink = ["/share/fish" "/share/zsh"];
+  };
 }
