@@ -13,12 +13,16 @@
     # Alejandra formatter
     alejandra.url = "github:kamadorueda/alejandra/4.0.0";
     alejandra.inputs.nixpkgs.follows = "nixpkgs";
+
+    # nix-maid
+    nix-maid.url = "github:viperML/nix-maid";
   };
 
   outputs = { 
     self,
     nixpkgs,
     alejandra,
+    nix-maid,
     ...
   } @inputs: let
     system = "x86_64-linux";
@@ -34,6 +38,8 @@
           {
             environment.systemPackages = [alejandra.defaultPackage.${system}];
           }
+
+          nix-maid.nixosModules.default
 
           # NixOS configuration
           ./configuration.nix

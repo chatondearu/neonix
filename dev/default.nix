@@ -29,6 +29,6 @@ in
   imports = [
     ./shell.nix
     ./docker.nix
-    ./ollama.nix
+    ./ia.nix
   ];
 }
