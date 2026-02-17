@@ -76,9 +76,9 @@
 
   # Hardware support for devices
   #hardware.steam-hardware.enable = true; # implicitly enabled by steam package
-  hardware.xone.enable = true; # Xbox One Controller
+  # hardware.xone.enable = true; # Xbox One Controller (disabled: firmware not installed, causes init radio failed)
   hardware.xpadneo.enable = true; # Xbox One Controller with wireless dongle
-  hardware.opentabletdriver.enable = true;
+  # hardware.opentabletdriver.enable = true; # Disabled: no tablet detected, wastes resources scanning
   services.ratbagd.enable = true; # Ratbagd is a daemon for managing input devices like Logitech G502
 
   # Create symlinks for goverlay to detect vkBasalt (hardcoded paths in /usr/ which don't exist on NixOS)

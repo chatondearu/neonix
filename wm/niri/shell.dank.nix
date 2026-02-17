@@ -16,6 +16,11 @@
     khal # calendar integration
 
     linux-wallpaperengine # Wallpaper engine for plugin : https://github.com/sgtaziz/dms-wallpaperengine
+
+    # QtMultimedia backend for DMS sound effects
+    gst_all_1.gstreamer
+    gst_all_1.gst-plugins-base
+    gst_all_1.gst-plugins-good
   ];
 
   programs.dms-shell = {

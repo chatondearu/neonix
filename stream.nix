@@ -2,7 +2,7 @@
 
 {
   environment.systemPackages = with pkgs; [
-    streamcontroller
+    unstable.streamcontroller
   ];
 
   programs.streamdeck-ui = {

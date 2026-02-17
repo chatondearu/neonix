@@ -1,9 +1,9 @@
 { ... }:
 
 {
-  # Enable bluetooth
-  hardware.bluetooth.enable = true;
-  services.blueman.enable = true;
+  # Bluetooth disabled (no hardware adapter detected)
+  hardware.bluetooth.enable = false;
+  services.blueman.enable = false;
 
   # Enable printing
   services.printing.enable = false;
