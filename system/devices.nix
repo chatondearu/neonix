@@ -5,6 +5,9 @@
   hardware.bluetooth.enable = false;
   services.blueman.enable = false;
 
+  # Power management (required by DMS and wireplumber)
+  services.upower.enable = true;
+
   # Printing
   services.printing.enable = false;
 

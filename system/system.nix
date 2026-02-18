@@ -22,17 +22,15 @@
   zramSwap = {
     enable = true;
     algorithm = "zstd";
-    memoryPercent = 50;
+    memoryPercent = 75;
     priority = 5;
   };
 
   swapDevices = [
     {
       device = "/dev/disk/by-partuuid/da2c2ea6-323f-426e-9644-328248df2efa";
-      randomEncryption = {
-        enable = true;
-        allowDiscards = true;
-      };
+      # randomEncryption disabled: nohibernate is set so swap is ephemeral,
+      # and dm_crypt causes deadlocks under memory pressure (bio alloc failure)
     }
   ];
 

@@ -66,4 +66,25 @@
     QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
     ELECTRON_OZONE_PLATFORM_HINT = "auto";
   };
+
+  # Strip trailing whitespace-only lines from .desktop files (SteamVR generates
+  # broken entries that cause quickshell desktop-entry parser to flood warnings
+  # and can trigger a crash in QObjectWrapper::wrap_slowPath)
+  systemd.user.services.fix-desktop-entries = {
+    description = "Fix malformed .desktop files";
+    wantedBy = [ "graphical-session.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = pkgs.writeShellScript "fix-desktop-entries" ''
+        dir="$HOME/.local/share/applications"
+        [ -d "$dir" ] || exit 0
+        for f in "$dir"/*.desktop; do
+          [ -f "$f" ] || continue
+          if ${pkgs.gnugrep}/bin/grep -Pq '^\s+$' "$f"; then
+            ${pkgs.gnused}/bin/sed -i '/^\s*$/d' "$f"
+          fi
+        done
+      '';
+    };
+  };
 }
