@@ -30,5 +30,6 @@ in
     ./docker.nix
     ./ai.nix
     ./helix.nix
+    ./direnv.nix
   ];
 }

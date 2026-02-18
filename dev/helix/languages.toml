@@ -1,4 +1,11 @@
-# --- Extra language servers ---
+# Language servers defined here are only active if the binary is in PATH.
+# Project-specific LSPs are installed via direnv + flake.nix per project.
+
+# --- Global language server declarations ---
+
+[language-server.emmet-language-server]
+command = "emmet-language-server"
+args = ["--stdio"]
 
 [language-server.eslint]
 command = "vscode-eslint-language-server"
@@ -10,15 +17,13 @@ run = "onType"
 experimental = { useFlatConfig = true }
 codeAction = { disableRuleComment = { enable = true, location = "separateLine" }, showDocumentation = { enable = true } }
 
-[language-server.emmet-language-server]
-command = "emmet-language-server"
-args = ["--stdio"]
-
 [language-server.tailwindcss]
 command = "tailwindcss-language-server"
 args = ["--stdio"]
 
 # --- Language overrides ---
+# LSPs here are declared but only activate when the binary exists in PATH
+# (i.e. when direnv loads the project flake)
 
 [[language]]
 name = "typescript"

@@ -7,41 +7,25 @@
   };
 
   environment.systemPackages = with pkgs; [
-    # Editor
+    # Editor + shell integration
     helix
+    fish-helix
 
-    # Helix has no built-in terminal; zellij provides split panes
-    # to run opencode + helix side-by-side (like Cursor's AI sidebar)
+    # Split panes to run opencode + helix side-by-side
     zellij
 
-    # --- LSP servers ---
+    # --- Global LSP servers (always needed regardless of project type) ---
 
-    # TypeScript / JavaScript / Vue / Nuxt
-    typescript
-    typescript-language-server
-    vue-language-server           # Volar (Vue 3 / Nuxt 3)
-    vscode-langservers-extracted  # HTML, CSS, JSON, ESLint LSPs
-    tailwindcss-language-server
-    emmet-language-server
-    prettierd                     # Fast prettier daemon for formatting
+    # Nix (system config, flakes, shell.nix)
+    nil
+    nixfmt-rfc-style
 
-    # Rust
-    rustc
-    cargo
-    rustfmt
-    clippy
-    rust-analyzer
+    # Config files common to all projects
+    taplo               # TOML (Cargo.toml, flake.nix, pyproject.toml)
+    yaml-language-server
+    marksman            # Markdown
 
-    # Nix
-    nil                           # Nix LSP
-    nixfmt-rfc-style              # Nix formatter
-
-    # Config files
-    taplo                         # TOML (Cargo.toml, pyproject.toml)
-    yaml-language-server          # YAML (docker-compose, CI configs)
-    marksman                      # Markdown
-
-    # --- Debug adapters (DAP) ---
-    lldb    # Rust / C / C++ debugging via lldb-dap
+    # Generic formatter (used as fallback)
+    prettierd
   ];
 }
