@@ -35,10 +35,9 @@
     wdisplays # GUI for display configuration
 
     # File management
-    xfce.thunar
-    xfce.thunar-volman
-    xfce.thunar-archive-plugin
+    nautilus # GTK4/libadwaita, integrates with DMS dynamic theming
     gvfs # Virtual filesystem (for network shares, etc.)
+    yazi # TUI file manager (Rust, image previews in Ghostty)
 
     # Image viewer
     imv # Wayland image viewer
