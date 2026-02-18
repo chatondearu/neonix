@@ -1,0 +1,85 @@
+# --- Extra language servers ---
+
+[language-server.eslint]
+command = "vscode-eslint-language-server"
+args = ["--stdio"]
+
+[language-server.eslint.config]
+validate = "on"
+run = "onType"
+experimental = { useFlatConfig = true }
+codeAction = { disableRuleComment = { enable = true, location = "separateLine" }, showDocumentation = { enable = true } }
+
+[language-server.emmet-language-server]
+command = "emmet-language-server"
+args = ["--stdio"]
+
+[language-server.tailwindcss]
+command = "tailwindcss-language-server"
+args = ["--stdio"]
+
+# --- Language overrides ---
+
+[[language]]
+name = "typescript"
+language-servers = ["typescript-language-server", "eslint"]
+formatter = { command = "prettierd", args = ["dummy.ts"] }
+auto-format = true
+
+[[language]]
+name = "tsx"
+language-servers = ["typescript-language-server", "eslint", "tailwindcss"]
+formatter = { command = "prettierd", args = ["dummy.tsx"] }
+auto-format = true
+
+[[language]]
+name = "javascript"
+language-servers = ["typescript-language-server", "eslint"]
+formatter = { command = "prettierd", args = ["dummy.js"] }
+auto-format = true
+
+[[language]]
+name = "jsx"
+language-servers = ["typescript-language-server", "eslint", "tailwindcss"]
+formatter = { command = "prettierd", args = ["dummy.jsx"] }
+auto-format = true
+
+[[language]]
+name = "vue"
+language-servers = ["vue-language-server", "tailwindcss", "eslint"]
+formatter = { command = "prettierd", args = ["dummy.vue"] }
+auto-format = true
+
+[[language]]
+name = "html"
+language-servers = ["vscode-html-language-server", "tailwindcss", "emmet-language-server"]
+formatter = { command = "prettierd", args = ["dummy.html"] }
+auto-format = true
+
+[[language]]
+name = "css"
+language-servers = ["vscode-css-language-server", "tailwindcss"]
+formatter = { command = "prettierd", args = ["dummy.css"] }
+auto-format = true
+
+[[language]]
+name = "json"
+formatter = { command = "prettierd", args = ["dummy.json"] }
+auto-format = true
+
+[[language]]
+name = "nix"
+formatter = { command = "nixfmt" }
+auto-format = true
+
+[[language]]
+name = "rust"
+auto-format = true
+
+[[language]]
+name = "toml"
+auto-format = true
+
+[[language]]
+name = "markdown"
+auto-format = true

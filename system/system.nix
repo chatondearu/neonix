@@ -38,7 +38,7 @@
     # Utilities
     wget
     ghostty
-    helix
+    #nano - set by default
     vlc
 
     # Disk utilities

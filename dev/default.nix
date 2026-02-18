@@ -29,5 +29,6 @@ in
   imports = [
     ./docker.nix
     ./ai.nix
+    ./helix.nix
   ];
 }
