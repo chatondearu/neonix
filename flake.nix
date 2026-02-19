@@ -28,6 +28,9 @@
     # dms-plugin-registry
     dms-plugin-registry.url = "github:AvengeMedia/dms-plugin-registry";
     dms-plugin-registry.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Affinity v3 (Designer, Photo, Publisher) via Wine
+    affinity-nix.url = "github:mrshmllow/affinity-nix";
   };
 
   outputs = { 

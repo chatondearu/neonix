@@ -7,5 +7,7 @@
     unstable.floorp-bin # Firefox fork with vertical tabs
     # vesktop: Discord client with Vencord, no forced updates, native Wayland
     unstable.vesktop
+
+    jellyfin-desktop
   ];
 }

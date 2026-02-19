@@ -32,6 +32,7 @@
     # User applications
     ./apps/browsers.nix
     ./apps/streaming.nix
+    ./apps/dao.nix
   ];
 
   # Enable AppImage support
