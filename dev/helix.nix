@@ -9,7 +9,6 @@
   environment.systemPackages = with pkgs; [
     # Editor + shell integration
     helix
-    fish-helix
 
     # Split panes to run opencode + helix side-by-side
     zellij

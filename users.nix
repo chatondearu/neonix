@@ -11,6 +11,7 @@
       "video"
       "input"
       "greeter"
+      "docker"
     ];
   };
 }
