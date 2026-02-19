@@ -8,6 +8,7 @@
     # vesktop: Discord client with Vencord, no forced updates, native Wayland
     unstable.vesktop
 
+    telegram-desktop
     jellyfin-desktop
   ];
 }
