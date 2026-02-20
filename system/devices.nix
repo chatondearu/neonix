@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs,... }:
 
 {
   # Bluetooth (disabled: no hardware adapter detected)
@@ -20,4 +20,10 @@
     pulse.enable = true;
     jack.enable = true; # Advanced audio routing (DMS audio features)
   };
+
+  # Keyboard: ZSA
+  hardware.keyboard.zsa.enable = true;
+  environment.systemPackages = with pkgs; [
+    keymapp
+  ];
 }
