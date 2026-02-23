@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   # Bootloader.
@@ -16,7 +21,7 @@
       limine = {
         enable = true;
         efiSupport = true;
-        style.wallpapers = [pkgs.nixos-artwork.wallpapers.simple-dark-gray-bootloader.gnomeFilePath];
+        style.wallpapers = [ pkgs.nixos-artwork.wallpapers.simple-dark-gray-bootloader.gnomeFilePath ];
         maxGenerations = 10;
         secureBoot.enable = true;
       };
@@ -27,11 +32,13 @@
       useTmpfs = true;
       cleanOnBoot = true;
     };
-    
+
     kernelParams = [
-      "nvidia.NVreg_PreserveVideoMemoryAllocations=0"  # Disable video memory preservation
-      "nvidia-drm.modeset=1"  # Enable DRM kernel mode setting (important for Wayland)
-      "nvidia-drm.fbdev=1"    # Enable framebuffer device support
+      "nvidia.NVreg_PreserveVideoMemoryAllocations=0"
+      "nvidia-drm.modeset=1"
+      "nvidia-drm.fbdev=1"
+      "nvidia.NVreg_EnableGpuFirmware=1"
+      "nvidia.NVreg_RmRestrictDeviceFileAccess=0"
     ];
   };
 

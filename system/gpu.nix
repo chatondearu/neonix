@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   hardware.graphics = {
@@ -20,7 +25,7 @@
       intel-vaapi-driver
       libva-vdpau-driver
       #libvdpau-va-gl
-      libva  
+      libva
     ];
   };
 
@@ -35,11 +40,6 @@
     nvidiaSettings = true; # Enable Nvidia settings
     modesetting.enable = true; # Enable modesetting
 
-    powerManagement = {
-      enable = false; # disable power management for nvidia because we don't hibernate
-      finegrained = false; # correct for RTX 3000 but we don't use it
-    };
-
     # Add these for VR:
     prime = {
       offload.enable = false; # You don't have hybrid graphics
@@ -51,7 +51,7 @@
     GSK_RENDERER = "ngl"; # use the new gles renderer for better performance (GTK4)
 
     __GL_SHADER_DISK_CACHE_SIZE = "12000000000"; # 12GB shader disk cache
-    
+
     # Add these for better gaming/VR performance:
     __GL_THREADED_OPTIMIZATION = "1";
     __GL_SYNC_TO_VBLANK = "0"; # Better for VR, disable for desktop if tearing occurs
