@@ -4,7 +4,7 @@
   time.hardwareClockInLocalTime = true;
   time.timeZone = "Europe/Paris";
   services.timesyncd.enable = true;
-  
+
   i18n.defaultLocale = "en_US.UTF-8";
 
   i18n.extraLocaleSettings = {
@@ -25,7 +25,7 @@
     variant = "alt-intl";
   };
 
-
   # Configure console keymap
-  console.keyMap = "us";
+  #console.keyMap = "us";
+  console.useXkbConfig = true;
 }

@@ -1,4 +1,9 @@
-{ lib, config, pkgs, ... }:
+{
+  lib,
+  config,
+  pkgs,
+  ...
+}:
 
 {
   # Security hardening for HSI compliance
@@ -7,7 +12,7 @@
     protectKernelImage = true;
     apparmor = {
       enable = true;
-      killUnconfinedConfinables = true;
+      killUnconfinedConfinables = false; # true;
     };
   };
 

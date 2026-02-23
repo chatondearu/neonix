@@ -31,6 +31,9 @@
 
     # Affinity v3 (Designer, Photo, Publisher) via Wine
     affinity-nix.url = "github:mrshmllow/affinity-nix";
+
+    # nixpkgs-xr
+    nixpkgs-xr.url = "github:nix-community/nixpkgs-xr";
   };
 
   outputs = { 

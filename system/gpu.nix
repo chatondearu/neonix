@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   pkgs,
   ...
 }:
@@ -36,7 +35,8 @@
   hardware.nvidia = {
     open = false; # TODO try proprietary driver instead
     package = config.boot.kernelPackages.nvidiaPackages.stable;
-    forceFullCompositionPipeline = true; # Force the use of the full composition pipeline for better performance
+    # can add latencies for VR
+    #forceFullCompositionPipeline = true; # Force the use of the full composition pipeline for better performance
     nvidiaSettings = true; # Enable Nvidia settings
     modesetting.enable = true; # Enable modesetting
 
@@ -55,6 +55,7 @@
     # Add these for better gaming/VR performance:
     __GL_THREADED_OPTIMIZATION = "1";
     __GL_SYNC_TO_VBLANK = "0"; # Better for VR, disable for desktop if tearing occurs
+
     PROTON_ENABLE_NVAPI = "1";
     DXVK_NVAPI_DRIVER_VERSION = "58011902"; # Match your driver version
   };

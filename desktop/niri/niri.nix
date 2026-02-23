@@ -79,7 +79,13 @@
     XDG_SESSION_TYPE = "wayland";
     XDG_CURRENT_DESKTOP = "niri";
     XDG_SESSION_DESKTOP = "niri";
-    NIXOS_OZONE_WL = "1"; # Enable Wayland support in Electron/Chrome apps
+    #NIXOS_OZONE_WL = "1"; # Enable Wayland support in Electron/Chrome apps
+  };
+
+  environment.variables = {
+    # GTK 4.20 stopped handling dead keys and Compose on its own on Wayland. To make them work, either run an IME like IBus or Fcitx5, or set the GTK_IM_MODULE=simple environment variable.
+    GTK_IM_MODULE = "simple";
+    ELECTRON_OZONE_PLATFORM_HINT = "auto";
   };
 
   # GTK theme configuration for consistent appearance

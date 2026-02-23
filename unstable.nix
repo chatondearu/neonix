@@ -14,8 +14,6 @@
       {
         unstable = unstable-pkgs; # Provides pkgs.unstable for convenience
 
-        wivrn = unstable-pkgs.wivrn;
-
         # Dank Material Shell
         dms-shell = unstable-pkgs.dms-shell;
         dms-greeter = unstable-pkgs.dms-greeter;
@@ -23,6 +21,12 @@
 
         # Niri
         niri = unstable-pkgs.niri;
+
+        # Steam 
+        steam = unstable-pkgs.steam;
       })
+
+      # Nixpkgs-XR - https://github.com/nix-community/nixpkgs-xr
+      inputs.nixpkgs-xr.overlays.default
   ];
 }

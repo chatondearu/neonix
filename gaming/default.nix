@@ -4,37 +4,36 @@
   environment.systemPackages = with pkgs; [
     # Gaming tools
     #mesa            # Ensure last mesa stable on GLF OS
-    mesa-demos       # Show hardware information
-    mangohud         # Vulkan and OpenGL overlay for monitoring FPS, temperatures, CPU/GPU load and more
-    vulkan-tools     # Vulkan utilities (vkcube, vulkaninfo) required by goverlay/vkbasalt
-    vkbasalt         # Vulkan post-processing layer for effects like sharpening, color correction
+    mesa-demos # Show hardware information
+    mangohud # Vulkan and OpenGL overlay for monitoring FPS, temperatures, CPU/GPU load and more
+    vulkan-tools # Vulkan utilities (vkcube, vulkaninfo) required by goverlay/vkbasalt
+    vkbasalt # Vulkan post-processing layer for effects like sharpening, color correction
     wineWowPackages.staging # Open Source implementation of the Windows API on top of X, OpenGL, and Unix (with staging patches)
-    winetricks       # Script to install DLLs needed to work around problems in Wine
-    goverlay         # Graphical UI to configure MangoHud, vkBasalt and other Vulkan/OpenGL overlays
-    gamescope-wsi    # HDR won't work without this
+    winetricks # Script to install DLLs needed to work around problems in Wine
+    goverlay # Graphical UI to configure MangoHud, vkBasalt and other Vulkan/OpenGL overlays
+    gamescope-wsi # HDR won't work without this
+    moonlight-qt # Play your PC games on almost any device
 
     # Input devices
     #oversteer       # Steering Wheel Manager for Linux
-    joystickwake     # Joystick-aware screen waker
-    piper            # Configure your mouse
-    input-remapper   # Change inputs of your joystick
-    protonup-qt      # Proton Updater for Steam Play
+    joystickwake # Joystick-aware screen waker
+    piper # Configure your mouse
+    input-remapper # Change inputs of your joystick
 
     # Launchers
-    heroic           # Native GOG, Epic, and Amazon Games Launcher for Linux, Windows and Mac
-    umu-launcher     # Unified launcher for Windows games on Linux using the Steam Linux Runtime and Tools
-    faugus-launcher  # An umu based launcher for Windows games on Linux using the Steam Linux Runtime and Tools
+    heroic # Native GOG, Epic, and Amazon Games Launcher for Linux, Windows and Mac
+    umu-launcher # Unified launcher for Windows games on Linux using the Steam Linux Runtime and Tools
+    faugus-launcher # An umu based launcher for Windows games on Linux using the Steam Linux Runtime and Tools
     #cartbridge      # Cartridge Bridge. A GTK4 + Libadwaita game launcher : https://codeberg.org/kramo/cartridges
     #lutris          # Game launcher for Linux, Windows, and macOS
     # Lutris Config with additional libraries
     (lutris.override {
-      extraLibraries = p: [ p.libadwaita p.gtk4 ];
+      extraLibraries = p: [
+        p.libadwaita
+        p.gtk4
+      ];
     })
   ];
-
-  environment.variables = {
-    MESA_SHADER_CACHE_MAX_SIZE = "12G";
-  };
 
   programs.gamemode.enable = true;
 
@@ -44,38 +43,15 @@
     capSysNice = true;
   };
 
-  # Install Steam.
-  programs.steam = {
+  # https://localhost:47990/
+  services.sunshine = {
     enable = true;
-    gamescopeSession.enable = true;
-    remotePlay.openFirewall = true;
-    dedicatedServer.openFirewall = true;
-    localNetworkGameTransfers.openFirewall = true;
-    package = pkgs.steam.override {
-      extraEnv = {
-        OBS_VKCAPTURE = true;
-        # Add these for Wayland + NVIDIA:
-        ENABLE_VKBASALT = "1";
-        SDL_VIDEODRIVER = "wayland";
-        GBM_BACKEND = "nvidia-drm";
-        __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-
-        # For VR
-        VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.x86_64.json";
-        PRESSURE_VESSEL_FILESYSTEMS_RO = "/nix/store";
-      };
-    };
-
-    extraCompatPackages = with pkgs; [ proton-ge-bin ];
+    autoStart = true;
+    capSysAdmin = true; # only needed for Wayland -- omit this when using with Xorg
+    openFirewall = true;
   };
 
-  # Issues with adding steam library on new disk
-  # to add it manualy : '$ steam steam://open/console'
-  # then in the steam console tab : 'library_folder_add /games/SteamLibrary'
-  # issue solved : do not use exfat filesystem for the steam library !
-
   # Hardware support for devices
-  #hardware.steam-hardware.enable = true; # implicitly enabled by steam package
   # hardware.xone.enable = true; # Xbox One Controller (disabled: firmware not installed, causes init radio failed)
   hardware.xpadneo.enable = true; # Xbox One Controller with wireless dongle
   # hardware.opentabletdriver.enable = true; # Disabled: no tablet detected, wastes resources scanning
@@ -94,14 +70,8 @@
     fi
   '';
 
-
-  services.udev.extraRules = ''
-    # Steam Deck controllers
-    SUBSYSTEM=="input", ATTRS{idVendor}=="2dc8", ATTRS{idProduct}=="3106", MODE="0660", GROUP="input"
-  '';
-
-  imports =
-    [
-      ./vr/vr.nix
-    ];
+  imports = [
+    ./steam.nix
+    ./vr/vr.nix
+  ];
 }
