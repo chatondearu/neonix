@@ -15,6 +15,9 @@
   programs.niri.enable = true;
 
   environment.systemPackages = with pkgs; [
+    # Portals
+    gnome-keyring
+
     # Wayland essentials
     xwayland-satellite
     xwayland-run
@@ -54,20 +57,26 @@
     networkmanagerapplet
   ];
 
-  # XDG Portal configuration for Niri
+  # XDG Portal configuration for Niri - https://github.com/niri-wm/niri/pull/3173/changes
   xdg.portal = {
     enable = true;
     xdgOpenUsePortal = true;
     extraPortals = with pkgs; [
-      xdg-desktop-portal-gnome
       xdg-desktop-portal-gtk
+      xdg-desktop-portal-gnome
     ];
-    config = {
-      common.default = [ "gtk" ];
-      niri.default = [
-        "gnome"
-        "gtk"
-      ];
+
+    config = { 
+      common = {
+        # Force the use of GTK for the file chooser, screen cast and screenshot portals - https://github.com/niri-wm/niri/issues/702#issuecomment-2392079684
+        "org.freedesktop.impl.portal.FileChooser" = "gtk";
+        "org.freedesktop.impl.portal.ScreenCast" = "gnome";
+        "org.freedesktop.impl.portal.Screenshot" = "gnome";
+      };
+
+      niri = {
+        default = [ "gnome" "gtk" ];
+      };
     };
   };
 
@@ -79,7 +88,6 @@
     XDG_SESSION_TYPE = "wayland";
     XDG_CURRENT_DESKTOP = "niri";
     XDG_SESSION_DESKTOP = "niri";
-    #NIXOS_OZONE_WL = "1"; # Enable Wayland support in Electron/Chrome apps
   };
 
   environment.variables = {

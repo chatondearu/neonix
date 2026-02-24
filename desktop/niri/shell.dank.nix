@@ -38,7 +38,6 @@
 
     # Core features
     enableSystemMonitoring = true;     # System monitoring widgets (dgop)
-    #enableClipboard = true;            # Clipboard history manager - no more needed in dms latest
     enableVPN = true;                  # VPN management widget
     enableDynamicTheming = true;       # Wallpaper-based theming (matugen)
     enableAudioWavelength = true;      # Audio visualizer (cava)
@@ -58,14 +57,6 @@
       # };
     };
   };
-
-  # Session variables for DMS
-  # Seems to broke SteamVR. need to test if it's needed.
-  # environment.sessionVariables = {
-  #   QT_QPA_PLATFORM = "wayland";
-  #   QT_QPA_PLATFORMTHEME = "gtk3";
-  #   QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
-  # };
 
   # Strip trailing whitespace-only lines from .desktop files (SteamVR generates
   # broken entries that cause quickshell desktop-entry parser to flood warnings

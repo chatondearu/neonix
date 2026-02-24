@@ -1,3 +1,6 @@
+# VR Guide
+see : https://lvra.gitlab.io/docs/distros/nixos/
+
 # TODO
 
 to avoid steamVR to claim sudo at each start use this :

@@ -37,11 +37,6 @@
           ENABLE_VKBASALT = "1";
           GBM_BACKEND = "nvidia-drm";
           __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-
-          # For VR
-          VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.x86_64.json";
-          PRESSURE_VESSEL_FILESYSTEMS_RO = "/nix/store";
-          QT_QPA_PLATFORM = "xcb";
         };
 
         # Patching bubblewrap to allow capabilities for steamVR (required)
@@ -80,7 +75,7 @@
   users.users.chaton.maid = {
     file.xdg_config."openxr/1/active_runtime.json".source = "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json";
     file.xdg_config."openvr/openvrpaths.vrpath".text = let
-        steam = "${config.users.users.chaton.home}/Steam";
+        steam = "${config.users.users.chaton.home}/.steam/steam";
       in builtins.toJSON {
         version = 1;
         jsonid = "vrpathreg";
