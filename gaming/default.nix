@@ -52,7 +52,8 @@
   };
 
   # Hardware support for devices
-  # hardware.xone.enable = true; # Xbox One Controller (disabled: firmware not installed, causes init radio failed)
+  hardware.xone.enable = true; # Xbox One Controller (disabled: firmware not installed, causes init radio failed)
+  hardware.enableAllFirmware = true;
   hardware.xpadneo.enable = true; # Xbox One Controller with wireless dongle
   # hardware.opentabletdriver.enable = true; # Disabled: no tablet detected, wastes resources scanning
   services.ratbagd.enable = true; # Ratbagd is a daemon for managing input devices like Logitech G502
