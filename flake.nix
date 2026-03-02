@@ -36,33 +36,43 @@
     nixpkgs-xr.url = "github:nix-community/nixpkgs-xr";
   };
 
-  outputs = { 
-    self,
-    nixpkgs,
-    alejandra,
-    nix-maid,
-    ...
-  } @inputs: let
-    system = "x86_64-linux";
-  in
-  {
-    nixosConfigurations = {
-      neo-nix = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = { inherit inputs; };
-        modules = [
+  outputs =
+    {
+      self,
+      nixpkgs,
+      alejandra,
+      nix-maid,
+      ...
+    }@inputs:
+    let
+      system = "x86_64-linux";
+      # pkgs = import nixpkgs { inherit system; };
+    in
+    {
+      #packages.${system} = {
+      #  rtk = pkgs.callPackage ./pkgs/rtk-ai { };
+      #};
 
-          # Alejandra formatter
-          {
-            environment.systemPackages = [alejandra.defaultPackage.${system}];
-          }
+      nixosConfigurations = {
+        neo-nix = nixpkgs.lib.nixosSystem {
+          inherit system;
+          specialArgs = { inherit inputs; };
+          modules = [
 
-          nix-maid.nixosModules.default
+            # Alejandra formatter
+            {
+              environment.systemPackages = [
+                alejandra.defaultPackage.${system}
+                #self.packages.${system}.rtk
+              ];
+            }
 
-          # NixOS configuration
-          ./configuration.nix
-        ];
+            nix-maid.nixosModules.default
+
+            # NixOS configuration
+            ./configuration.nix
+          ];
+        };
       };
     };
-  };
 }

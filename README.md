@@ -5,33 +5,29 @@ Custom NixOS configuration with Niri (scrollable window manager), integrating Ho
 ### 📁 Project Structure
 
 ```
-.
-├── flake.nix                    # Main Flake configuration
-├── configuration.nix            # Main system configuration
-├── hardware-configuration.nix   # Hardware configuration (auto-generated)
-├── users.nix                    # User management
-├── nix.nix                      # Nix configuration (features, garbage collection, etc.)
-├── unstable.nix                 # Packages from nixpkgs-unstable
-│
-├── wm/                          # Window Managers
-│   ├── niri/                    # Niri configuration (scrollable tiling WM)
-│   └── plasma/                  # KDE Plasma configuration
-│
-├── system/                      # System-specific configurations
-├── gaming/                      # Gaming configuration
-│   └── vr/                      # VR support
-│
-├── virtualenv/                  # Virtual environments
-│   └── nodejs/                  # Node.js configuration
-│
-├── secrets/                     # Secrets (gitignored)
-├── secrets.nix                  # Secrets import
-├── secrets.nix.example          # Secrets template
-│
-├── dev.nix                      # Development tools
-├── stream.nix                   # Streaming configuration (OBS, etc.)
-└── zsh.nix                      # ZSH configuration
+/etc/nixos/
+├── configuration.nix          # Main NixOS configuration
+├── flake.nix                  # Flake definition with inputs
+├── hardware-configuration.nix  # Hardware-specific settings
+├── users.nix                  # User configurations
+├── system/                    # System-level configurations
+│   ├── boot.nix               # Bootloader settings
+│   ├── locale.nix             # Locale configuration
+│   └── ...
+├── desktop/                   # Desktop environment configs
+├── dev/                       # Development tools and settings
+│   ├── helix.nix              # Helix editor config
+│   ├── ai.nix                 # AI tooling setup
+│   └── ...
+├── gaming/                    # Gaming-related configurations
+└── virtual-envs/              # Virtual environment setups
+    ├── templates/             # Some templates to use in dev projects as environment setup
+    │   ├── fullstack/         # Full-stack dev environment
+    │   └── ...
+    ├── certbot/               # Certbot configuration with custom commands
+    └── ...
 ```
+
 
 ### 🚀 Usage
 

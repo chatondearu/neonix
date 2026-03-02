@@ -31,22 +31,6 @@ This file provides guidelines for agentic coding tools (like opencode) working i
 
 ### Language-Specific Settings
 
-#### TypeScript/JavaScript
-- **Formatter**: `prettierd`
-- **Linter**: ESLint with flat config enabled
-- **Language servers**: TypeScript, ESLint, TailwindCSS (for TSX/JSX)
-- **Auto-format**: Enabled on save
-
-#### Vue
-- **Language servers**: Vue LS, TailwindCSS, ESLint
-- **Formatter**: `prettierd`
-- **Auto-format**: Enabled on save
-
-#### HTML/CSS
-- **Language servers**: VSCode HTML LS, TailwindCSS, Emmet (HTML)
-- **Formatter**: `prettierd`
-- **Auto-format**: Enabled on save
-
 #### Nix
 - **Formatter**: `nixfmt-rfc-style`
 - **Auto-format**: Enabled on save
@@ -77,9 +61,11 @@ This file provides guidelines for agentic coding tools (like opencode) working i
 │   ├── ai.nix                 # AI tooling setup
 │   └── ...
 ├── gaming/                    # Gaming-related configurations
-└── virtualenv/                # Virtual environment setups
-    ├── certbot/               # Certbot configuration
-    ├── fullstack/             # Full-stack dev environment
+└── virtual-envs/              # Virtual environment setups
+    ├── templates/             # Some templates to use in dev projects as environment setup
+    │   ├── fullstack/         # Full-stack dev environment
+    │   └── ...
+    ├── certbot/               # Certbot configuration with custom commands
     └── ...
 ```
 
@@ -89,27 +75,55 @@ This file provides guidelines for agentic coding tools (like opencode) working i
 - **hardware-configuration.nix**: Auto-generated hardware settings (do not edit manually)
 - **users.nix**: User-specific configurations and package installations
 
-## Development Workflow
+### NixOS Flakes Workflow (No Home Manager, Using nix-maid)
 
-### Setting Up a New Project
-1. Create a new directory under `virtualenv/`
-2. Add a `flake.nix` with project-specific dependencies
-3. Create a `shell.nix` for development environment
-4. Add `.envrc` for direnv integration:
-   ```bash
-   use flake
-   ```
-5. Commit the new files to version control
+This configuration uses **NixOS with flakes** as the primary workflow, **without Home Manager**. Instead, the setup relies on [nix-maid](https://github.com/viperML/nix-maid) to personalize configuration files and user-specific settings that are not managed by the standard system configuration.
 
-### Adding Dependencies
-- For system-wide packages: Add to `environment.systemPackages` in configuration.nix
-- For project-specific packages: Add to the project's flake.nix
-- Use Nixpkgs inputs from the flake for consistency
+#### Core Workflow
 
-### Configuration Management
-- Use separate `.nix` files for logical groupings (e.g., `desktop/niri.nix`)
-- Import configurations using `imports` in parent files
-- Keep configurations modular and reusable
+1. **Edit system configuration:**
+   - Main system settings are managed in `configuration.nix` and supplementary `.nix` modules inside the `/system/`, `/desktop/`, `/dev/`, etc. directories.
+   - Do **not** use or configure `home-manager` modules. Personal dotfiles and user config are not handled by Home Manager here.
+
+2. **Personalization with nix-maid:**
+   - User-level dotfiles, non-system configuration files, and user scripts are managed via `nix-maid`.
+   - Add `nix-maid` modules or managed files under the appropriate location, typically referenced via `nix-maid.nixosModules.default` in `flake.nix`.
+   - To add managed files, use the nix-maid mechanisms (see nix-maid documentation) instead of placing them in Home Manager modules.
+
+3. **Build, Test, and Apply:**
+   - Build and check the current configuration:
+     ```sh
+     nixos-rebuild build --flake .#neo-nix
+     ```
+   - Switch (apply the configuration):
+     ```sh
+     sudo nixos-rebuild switch --flake .#neo-nix
+     ```
+   - You can validate/evaluate your configuration without building:
+     ```sh
+     nix-instantiate --eval -E 'with import ./.; config'
+     ```
+
+4. **Flake Management:**
+   - Lock/update flake inputs:
+     ```sh
+     nix flake update
+     ```
+   - Add or update system modules in the `flake.nix`'s outputs.
+
+5. **User-Specific Configuration:**
+   - All dotfiles and scripts for specific users should be organized within the appropriate nix-maid structure. Update your `flake.nix` to include or reference these as needed.
+   - Avoid using Home Manager commands or configuration files.
+
+6. **Consistent Formatting:**
+   - Use `alejandra .` to format all Nix files before committing.
+
+#### Summary
+
+- **Flakes-powered** declarative configuration, without Home Manager
+- **nix-maid** is used for user-level configuration, dotfiles, and local scripts
+- System-wide settings live in traditional NixOS modules
+- All configuration and personalization tracked in the flake for reproducibility
 
 ## Best Practices
 
@@ -154,6 +168,16 @@ This file provides guidelines for agentic coding tools (like opencode) working i
   - Qwen.3 35b A3B (local)
   - GLM 4.7 Flash (local)
 
+### Setting Up a new template for dev Projects or a one-time application
+1. Create a new directory under `virtual-envs/` or `virtual-envs/templates/`
+2. Add a `flake.nix` with project-specific dependencies
+3. Create a `shell.nix` for development environment
+4. Add `.envrc` for direnv integration:
+   ```bash
+   use flake
+   ```
+5. Commit the new files to version control
+
 ## Troubleshooting
 
 ### Common Issues
@@ -170,6 +194,6 @@ This file provides guidelines for agentic coding tools (like opencode) working i
 
 ## References
 - [NixOS Manual](https://nixos.org/manual/)
-- [Home Manager Documentation](https://nix-community.github.io/home-manager/)
+- [nix-maid documentation](https://github.com/viperML/nix-maid)
 - [Alejandra Formatter](https://github.com/kamadorueda/alejandra)
 - [Helix Editor](https://helix-editor.com/)
