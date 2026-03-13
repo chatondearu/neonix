@@ -19,7 +19,7 @@ in
     enable = true;
     config = {
       user = {
-        name  = secrets.githubUser;
+        name = secrets.githubUser;
         email = secrets.githubEmail;
       };
       init.defaultBranch = "main";

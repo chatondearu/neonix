@@ -1,3 +1,4 @@
+{ pkgs, ... }:
 # security tweaks borrowed from @hlissner
 {
   boot.kernel.sysctl = {
@@ -83,5 +84,34 @@
     sudo = {
       wheelNeedsPassword = false;
     };
+  };
+
+  services.fail2ban = {
+    enable = true;
+   # Ban IP after 5 failures
+    maxretry = 5;
+    ignoreIP = [
+      # Whitelist some subnets
+      "10.0.0.0/8" "172.16.0.0/12" "192.168.0.0/16"
+      "8.8.8.8" # whitelist a specific IP
+      "cypher.yt" # resolve the IP via DNS
+    ];
+    bantime = "24h"; # Ban IPs for one day on the first ban
+    bantime-increment = {
+      enable = true; # Enable increment of bantime after each violation
+      formula = "ban.Time * math.exp(float(ban.Count+1)*banFactor)/math.exp(1*banFactor)";
+      #multipliers = "1 2 4 8 16 32 64"; # cannot be used with formula
+      maxtime = "168h"; # Do not ban for more than 1 week
+      overalljails = true; # Calculate the bantime based on all the violations
+    };
+  };
+
+  environment.etc = {
+    # Define an action that will trigger a Ntfy push notification upon the issue of every new ban
+    "fail2ban/action.d/ntfy.local".text = pkgs.lib.mkDefault (pkgs.lib.mkAfter ''
+      [Definition]
+      norestored = true # Needed to avoid receiving a new notification after every restart
+      actionban = curl -H "Title: <ip> has been banned" -d "<name> jail has banned <ip> from accessing $(hostname) after <failures> attempts of hacking the system." https://ntfy.sh/Fail2banNotifications
+    '');
   };
 }

@@ -9,10 +9,12 @@
   # SSH configuration with security hardening
   services.openssh = {
     enable = true;
+    ports = [ 2242 ];
     settings = {
       PasswordAuthentication = false;
-      PermitRootLogin = "no";
+      PermitRootLogin = "prohibit-password";
       KbdInteractiveAuthentication = false;
+      AllowUsers = [ "chaton" ];
     };
     openFirewall = true;
   };
