@@ -60,6 +60,7 @@
     }
   },
   "plugin": [
+    "opencode-lmstudio@latest",
     "opencode-gemini-auth@latest",
     "@tarquinen/opencode-dcp@latest"
   ]

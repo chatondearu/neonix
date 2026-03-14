@@ -34,6 +34,9 @@
 
     # nixpkgs-xr
     nixpkgs-xr.url = "github:nix-community/nixpkgs-xr";
+
+    zen-browser.url = "github:youwen5/zen-browser-flake";
+    zen-browser.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =

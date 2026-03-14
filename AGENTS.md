@@ -159,7 +159,7 @@ This configuration uses **NixOS with flakes** as the primary workflow, **without
 - Default branch: `main`
 - Integrated with gh CLI for GitHub operations
 
-### AI Tools
+### AI Tool
 - Configured in `dev/ai.nix`
 - opencode.json defines model providers and settings
 - Models available:

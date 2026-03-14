@@ -8,6 +8,11 @@
 
     # LM Studio - https://lmstudio.ai/
     unstable.lmstudio
+
+    # Openwork - https://github.com/different-ai/openwork
+    # (callPackage ../pkgs/openwork/default.nix { })
+
+    (pkgs.callPackage ../pkgs/OpenAgentsControl/default.nix { })
   ];
 
   users.users.chaton.maid = {
