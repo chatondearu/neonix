@@ -1,11 +1,15 @@
 { pkgs, ... }:
 
 {
-  fonts.packages = with pkgs; [
+  fonts = {
+    fontDir.enable = true;
+  
+    packages = with pkgs; [
     noto-fonts noto-fonts-cjk-sans noto-fonts-color-emoji liberation_ttf
     fira-code fira-code-symbols dina-font roboto lato montserrat
     raleway oswald merriweather poppins source-sans-pro league-spartan
-  ];
+    ];
+  };
 
   services.displayManager.autoLogin.enable = false;
 
