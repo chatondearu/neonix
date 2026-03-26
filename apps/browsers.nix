@@ -4,8 +4,6 @@
   programs.firefox.enable = true;
 
   environment.systemPackages = with pkgs; [
-    unstable.floorp-bin # Firefox fork with vertical tabs
-
     inputs.zen-browser.packages.${stdenv.hostPlatform.system}.default # Zen Browser - https://wiki.nixos.org/wiki/Zen_Browser
 
     # vesktop: Discord client with Vencord, no forced updates, native Wayland

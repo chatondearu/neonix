@@ -7,6 +7,7 @@
   imports = [
     # Import the niri module from unstable
     "${inputs.nixpkgs-unstable}/nixos/modules/programs/wayland/niri.nix"
+    inputs.nirinit.nixosModules.nirinit
     ./shell.dank.nix
     ./greeter.dank.nix
   ];
@@ -39,7 +40,7 @@
 
     # File management
     nautilus # GTK4/libadwaita, integrates with DMS dynamic theming
-    gvfs # Virtual filesystem (for network shares, etc.)
+    #gvfs # Virtual filesystem (for network shares, etc.)
     yazi # TUI file manager (Rust, image previews in Ghostty)
 
     # Image viewer
@@ -76,6 +77,7 @@
 
       niri = {
         default = [ "gnome" "gtk" ];
+        "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
       };
     };
   };
@@ -88,6 +90,7 @@
     XDG_SESSION_TYPE = "wayland";
     XDG_CURRENT_DESKTOP = "niri";
     XDG_SESSION_DESKTOP = "niri";
+    NIXOS_OZONE_WL = "1";
   };
 
   environment.variables = {
@@ -98,4 +101,13 @@
 
   # GTK theme configuration for consistent appearance
   programs.dconf.enable = true;
+
+  # Enable GVFS for network shares
+  services.gvfs.enable = true;
+
+  # Nirinit configuration - https://github.com/amaanq/nirinit
+  services.nirinit.enable = true;
+  users.users.chaton.maid = {
+    file.xdg_config."nirinit/config.toml".source = "{{home}}/etc/nixos/desktop/niri/nirinit/config.toml";
+  };
 }

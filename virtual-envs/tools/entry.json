@@ -1,0 +1,12 @@
+{
+	"test": "toto",
+	"test2": {
+		"a": "tutu",
+		"b": "tata"
+	},
+	"test3": [
+		"toto",
+		"tutu",
+		"tata"
+	]
+}

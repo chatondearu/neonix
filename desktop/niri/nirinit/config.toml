@@ -1,0 +1,6 @@
+[skip]
+apps = ["steam"]
+
+[launch]
+# Map app_id to the actual command to spawn
+"chromium-example.com__-Default" = "example-web-app"

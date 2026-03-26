@@ -37,6 +37,9 @@
 
     zen-browser.url = "github:youwen5/zen-browser-flake";
     zen-browser.inputs.nixpkgs.follows = "nixpkgs";
+
+    nirinit.url = "github:amaanq/nirinit";
+    nirinit.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
