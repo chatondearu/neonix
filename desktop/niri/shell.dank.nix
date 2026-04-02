@@ -16,8 +16,7 @@
     khal # calendar integration
     cliphist # clipboard history manager
     wl-clipboard # clipboard manager
-
-    linux-wallpaperengine # Wallpaper engine for plugin : https://github.com/sgtaziz/dms-wallpaperengine
+    wtype # Wayland clipboard paste
 
     # QtMultimedia backend for DMS sound effects
     gst_all_1.gstreamer
@@ -42,19 +41,10 @@
     enableDynamicTheming = true;       # Wallpaper-based theming (matugen)
     enableAudioWavelength = true;      # Audio visualizer (cava)
     enableCalendarEvents = true;       # Calendar integration (khal)
+    enableClipboardPaste = true;       # Clipboard paste (wtype)
 
     plugins = {
       dockerManager.enable = true;
-
-      # LinuxWallpaperEngine = { # Wallpaper engine for plugin : https://github.com/sgtaziz/dms-wallpaperengine Need steam workshop
-      #   enable = true;
-      #   src = pkgs.fetchFromGitHub {
-      #     owner = "sgtaziz";
-      #     repo = "dms-wallpaperengine";
-      #     rev = "main";
-      #     sha256 = "0513aab5eee2d35d9c0239f3326b6a80b36d8ea96d677b72dcd8cc7ad373a603";
-      #   };
-      # };
     };
   };
 

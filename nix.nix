@@ -9,6 +9,7 @@
       builders-use-substitutes = true;
       warn-dirty = false;
       experimental-features = [ "nix-command" "flakes" ];
+      download-buffer-size = 524288000; # 500MB
 
       # Limit build parallelism to prevent OOM during heavy builds
       max-jobs = 4;

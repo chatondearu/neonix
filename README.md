@@ -130,7 +130,7 @@ Secrets are stored in the `secrets/` folder and imported via `secrets.nix`. To s
   - [ ] Document the secrets management workflow
 
 - [ ] **Configuration improvements**
-  - [ ] Separate configuration into more modular modules
+  - [x] Separate configuration into more modular modules
   - [ ] Add automated tests for configurations
   - [ ] Create optional profiles (minimal, desktop, gaming, etc.)
   
@@ -143,6 +143,6 @@ Secrets are stored in the `secrets/` folder and imported via `secrets.nix`. To s
   - [ ] Configure GitHub Actions to verify builds
   - [ ] Auto-format with Alejandra in CI
 
-- [ ] **Optimizations**
-  - [ ] Configure binary cache to speed up builds
-  - [ ] Automatically clean up old generations
+- [x] **Optimizations**
+  - [x] Configure binary cache to speed up builds
+  - [x] Automatically clean up old generations

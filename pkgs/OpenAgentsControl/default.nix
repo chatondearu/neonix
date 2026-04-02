@@ -17,7 +17,7 @@ stdenvNoCC.mkDerivation rec {
     url = "https://raw.githubusercontent.com/darrenhinde/OpenAgentsControl/refs/heads/main/install.sh";
     # Pensez à remplacer ce fakeHash par le vrai hash via :
     # nix-prefetch-url https://raw.githubusercontent.com/darrenhinde/OpenAgentsControl/refs/heads/main/install.sh
-    hash = "sha256-VVk0zX+nUpITEmVVkCjrj5GvXavcnUqLEyjFtA+gM70=";
+    hash = "sha256-UOY6OQQRyVWWIRPOei1ZpQkpdG6a9tOMDIMKLuOP1hY=";
   };
 
   # Ce n'est pas une archive, pas besoin de la décompresser
