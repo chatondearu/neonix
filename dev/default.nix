@@ -12,7 +12,9 @@ in
 
     # Flake uses nixos-unstable, so these are already unstable packages
     unstable.cursor-cli
-    unstable.code-cursor
+    #unstable.code-cursor
+
+    (pkgs.callPackage ../pkgs/cursor/default.nix { })
   ];
 
   programs.git = {

@@ -62,7 +62,7 @@ sudo nixos-rebuild switch --flake .#neo-nix
 #### 3. Updating Inputs
 
 ```sh
-# Update all inputs (nixpkgs, home-manager, etc.)
+# Update all inputs (nixpkgs, etc.)
 nix flake update
 
 # Or update a specific input
@@ -107,14 +107,12 @@ Secrets are stored in the `secrets/` folder and imported via `secrets.nix`. To s
 ### 📚 Resources
 
 - [NixOS Manual](https://nixos.org/manual/nixos/stable/)
-- [Home Manager Manual](https://nix-community.github.io/home-manager/)
 - [Niri Documentation](https://github.com/YaLTeR/niri)
 - [Flakes Wiki](https://nixos.wiki/wiki/Flakes)
 
 ### ✨ Features
 
 - **Window Manager:** Niri (scrollable tiling) with custom Waybar configuration
-- **Home Manager:** Declarative user environment management
 - **Unstable Packages:** Access to latest versions via nixpkgs-unstable
 - **Gaming:** Full support including Steam, VR, etc.
 - **Development:** Environments for Node.js, Python, and other dev tools
