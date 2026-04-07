@@ -1,3 +1,4 @@
+# Pinned Cursor for x86_64-linux (AppImage), same layout as nixpkgs code-cursor.
 {
   lib,
   stdenv,
@@ -6,19 +7,25 @@
   appimageTools,
   commandLineArgs ? "",
 }: let
-  finalCommandLineArgs = "--update=false " + commandLineArgs;
+  inherit (stdenv) hostPlatform;
 
   sourcesJson = lib.importJSON ./sources.json;
+
+  finalCommandLineArgs = "--update=false " + commandLineArgs;
+
   source = fetchurl {
     url = sourcesJson.source;
     hash = sourcesJson.hash;
   };
 in
-  buildVscode rec {
-    inherit (sourcesJson) version vscodeVersion;
+  lib.throwIfNot (hostPlatform.system == "x86_64-linux")
+  "pkgs/cursor: only x86_64-linux is supported (see sources.json / update.sh)"
+  (buildVscode rec {
     commandLineArgs = finalCommandLineArgs;
+    inherit (sourcesJson) version vscodeVersion;
 
     pname = "cursor";
+    useVSCodeRipgrep = false;
 
     executableName = "cursor";
     longName = "Cursor";
@@ -37,7 +44,6 @@ in
 
     updateScript = ./update.sh;
 
-    # Cursor has no wrapper script.
     patchVSCodePath = false;
 
     meta = {
@@ -45,15 +51,13 @@ in
       homepage = "https://cursor.com";
       changelog = "https://cursor.com/changelog";
       license = lib.licenses.unfree;
-      sourceProvenance = [lib.sourceTypes.binaryNativeCode];
+      sourceProvenance = with lib.sourceTypes; [binaryNativeCode];
       maintainers = with lib.maintainers; [
         aspauldingcode
         prince213
         qweered
       ];
-      platforms = [
-        "x86_64-linux"
-      ];
+      platforms = ["x86_64-linux"];
       mainProgram = "cursor";
     };
-  }
+  })

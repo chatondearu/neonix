@@ -1,9 +1,6 @@
-{ pkgs, ... }:
-let
+{pkgs, ...}: let
   secrets = import ./../secrets.nix;
-in
-{
-
+in {
   environment.systemPackages = with pkgs; [
     git
     gh
@@ -14,7 +11,7 @@ in
     unstable.cursor-cli
     #unstable.code-cursor
 
-    (pkgs.callPackage ../pkgs/cursor/default.nix { })
+    (pkgs.unstable.callPackage ../pkgs/cursor/default.nix { })
   ];
 
   programs.git = {
