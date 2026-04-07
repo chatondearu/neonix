@@ -1,6 +1,4 @@
-{ pkgs, ... }:
-
-{
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     # Gaming tools
     #mesa            # Ensure last mesa stable on GLF OS
@@ -8,7 +6,7 @@
     mangohud # Vulkan and OpenGL overlay for monitoring FPS, temperatures, CPU/GPU load and more
     vulkan-tools # Vulkan utilities (vkcube, vulkaninfo) required by goverlay/vkbasalt
     vkbasalt # Vulkan post-processing layer for effects like sharpening, color correction
-    wineWowPackages.staging # Open Source implementation of the Windows API on top of X, OpenGL, and Unix (with staging patches)
+    wineWow64Packages.staging # Open Source implementation of the Windows API on top of X, OpenGL, and Unix (with staging patches)
     winetricks # Script to install DLLs needed to work around problems in Wine
     goverlay # Graphical UI to configure MangoHud, vkBasalt and other Vulkan/OpenGL overlays
     gamescope-wsi # HDR won't work without this
