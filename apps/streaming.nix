@@ -6,6 +6,7 @@
   # - goxlr-utility
   # - goxlr-utility-ui
   # - Twitchat
+  # - obs-vertical-canvas
 
   ## TO TEST :
   # - Speaker.bot
@@ -30,7 +31,6 @@
     plugins = with pkgs.obs-studio-plugins; [
       obs-vkcapture
       obs-move-transition
-      obs-vertical-canvas
     ];
   };
 }
