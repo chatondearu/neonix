@@ -1,10 +1,25 @@
 { pkgs, ... }:
 
 {
-  # Stream Deck hardware support
-  programs.streamdeck-ui = {
+  ## TO INSTALL :
+  # - Stream Deck hardware support
+  # - goxlr-utility
+  # - goxlr-utility-ui
+  # - Twitchat
+
+  ## TO TEST :
+  # - Speaker.bot
+  # - MacroGraph
+
+  environment.systemPackages = with pkgs; [
+    # Stream Deck hardware support
+    unstable.streamcontroller
+  ];
+
+  services.goxlr-utility = {
     enable = true;
-    autoStart = true;
+    package = pkgs.unstable.goxlr-utility;
+    autoStart.xdg = true;
   };
 
   # OBS Studio with NVIDIA CUDA and virtual camera
@@ -15,6 +30,7 @@
     plugins = with pkgs.obs-studio-plugins; [
       obs-vkcapture
       obs-move-transition
+      obs-vertical-canvas
     ];
   };
 }

@@ -1,4 +1,5 @@
 # Pinned Cursor for x86_64-linux (AppImage), same layout as nixpkgs code-cursor.
+# See: https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/by-name/co/code-cursor/package.nix
 {
   lib,
   stdenv,

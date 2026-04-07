@@ -1,6 +1,9 @@
 { pkgs, ... }:
 
 {
+  ## TO TEST :
+  # - Stardust XR runtime https://github.com/StardustXR
+
   environment.systemPackages = with pkgs; [
     wayvr # Stream your desktop to your Quest - nixpkgs-xr
   ];
