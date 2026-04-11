@@ -15,7 +15,7 @@ After=sound.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/alsaloop -C plughw:1,0 -P plughw:0,0 -t 50000
+ExecStart=/usr/bin/alsaloop -C plughw:1,0 -P plughw:0,0 -t 2000
 Restart=on-failure
 RestartSec=2
 
@@ -38,7 +38,7 @@ And to reverse
 
 dmix will say to Alsa to use a virtual mixer to avoid the blocking of the access to the I2S amp
 If we want to use a software mixer we can write where `CODEC` is the usb card:
-`ExecStart=/usr/bin/alsaloop -C plughw:CODEC,0 -P default -t 50000`
+`ExecStart=/usr/bin/alsaloop -C plughw:CODEC,0 -P default -t 1000`
 
 Say to Alsa to globaly use the dmix by creating or editing `nano /etc/asound.conf`
 

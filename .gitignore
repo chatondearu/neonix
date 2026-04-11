@@ -17,3 +17,6 @@ result-*
 *~
 *.bak
 *.swp
+
+**/node_modules
+**/__pycache__

@@ -38,43 +38,41 @@
     nirinit.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs =
-    {
-      self,
-      nixpkgs,
-      alejandra,
-      nix-maid,
-      ...
-    }@inputs:
-    let
-      system = "x86_64-linux";
-      # pkgs = import nixpkgs { inherit system; };
-    in
-    {
-      #packages.${system} = {
-      #  rtk = pkgs.callPackage ./pkgs/rtk-ai { };
-      #};
+  outputs = {
+    self,
+    nixpkgs,
+    alejandra,
+    nix-maid,
+    ...
+  } @ inputs: let
+    system = "x86_64-linux";
+    pkgs = import nixpkgs {inherit system;};
+  in {
+    packages.${system} = {
+      goxlr-router = pkgs.callPackage ./pkgs/goxlr-router {};
+    };
 
-      nixosConfigurations = {
-        neo-nix = nixpkgs.lib.nixosSystem {
-          inherit system;
-          specialArgs = { inherit inputs; };
-          modules = [
-
-            # Alejandra formatter
-            {
-              environment.systemPackages = [
-                alejandra.defaultPackage.${system}
-                #self.packages.${system}.rtk
-              ];
-            }
-
-            nix-maid.nixosModules.default
-
-            # NixOS configuration
-            ./configuration.nix
-          ];
+    nixosConfigurations = {
+      neo-nix = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          inherit inputs self;
         };
+        modules = [
+          # Alejandra formatter
+          {
+            environment.systemPackages = [
+              alejandra.defaultPackage.${system}
+              #self.packages.${system}.rtk
+            ];
+          }
+
+          nix-maid.nixosModules.default
+
+          # NixOS configuration
+          ./configuration.nix
+        ];
       };
     };
+  };
 }

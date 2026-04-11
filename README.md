@@ -119,6 +119,10 @@ Secrets are stored in the `secrets/` folder and imported via `secrets.nix`. To s
 - **Streaming:** OBS configuration and associated tools
 - **Formatter:** Alejandra for automatically formatted Nix code
 
+### Utils
+
+`sudo rm -f /run/avahi-daemon/pid && sudo systemctl restart avahi-daemon`
+
 ### 📝 TODO
 
 - [ ] **Improved secrets management**
