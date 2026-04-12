@@ -23,17 +23,52 @@ function linkEndpoint(info: Record<string, unknown>, keys: string[]): number | u
   return undefined;
 }
 
+/** pw-dump uses pw_direction_as_string: "in" / "out", not "input" / "output". */
+function portDirectionFromPwDump(
+  dir: string | undefined,
+): "input" | "output" {
+  if (dir === "in" || dir === "input") return "input";
+  return "output";
+}
+
+function flattenPwDumpObjects(raw: string): PwObject[] {
+  const t = raw.trim();
+  if (!t) return [];
+  try {
+    const v = JSON.parse(t) as unknown;
+    if (Array.isArray(v)) return v as PwObject[];
+  } catch {
+    /* try fallbacks */
+  }
+  // Newline-delimited JSON arrays (e.g. monitor mode or multiple dumps)
+  const merged: PwObject[] = [];
+  for (const line of t.split(/\n/)) {
+    const s = line.trim();
+    if (!s.startsWith("[")) continue;
+    try {
+      const v = JSON.parse(s) as unknown;
+      if (Array.isArray(v)) merged.push(...(v as PwObject[]));
+    } catch {
+      /* skip */
+    }
+  }
+  if (merged.length > 0) return merged;
+  // Adjacent arrays: ][ -> ,  (compact output only)
+  try {
+    const v = JSON.parse(t.replace(/\]\s*\[/g, ",")) as unknown;
+    if (Array.isArray(v)) return v as PwObject[];
+  } catch {
+    /* */
+  }
+  return [];
+}
+
 /**
  * Build a graph model from pw-dump JSON for Vue Flow.
  */
 export function parsePwDump(jsonText: string): GraphModel {
-  let arr: PwObject[];
-  try {
-    arr = JSON.parse(jsonText) as PwObject[];
-  } catch {
-    return { nodes: [], ports: [], links: [] };
-  }
-  if (!Array.isArray(arr)) return { nodes: [], ports: [], links: [] };
+  const arr = flattenPwDumpObjects(jsonText);
+  if (arr.length === 0) return { nodes: [], ports: [], links: [] };
 
   const nodeById = new Map<number, PwNodeModel>();
   const portById = new Map<number, PwPortModel>();
@@ -76,7 +111,7 @@ export function parsePwDump(jsonText: string): GraphModel {
     const node = nodeById.get(nodeId);
     const nodeName = node?.name || `node-${nodeId}`;
     const portName = str(props["port.name"] || props["port.alias"] || `port-${o.id}`);
-    const direction = o.info.direction === "input" ? "input" : "output";
+    const direction = portDirectionFromPwDump(o.info.direction);
     const formatHint = str(props["format.dsp"] || props["audio.format"] || "");
 
     portById.set(o.id, {
@@ -93,8 +128,21 @@ export function parsePwDump(jsonText: string): GraphModel {
   for (const o of arr) {
     if (o.type !== "PipeWire:Interface:Link" || !o.info) continue;
     const info = o.info as unknown as Record<string, unknown>;
-    const outPid = linkEndpoint(info, ["output-port-id", "outputPortId"]);
-    const inPid = linkEndpoint(info, ["input-port-id", "inputPortId"]);
+    const props =
+      info.props && typeof info.props === "object" && info.props !== null
+        ? (info.props as Record<string, unknown>)
+        : {};
+    const merged: Record<string, unknown> = { ...info, ...props };
+    const outPid = linkEndpoint(merged, [
+      "output-port-id",
+      "outputPortId",
+      "link.output.port",
+    ]);
+    const inPid = linkEndpoint(merged, [
+      "input-port-id",
+      "inputPortId",
+      "link.input.port",
+    ]);
     if (outPid === undefined || inPid === undefined) continue;
     links.push({
       id: o.id,

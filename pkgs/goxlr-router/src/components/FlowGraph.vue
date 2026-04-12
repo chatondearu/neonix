@@ -12,7 +12,32 @@ import {
   type VueFlowStore,
 } from "@vue-flow/core";
 import { computed, markRaw, nextTick, shallowRef, watch } from "vue";
-import type { GraphModel, PwPortModel } from "../pwTypes";
+import type { GraphModel, PwNodeModel, PwPortModel } from "../pwTypes";
+
+/** Match SwitchboardNode.vue chrome so stacked nodes do not overlap. */
+function estimateSwitchboardHeight(
+  ports: PwPortModel[],
+  model: PwNodeModel,
+): number {
+  const borderChrome = 10;
+  const titleH = 34;
+  const subH = model.mediaClass?.trim() ? 22 : 0;
+  const bodyPad = 14;
+  const rowMin = 22;
+  const rowGap = 4;
+  let inC = 0;
+  let outC = 0;
+  for (const p of ports) {
+    if (p.direction === "input") inC++;
+    else outC++;
+  }
+  const maxRows = Math.max(inC, outC);
+  const rowsH =
+    maxRows === 0
+      ? 10
+      : maxRows * rowMin + Math.max(0, maxRows - 1) * rowGap;
+  return borderChrome + titleH + subH + bodyPad + rowsH;
+}
 import SwitchboardNode from "./SwitchboardNode.vue";
 import TelephoneEdge from "./TelephoneEdge.vue";
 
@@ -58,16 +83,19 @@ const visibleNodeIds = computed(() => new Set(filteredNodes.value.map((n) => n.i
 
 const flowNodes = computed((): Node[] => {
   const cols = 2;
-  const xGap = 340;
-  const yGap = 32;
+  const xGap = 360;
+  const nodeMarginY = 28;
+  const colY = Array.from({ length: cols }, () => 0);
   return filteredNodes.value.map((n, i) => {
     const ports = props.graph.ports.filter((p) => p.nodeId === n.id);
     const col = i % cols;
-    const row = Math.floor(i / cols);
+    const y = colY[col]!;
+    const h = estimateSwitchboardHeight(ports, n);
+    colY[col] = y + h + nodeMarginY;
     return {
       id: `n-${n.id}`,
       type: "switchboard",
-      position: { x: col * xGap, y: row * yGap },
+      position: { x: col * xGap, y },
       data: {
         model: n,
         ports,

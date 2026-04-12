@@ -35,9 +35,10 @@
     ];
   };
 
-  # PipeWire: route GoXLR Headphones *split* (hardware mix to the physical jack) to Logitech PRO X Wireless.
-  # Sources are output_AUX4 / output_AUX5 on the split node (not monitor_FL/FR, which may only reflect chat).
-  # One link per output port: disconnect split -> hw_GoXLR before linking split -> headset.
+  # PipeWire: route GoXLR Headphones *split* (AUX4/AUX5 = hardware mix to the jack) to Logitech PRO X Wireless.
+  # Logitech playback_FL/FR can have *multiple* incoming links; monitor_* -> headset must be removed or you
+  # keep hearing the chat-heavy monitor path on top of the split. We always `pw-link -d` monitor -> headset first.
+  # Then: disconnect split -> hw_GoXLR, then split -> headset.
   systemd.user.services."goxlr-audio-route" = {
     description = "Route GoXLR Headphones split (AUX4/AUX5) to Logitech PRO X Wireless (PipeWire)";
     wantedBy = ["default.target"];
@@ -82,6 +83,8 @@
           fi
           SRC_L="''${split}:output_AUX4"
           SRC_R="''${split}:output_AUX5"
+          # Parent sink node (strip trailing .split) — monitor_* live here, not on the split adapter.
+          SINK_PARENT="''${split%.split}"
           HW_L="alsa_output.hw_GoXLR_0:playback_AUX4"
           HW_R="alsa_output.hw_GoXLR_0:playback_AUX5"
           DST_L="''${logi}:playback_FL"
@@ -94,6 +97,8 @@
             sleep 1
             continue
           fi
+          "$PW_LINK" -d "''${SINK_PARENT}:monitor_FL" "''${DST_L}" 2>/dev/null || true
+          "$PW_LINK" -d "''${SINK_PARENT}:monitor_FR" "''${DST_R}" 2>/dev/null || true
           "$PW_LINK" -d "''${SRC_L}" "''${HW_L}" 2>/dev/null || true
           "$PW_LINK" -d "''${SRC_R}" "''${HW_R}" 2>/dev/null || true
           "$PW_LINK" -d "''${SRC_L}" "''${DST_L}" 2>/dev/null || true

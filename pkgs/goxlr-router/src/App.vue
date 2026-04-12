@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
-import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
+import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 import AlsaPanel from "./components/AlsaPanel.vue";
 import FlowGraph from "./components/FlowGraph.vue";
-import { parsePwDump, reachablePortIds } from "./pwParse";
+import { reachablePortIds } from "./pwParse";
 import type { GraphModel } from "./pwTypes";
 
-const rawDump = ref("");
 const lastError = ref<string | undefined>();
+const graphJson = ref('{"nodes":[],"ports":[],"links":[]}');
 const pollMs = ref(2000);
+const hasAutoPolling = ref(false);
 const filterText = ref("");
 const goxlrOnly = ref(false);
 const selectedPortId = ref<number | null>(null);
@@ -17,7 +18,13 @@ const alsaPlayback = ref("");
 const alsaCapture = ref("");
 const alsaError = ref<string | undefined>();
 
-const graph = computed<GraphModel>(() => parsePwDump(rawDump.value));
+const graph = computed<GraphModel>(() => {
+  try {
+    return JSON.parse(graphJson.value) as GraphModel;
+  } catch {
+    return { nodes: [], ports: [], links: [] };
+  }
+});
 
 const highlightPortIds = computed(() => {
   if (selectedPortId.value === null) return new Set<number>();
@@ -30,8 +37,8 @@ const refreshing = shallowRef(false);
 async function refreshPw() {
   refreshing.value = true;
   try {
-    const s = await invoke<string>("get_pw_dump");
-    rawDump.value = s;
+    const s = await invoke<string>("get_pipewire_graph");
+    graphJson.value = s;
     lastError.value = undefined;
   } catch (e) {
     lastError.value = String(e);
@@ -55,8 +62,12 @@ async function refreshAll() {
 }
 
 function restartPoll() {
-  if (pollTimer) clearInterval(pollTimer);
+  stopPoll();
   pollTimer = setInterval(refreshAll, Math.max(500, pollMs.value));
+}
+
+function stopPoll() {
+  if (pollTimer) clearInterval(pollTimer);
 }
 
 function onSelectPort(id: number | null) {
@@ -83,16 +94,27 @@ async function onDisconnect(fromSpec: string, toSpec: string) {
 
 onMounted(async () => {
   await refreshAll();
-  restartPoll();
+
+  if (hasAutoPolling.value) {
+    restartPoll();
+  }
 });
 
 onUnmounted(() => {
-  if (pollTimer) clearInterval(pollTimer);
+  stopPoll();
 });
 
 function onPollInput() {
   restartPoll();
 }
+
+watch(hasAutoPolling, (hasAutoPollingValue) => {
+  if (hasAutoPollingValue) {
+    restartPoll();
+  } else {
+    stopPoll();
+  }
+})
 </script>
 
 <template>
@@ -100,6 +122,10 @@ function onPollInput() {
     <header class="bar">
       <h1>goxlr-router</h1>
       <span class="sub">PipeWire switchboard</span>
+      <label class="lbl chk">
+        <input v-model="hasAutoPolling" type="checkbox" />
+        Auto polling
+      </label>
       <label class="lbl">
         Poll (ms)
         <input
@@ -124,8 +150,19 @@ function onPollInput() {
         placeholder="Filter nodes…"
       />
       <button type="button" @click="onSelectPort(null)">Clear path highlight</button>
+      <span class="pw-stats" title="Parsed PipeWire graph">
+        PW: {{ graph.nodes.length }} nodes · {{ graph.ports.length }} ports ·
+        {{ graph.links.length }} links
+      </span>
     </header>
     <p v-if="lastError" class="global-err">{{ lastError }}</p>
+    <p
+      v-else-if="graph.nodes.length === 0 && graph.ports.length === 0 && !refreshing"
+      class="global-warn"
+    >
+      No PipeWire nodes in graph (empty session or parsing issue). See error above
+      if any.
+    </p>
     <div class="main">
       <div class="graph-pane">
         <FlowGraph
@@ -227,11 +264,23 @@ button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+.pw-stats {
+  font-size: 11px;
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
 .global-err {
   margin: 0;
   padding: 8px 14px;
   background: #3a1818;
   color: #f0a0a0;
+  font-size: 12px;
+}
+.global-warn {
+  margin: 0;
+  padding: 8px 14px;
+  background: #3a3218;
+  color: #e8d080;
   font-size: 12px;
 }
 .main {

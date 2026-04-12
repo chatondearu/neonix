@@ -2,10 +2,13 @@
 
 Desktop UI (Tauri + Vue) to inspect PipeWire nodes, ports, and links in a switchboard-style graph, and to create or remove links with `pw-link`. ALSA playback/capture lists (`aplay -l`, `arecord -l`) help correlate with hardware.
 
+The graph is built in Rust from `pw-dump` and sent to the UI as a small JSON blob (full dumps are too large for Tauri IPC and were getting truncated, which looked like an empty graph).
+
 ## Requirements
 
 - A **user graphical session** with PipeWire (same `XDG_RUNTIME_DIR` as your compositor).
 - **`pw-dump`**, **`pw-link`**, **`aplay`**, and **`arecord`** on `PATH` when running the binary without the Nix wrapper.
+- **GStreamer** plugins for WebKitGTK (the Nix package sets `GST_PLUGIN_SYSTEM_PATH_1_0`). If you run a locally built binary and see *GStreamer element appsink not found*, point that variable at `gst-plugins-base` (and usually `gst-plugins-good`), e.g. under NixOS install those packages and match the `default.nix` wrapper pattern.
 
 ## Local development
 
@@ -62,6 +65,8 @@ cargo build --release
 ```
 
 Ensure `pw-dump`, `pw-link`, `aplay`, and `arecord` are on `PATH` when running the binary.
+
+**Important:** use `cargo tauri build --no-bundle` (or the Nix package, which does this), not plain `cargo build --release` alone. A bare `cargo build` can produce a binary that still points the WebView at the Vite dev server (`http://localhost:1420`), which fails at runtime with **Connection refused**.
 
 ## Build with the flake (this repo)
 
