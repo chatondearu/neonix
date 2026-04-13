@@ -12,6 +12,7 @@
       "input"
       "greeter"
       "docker"
+      "audio"
     ];
   };
 

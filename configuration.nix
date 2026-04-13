@@ -23,6 +23,9 @@
     ./desktop/default.nix
     ./shells
 
+    # Streaming
+    ./streaming/default.nix
+
     # Development
     ./dev/default.nix
 
@@ -31,7 +34,6 @@
 
     # User applications
     ./apps/browsers.nix
-    ./apps/streaming.nix
     ./apps/dao.nix
   ];
 
