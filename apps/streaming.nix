@@ -35,80 +35,35 @@
     ];
   };
 
-  # PipeWire: route GoXLR Headphones *split* (AUX4/AUX5 = hardware mix to the jack) to Logitech PRO X Wireless.
-  # Logitech playback_FL/FR can have *multiple* incoming links; monitor_* -> headset must be removed or you
-  # keep hearing the chat-heavy monitor path on top of the split. We always `pw-link -d` monitor -> headset first.
-  # Then: disconnect split -> hw_GoXLR, then split -> headset.
+  # Route GoXLR Headphones split (AUX4/AUX5) to Logitech PRO X Wireless
   systemd.user.services."goxlr-audio-route" = {
-    description = "Route GoXLR Headphones split (AUX4/AUX5) to Logitech PRO X Wireless (PipeWire)";
+    description = "Route GoXLR Headphones (AUX4/AUX5) to Logitech PRO X Wireless";
     wantedBy = ["default.target"];
     wants = ["pipewire.service" "wireplumber.service"];
-    after = [
-      "pipewire.service"
-      "wireplumber.service"
-      "graphical-session.target"
-    ];
+    after = ["pipewire.service" "wireplumber.service"];
     serviceConfig = {
       Type = "oneshot";
+      RemainAfterExit = true;
       ExecStart = pkgs.writeShellScript "goxlr-audio-route.sh" ''
-        set -uo pipefail
-        PW_LINK="${pkgs.pipewire}/bin/pw-link"
-        PW_DUMP="${pkgs.pipewire}/bin/pw-dump"
+        PW="${pkgs.pipewire}/bin/pw-link"
 
-        goxlr_headphones_split() {
-          local n
-          if [[ -x "$PW_DUMP" ]]; then
-            n=$("$PW_DUMP" 2>/dev/null | grep -F '"node.name"' | grep -F 'HiFi__Headphones__sink.split' | head -1 | sed 's/.*"node.name": "\([^"]*\)".*/\1/')
-            [[ -n "$n" ]] && echo "$n" && return 0
-          fi
-          echo "alsa_output.usb-TC-Helicon_GoXLR-00.HiFi__Headphones__sink.split"
-        }
+        SRC_L="alsa_output.hw_GoXLR_0:monitor_AUX4"
+        SRC_R="alsa_output.hw_GoXLR_0:monitor_AUX5"
+        DST_L="alsa_output.usb-Logitech_PRO_X_Wireless_Gaming_Headset-00.analog-stereo:playback_FL"
+        DST_R="alsa_output.usb-Logitech_PRO_X_Wireless_Gaming_Headset-00.analog-stereo:playback_FR"
 
-        logitech_sink_base() {
-          if [[ -x "$PW_DUMP" ]]; then
-            "$PW_DUMP" 2>/dev/null | grep -F '"node.name"' | grep -F 'alsa_output.usb-Logitech_PRO_X' | grep -F 'analog-stereo' | grep -F 'Wireless_Gaming_Headset' | head -1 | sed 's/.*"node.name": "\([^"]*\)".*/\1/'
-          fi
-        }
-
-        resolve_ports() {
-          local split logi
-          split=$(goxlr_headphones_split)
-          logi=$(logitech_sink_base)
-          if [[ -z "$logi" ]]; then
-            logi=$("$PW_LINK" -l 2>/dev/null | grep -oE 'alsa_output\.usb-Logitech_PRO_X[^[:space:]:]+analog-stereo' | sort -u | head -1)
-          fi
-          if [[ -z "$logi" ]]; then
-            echo "goxlr-audio-route: no Logitech PRO X Wireless analog-stereo sink; is the dongle plugged in?" >&2
-            return 1
-          fi
-          SRC_L="''${split}:output_AUX4"
-          SRC_R="''${split}:output_AUX5"
-          # Parent sink node (strip trailing .split) — monitor_* live here, not on the split adapter.
-          SINK_PARENT="''${split%.split}"
-          HW_L="alsa_output.hw_GoXLR_0:playback_AUX4"
-          HW_R="alsa_output.hw_GoXLR_0:playback_AUX5"
-          DST_L="''${logi}:playback_FL"
-          DST_R="''${logi}:playback_FR"
-          return 0
-        }
-
-        for ((i = 0; i < 90; i++)); do
-          if ! resolve_ports; then
-            sleep 1
-            continue
-          fi
-          "$PW_LINK" -d "''${SINK_PARENT}:monitor_FL" "''${DST_L}" 2>/dev/null || true
-          "$PW_LINK" -d "''${SINK_PARENT}:monitor_FR" "''${DST_R}" 2>/dev/null || true
-          "$PW_LINK" -d "''${SRC_L}" "''${HW_L}" 2>/dev/null || true
-          "$PW_LINK" -d "''${SRC_R}" "''${HW_R}" 2>/dev/null || true
-          "$PW_LINK" -d "''${SRC_L}" "''${DST_L}" 2>/dev/null || true
-          "$PW_LINK" -d "''${SRC_R}" "''${DST_R}" 2>/dev/null || true
-          if "$PW_LINK" "''${SRC_L}" "''${DST_L}" && "$PW_LINK" "''${SRC_R}" "''${DST_R}"; then
+        for i in $(seq 1 60); do
+          if "$PW" -o 2>/dev/null | grep -qF "$SRC_L" && \
+             "$PW" -i 2>/dev/null | grep -qF "$DST_L"; then
+            "$PW" "$SRC_L" "$DST_L" 2>/dev/null || true
+            "$PW" "$SRC_R" "$DST_R" 2>/dev/null || true
+            echo "goxlr-audio-route: links created"
             exit 0
           fi
           sleep 1
         done
-        echo "goxlr-audio-route: failed after 90s. Check: pw-link -l | grep -E 'Headphones__sink.split|Logitech'" >&2
+
+        echo "goxlr-audio-route: timeout waiting for ports" >&2
         exit 1
       '';
     };
