@@ -15,6 +15,12 @@ journalctl --user -u sunshine -f
 
 If `systemctl restart sunshine` fails with "Unit sunshine.service not found", use the `--user` variant above.
 
+Post-rebuild quick checks can be run with:
+
+```bash
+bash /home/chaton/etc/nixos/gaming/smoke-tests-wayland.sh
+```
+
 # Steam 
 
 to see : https://discourse.nixos.org/t/unable-to-add-new-library-folder-to-steam/38923

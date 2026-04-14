@@ -72,6 +72,30 @@ nix flake lock --update-input nixpkgs
 sudo nixos-rebuild switch --flake .#neo-nix
 ```
 
+#### 3.1 Safe update workflow (Niri/Wayland)
+
+Use this sequence to reduce regressions on the desktop stack:
+
+```sh
+# 1) Update inputs
+nix flake update
+
+# 2) Build first (no switch yet)
+sudo nixos-rebuild build --flake .#neo-nix
+
+# 3) Apply
+sudo nixos-rebuild switch --flake .#neo-nix
+
+# 4) Run smoke tests in user session
+bash /home/chaton/etc/nixos/gaming/smoke-tests-wayland.sh
+```
+
+If session components regress, rollback immediately:
+
+```sh
+sudo nixos-rebuild switch --rollback
+```
+
 #### 4. Useful Commands
 
 ```sh
