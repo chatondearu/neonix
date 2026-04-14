@@ -8,9 +8,11 @@
     2242  # SSH
     8009  # TCP SYN
     9000  # UPnP control ports (dynamic, opened via conntrack normally)
+    8080  # HTTP
   ];
   networking.firewall.allowedUDPPorts = [
     8009  # UDP SYN
+    8080  # HTTP
     5353  # mDNS
   ];
 

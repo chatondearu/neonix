@@ -47,7 +47,30 @@
     autoStart = true;
     capSysAdmin = true; # only needed for Wayland -- omit this when using with Xorg
     openFirewall = true;
+
+    package = pkgs.sunshine.override {
+      cudaSupport = true;
+    };
+
+    settings = {
+      # Disable AV1 encoding, not supported by my GPU <= RTX 4000
+      av1_mode = 1;
+    };
   };
+
+  # Firewall rules for Sunshine
+  networking.firewall = {
+    allowedTCPPorts = [
+      47984
+      47989
+      47990
+      48010
+    ]; # Sunshine web interface
+  };
+
+  networking.firewall.allowedUDPPortRanges = [
+    { from = 47998; to = 48000; }  # Sunshine UDP
+  ];
 
   # Hardware support for devices
   hardware.xone.enable = true; # Xbox One Controller (disabled: firmware not installed, causes init radio failed)
