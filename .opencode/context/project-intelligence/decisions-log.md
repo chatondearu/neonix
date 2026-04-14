@@ -211,12 +211,12 @@ Chose niri for:
 - **Modern Wayland**: Better security, smoother rendering than X11
 - **Tiling WM**: Efficient keyboard-driven workflow
 - **Smooth animations**: GPU-accelerated compositor effects
-- **dndm support**: Custom shell integration via DankMaterialShell
+- **DMS support**: Custom shell integration via DankMaterialShell
 
 ### Alternatives Considered
 | Alternative | Pros | Cons | Why Rejected? |
 |-------------|------|------|---------------|
-| Sway (X11) | Mature, large community, stable | X11 architecture older, less secure than Wayland | Chose modern Wayland for better GPU utilization |
+| Sway (Wayland) | Mature, large community, stable | Different tiling model and workflow ergonomics for this setup | Chose niri workflow and integration with current shell stack |
 | Hyprland | Popular, highly customizable | More complex config, occasional stability issues | niri's simpler design is easier to maintain |
 
 ### Impact
@@ -227,7 +227,7 @@ Chose niri for:
 ### Related
 - `desktop/niri/niri.nix`: Window manager configuration
 - AGENTS.md: Desktop environment setup documentation
-- [niri GitHub](https://github.com/pystray/niri) (or actual repo)
+- [niri GitHub](https://github.com/YaLTeR/niri)
 
 ---
 
@@ -252,86 +252,3 @@ Decisions that were later overturned (for historical context):
 - `technical-domain.md` - Technical implementation affected by these decisions
 - `business-tech-bridge.md` - How decisions connect personal needs to NixOS features
 - `living-notes.md` - Current open questions that may become future decisions
-</parameter> }
-
-**Date**: YYYY-MM-DD
-**Status**: [Status]
-**Owner**: [Owner]
-
-### Context
-[What was happening? Why did we need to decide?]
-
-### Decision
-[What we decided]
-
-### Rationale
-[Why this was the right choice]
-
-### Alternatives Considered
-| Alternative | Pros | Cons | Why Rejected? |
-|-------------|------|------|---------------|
-| [Option A] | [Good things] | [Bad things] | [Reason] |
-| [Option B] | [Good things] | [Bad things] | [Reason] |
-
-### Impact
-- **Positive**: [What we gain]
-- **Negative**: [What we trade off]
-- **Risk**: [What to watch for]
-
-### Related
-- [Link to PR #000]
-- [Link to issue #000]
-- [Link to documentation]
-
----
-
-## Decision: [Title]
-
-**Date**: YYYY-MM-DD
-**Status**: [Status]
-**Owner**: [Owner]
-
-### Context
-[What was happening?]
-
-### Decision
-[What we decided]
-
-### Rationale
-[Why this was right]
-
-### Alternatives Considered
-| Alternative | Pros | Cons | Why Rejected? |
-|-------------|------|------|---------------|
-| [Option A] | [Good things] | [Bad things] | [Reason] |
-
-### Impact
-- **Positive**: [What we gain]
-- **Negative**: [What we trade off]
-
-### Related
-- [Link]
-
----
-
-## Deprecated Decisions
-
-Decisions that were later overturned (for historical context):
-
-| Decision | Date | Replaced By | Why |
-|----------|------|-------------|-----|
-| [Old decision] | [Date] | [New decision] | [Reason] |
-
-## Onboarding Checklist
-
-- [ ] Understand the philosophy behind major architectural choices
-- [ ] Know why certain technologies were chosen over alternatives
-- [ ] Understand trade-offs that were made
-- [ ] Know where to find decision context when questions arise
-- [ ] Understand what decisions are pending and why
-
-## Related Files
-
-- `technical-domain.md` - Technical implementation affected by these decisions
-- `business-tech-bridge.md` - How decisions connect business and technical
-- `living-notes.md` - Current open questions that may become decisions

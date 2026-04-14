@@ -1,5 +1,20 @@
 # Gaming setup instructions
 
+# Niri / Wayland operational notes (current setup)
+
+- Session stack: `greetd` + `dms-greeter` + `niri` + `dms-shell`.
+- X11 compatibility is provided through XWayland (`services.xserver.enable = true` + `programs.xwayland.enable = true` in the NixOS modules).
+- The system base is pinned to `nixos-25.11`; selected desktop/gaming components are intentionally sourced from unstable.
+- Sunshine is handled as a **user service** in this setup:
+
+```bash
+systemctl --user status sunshine
+systemctl --user restart sunshine
+journalctl --user -u sunshine -f
+```
+
+If `systemctl restart sunshine` fails with "Unit sunshine.service not found", use the `--user` variant above.
+
 # Steam 
 
 to see : https://discourse.nixos.org/t/unable-to-add-new-library-folder-to-steam/38923

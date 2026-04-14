@@ -48,7 +48,7 @@ Modular structure directly serves the goal of easy maintenance. When adding a ne
 
 **Technical Implementation**:
 - Solution: `flake.nix` with pinned inputs, committed `flake.lock`
-- Architecture: All dependencies (nixpkgs, Home Manager, etc.) locked to specific commits
+- Architecture: Core system pinned to `nixos-25.11`, with selected unstable inputs for specific desktop/gaming components
 - Trade-offs: Must run `nix flake update` manually for new versions vs automatic updates
 
 **Connection**:
@@ -77,7 +77,7 @@ Having proper LSP support means I get syntax highlighting and error detection wh
 - Priority: Medium - quality-of-life improvement
 
 **Technical Implementation**:
-- Solution: niri Wayland compositor with custom dndm shell integration
+- Solution: niri Wayland compositor with custom DMS shell integration
 - Architecture: All GUI apps run under Wayland protocol, X11 apps via XWayland compatibility layer
 - Trade-offs: Some legacy applications may have minor issues vs mature X11 ecosystem
 
@@ -90,7 +90,7 @@ When personal needs and technical constraints conflict, document the decision:
 
 | Situation | Personal Priority | Technical Constraint | Decision Made | Rationale |
 |-----------|-------------------|---------------------|---------------|----------|
-| **Package freshness vs stability** | Latest software features | nixos-unstable less stable than LTS | Stay on unstable, update monthly | Prefer newest packages; security patches via regular updates |
+| **Package freshness vs stability** | Latest software features | Unstable modules may regress faster than stable | Keep a stable base (`nixos-25.11`) and use unstable only where needed | Reduces blast radius while keeping fast-moving desktop/gaming components |
 | **Simplicity vs automation** | Easy to understand config | Home Manager provides more automation | Chose nix-maid over HM | Simpler setup doesn't need HM complexity; can migrate later if needed |
 | **Wayland compatibility** | Modern compositor features | Some apps don't work perfectly on Wayland | Use niri with XWayland fallback | Benefits outweigh minor compatibility issues; most critical apps have native support |
 
@@ -106,7 +106,7 @@ When personal needs and technical constraints conflict, document the decision:
 
 This file helps clarify why technical choices serve personal goals:
 
-**For the Administrator **(Self - Future Me)
+**For the Administrator** (Self - Future Me)
 - Shows that NixOS investments serve productivity and stability goals
 - Provides context for why flake locking requires manual updates
 - Demonstrates ROI of modular architecture when debugging issues
@@ -131,78 +131,3 @@ This file helps clarify why technical choices serve personal goals:
 - `decisions-log.md` - Decisions made with full context and alternatives
 - `living-notes.md` - Current open questions and issues
 - `AGENTS.md` - Development guidelines for maintaining this config
-
-## Feature Mapping Examples
-
-### Feature: [Feature Name]
-
-**Business Context**:
-- User need: [What users need]
-- Business goal: [Why this matters to business]
-- Priority: [Why this was prioritized]
-
-**Technical Implementation**:
-- Solution: [What was built]
-- Architecture: [How it fits the system]
-- Trade-offs: [What was considered and why it won]
-
-**Connection**:
-[Explain clearly how the technical solution serves the business need. What would happen without this feature? What does this feature enable for the business?]
-
-### Feature: [Feature Name]
-
-**Business Context**:
-- User need: [What users need]
-- Business goal: [Why this matters to business]
-- Priority: [Why this was prioritized]
-
-**Technical Implementation**:
-- Solution: [What was built]
-- Architecture: [How it fits the system]
-- Trade-offs: [What was considered and why it won]
-
-**Connection**:
-[Explain clearly how the technical solution serves the business need.]
-
-## Trade-off Decisions
-
-When business and technical needs conflict, document the trade-off:
-
-| Situation | Business Priority | Technical Priority | Decision Made | Rationale |
-|-----------|-------------------|-------------------|---------------|-----------|
-| [Conflict] | [What business wants] | [What tech wants] | [What was chosen] | [Why this was right] |
-
-## Common Misalignments
-
-| Misalignment | Warning Signs | Resolution Approach |
-|--------------|---------------|---------------------|
-| [Type of mismatch] | [Symptoms to watch for] | [How to address] |
-
-## Stakeholder Communication
-
-This file helps translate between worlds:
-
-**For Business Stakeholders**:
-- Shows that technical investments serve business goals
-- Provides context for why certain choices were made
-- Demonstrates ROI of technical decisions
-
-**For Technical Stakeholders**:
-- Provides business context for architectural decisions
-- Shows the "why" behind constraints and requirements
-- Helps prioritize technical debt with business impact
-
-## Onboarding Checklist
-
-- [ ] Understand the core business needs this project addresses
-- [ ] See how each major feature maps to business value
-- [ ] Know the key trade-offs and why decisions were made
-- [ ] Be able to explain to stakeholders why technical choices matter
-- [ ] Be able to explain to developers why business constraints exist
-
-## Related Files
-
-- `business-domain.md` - Business needs in detail
-- `technical-domain.md` - Technical implementation in detail
-- `decisions-log.md` - Decisions made with full context
-- `living-notes.md` - Current open questions and issues

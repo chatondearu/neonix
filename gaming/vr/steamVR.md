@@ -1,6 +1,13 @@
 # VR Guide
 see : https://lvra.gitlab.io/docs/distros/nixos/
 
+# Niri / Wayland compatibility notes
+
+- This machine runs SteamVR from a Wayland desktop (`niri`) with XWayland compatibility enabled.
+- For this setup, keep WayVR as the preferred fallback dashboard when SteamVR dashboard becomes unstable.
+- After a rebuild or flake update, validate in this order: Steam launch, SteamVR launch, headset tracking, controller tracking, and compositor stability.
+- If SteamVR starts but desktop integration is flaky, test with dashboard disabled first (see section below) before changing Nix modules.
+
 # TODO
 
 to avoid steamVR to claim sudo at each start use this :

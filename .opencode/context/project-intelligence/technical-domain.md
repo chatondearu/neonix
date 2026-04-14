@@ -14,12 +14,12 @@
 
 | Layer | Technology | Version | Rationale |
 |-------|-----------|---------|----------|
-| OS | NixOS | 25.11 (nixos-unstable) | Latest stable with newest packages |
+| OS | NixOS | 25.11 (stable base) + targeted unstable inputs | Stable core with selective fast-moving desktop/gaming components |
 | Config System | Nix Flakes | Current flake.nix | Reproducible, locked dependencies |
 | Personalization | nix-maid | viperML/nix-maid | User-level dotfiles without Home Manager |
 | Formatter | alejandra | 4.0.0 | Consistent Nix formatting (RFC style) |
 | Editor | Helix | Latest | Rust-based, Lua config via direnv |
-| Window Manager | niri | Latest | Wayland compositor with dndm support |
+| Window Manager | niri | Latest | Wayland compositor with DMS shell support |
 
 ## Architecture Pattern
 

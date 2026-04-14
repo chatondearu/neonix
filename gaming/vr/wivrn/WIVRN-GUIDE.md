@@ -10,10 +10,12 @@ Votre système NixOS est maintenant correctement configuré pour utiliser WiVRn 
 - Ajout du groupe `adbusers` pour l'utilisateur `chaton`
 - Permet l'accès aux appareils Android via ADB
 
-#### 2. `/home/chaton/etc/nixos/gaming.nix`
+#### 2. `/home/chaton/etc/nixos/gaming/default.nix` (current layout)
 - Activation de `programs.adb.enable = true`
 - Mise à jour des règles udev pour les casques Meta Quest
 - Documentation des Product IDs (Quest 1: 0183/0186, Quest 2: 01a0/01a1, Quest 3: 0360/0361)
+
+Note: in the current repository layout, gaming configuration is split under `/home/chaton/etc/nixos/gaming/` (for example `default.nix` and `vr/vr.nix`) instead of a single `gaming.nix` file.
 
 ## 📱 Installation de WiVRn sur le Quest
 
@@ -37,6 +39,10 @@ Ce script :
 - USB Debugging autorisé sur le Quest
 
 ## 🎮 Utilisation de WiVRn
+
+### Session graphique
+
+Cette configuration utilise `niri` (Wayland). Garder les tests WiVRn/SteamVR dans une session utilisateur active, avec les services utilisateur (`systemctl --user`) pour éviter les faux diagnostics.
 
 ### Sur le Quest
 1. Mettez le casque

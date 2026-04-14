@@ -1,6 +1,6 @@
 ## My NixOS Configuration
 
-Custom NixOS configuration with Niri (scrollable window manager), integrating Home Manager and various configurations for development, gaming, and streaming.
+Custom NixOS configuration with Niri (scrollable window manager), integrating nix-maid and various configurations for development, gaming, and streaming.
 
 ### 📁 Project Structure
 
@@ -118,6 +118,14 @@ Secrets are stored in the `secrets/` folder and imported via `secrets.nix`. To s
 - **Development:** Environments for Node.js, Python, and other dev tools
 - **Streaming:** OBS configuration and associated tools
 - **Formatter:** Alejandra for automatically formatted Nix code
+
+### Niri / Wayland setup notes
+
+- **Base channel:** system base is pinned to `nixos-25.11` through `flake.nix` and `flake.lock`.
+- **Targeted unstable composition:** `niri`, `dms-*`, and `steam` are pulled from unstable through `unstable.nix`.
+- **Niri module source:** the stable Niri module is disabled and replaced by the unstable module in `desktop/niri/niri.nix` on purpose.
+- **XWayland support:** `services.xserver.enable = true` is kept to support legacy X11 apps through XWayland.
+- **Session management:** this setup uses `greetd` + `dms-greeter` + `niri` + `dms-shell`; user-level services such as Sunshine should be handled via `systemctl --user`.
 
 ### Utils
 
