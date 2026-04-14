@@ -45,6 +45,7 @@ Use this template after each `nix flake update` to keep version-impact tracking 
 - Steam launch: ok/fail
 - One Wayland-native app test: ok/fail
 - One XWayland app test: ok/fail
+- Matrix reference used: `doc/test-matrix-wayland.md` yes/no
 
 ## VR/gaming checks (when relevant)
 

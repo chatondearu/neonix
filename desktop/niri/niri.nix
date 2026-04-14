@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputs, self, ... }:
 
 {
   # Disable the stable niri module
@@ -108,6 +108,6 @@
   # Nirinit configuration - https://github.com/amaanq/nirinit
   services.nirinit.enable = true;
   users.users.chaton.maid = {
-    file.xdg_config."nirinit/config.toml".source = "{{home}}/etc/nixos/desktop/niri/nirinit/config.toml";
+    file.xdg_config."nirinit/config.toml".source = "${self}/desktop/niri/nirinit/config.toml";
   };
 }

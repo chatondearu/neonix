@@ -74,9 +74,25 @@ sudo nixos-rebuild switch --flake .#neo-nix
 
 #### 3.1 Safe update workflow (Niri/Wayland)
 
-Use this sequence to reduce regressions on the desktop stack:
+Use this routine to reduce regressions on the desktop stack.
+Preferred command:
 
 ```sh
+bash /home/chaton/etc/nixos/scripts/safe-flake-update.sh
+```
+
+Then create/update a release note for this lock update:
+
+```sh
+bash /home/chaton/etc/nixos/scripts/new-flake-release-note.sh
+```
+
+Manual equivalent (if needed):
+
+```sh
+# 0) Create release note file
+bash /home/chaton/etc/nixos/scripts/new-flake-release-note.sh
+
 # 1) Update inputs
 nix flake update
 
@@ -88,6 +104,9 @@ sudo nixos-rebuild switch --flake .#neo-nix
 
 # 4) Run smoke tests in user session
 bash /home/chaton/etc/nixos/gaming/smoke-tests-wayland.sh
+
+# 5) Fill the release note with results
+# doc/release-notes/YYYY-MM-DD-flake-update.md
 ```
 
 If session components regress, rollback immediately:

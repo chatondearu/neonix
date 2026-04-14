@@ -1,0 +1,50 @@
+name: nix-ci
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  build-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Flake check
+        run: nix flake check --show-trace
+
+      - name: Build NixOS toplevel
+        run: nix build .#nixosConfigurations.neo-nix.config.system.build.toplevel --show-trace
+
+  require-release-note-on-lock-change:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enforce release note when lockfile changes
+        run: |
+          base_ref="${{ github.base_ref }}"
+          git fetch origin "$base_ref":"origin/$base_ref"
+
+          changed_files="$(git diff --name-only "origin/$base_ref...HEAD")"
+          echo "$changed_files"
+
+          if echo "$changed_files" | grep -q '^flake.lock$'; then
+            if ! echo "$changed_files" | grep -q '^doc/release-notes/'; then
+              echo "flake.lock changed but no file in doc/release-notes/ was updated."
+              echo "Create a note from doc/flake-update-release-notes-template.md."
+              exit 1
+            fi
+          fi

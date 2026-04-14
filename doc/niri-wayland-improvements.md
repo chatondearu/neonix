@@ -70,6 +70,8 @@ This document tracks safe improvements for the current NixOS + Niri + Wayland st
      - Steam launch + one XWayland app + one Wayland app
    - Optional helper script:
      - `bash gaming/smoke-tests-wayland.sh`
+   - Full routine helper:
+     - `bash scripts/safe-flake-update.sh`
 
 3. **Quickshell drift visibility (P1)**
    - Add a release note in docs before each lock update to mention current Quickshell pair and test outcomes.
@@ -92,6 +94,7 @@ This document tracks safe improvements for the current NixOS + Niri + Wayland st
 
 - Keep `gaming/smoke-tests-wayland.sh` as the baseline post-rebuild smoke-test helper script.
 - Use `doc/flake-update-release-notes-template.md` to track lockfile impact and validation results after each `nix flake update`.
+- Use `doc/test-matrix-wayland.md` for structured validation of Wayland/XWayland/Gaming/VR critical paths.
 - Add CI checks:
   - `nix flake check`
   - `nix build .#nixosConfigurations.neo-nix.config.system.build.toplevel`
