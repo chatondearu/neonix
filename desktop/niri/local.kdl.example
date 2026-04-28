@@ -1,0 +1,35 @@
+// Local machine overrides for niri.
+// This file is intentionally not managed by nix-maid.
+//
+// Usage:
+// 1) Copy this file to ~/.config/niri/local.kdl
+// 2) Uncomment and adapt the sections you need
+// 3) Reload niri config
+
+// Example: override monitor layout for a specific setup.
+/-output "DP-1" {
+    mode "2560x1440@143.973"
+    scale 1
+    position x=0 y=0
+}
+
+/-output "DP-2" {
+    mode "2560x1440@143.973"
+    scale 1
+    position x=2560 y=0
+}
+
+// Example: machine-only keybinds.
+/-binds {
+    Mod+Return { spawn "ghostty"; }
+    Mod+Shift+P { spawn "playerctl" "play-pause"; }
+}
+
+// Example: custom blur tuning for local experiments.
+/-layer-rule {
+    match namespace="^dms:.*"
+    background-effect {
+        blur true
+        xray false
+    }
+}

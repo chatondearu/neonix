@@ -1,0 +1,23 @@
+{
+  "dockerManager": {
+    "enabled": true
+  },
+  "linuxWallpaperEngine": {
+    "enabled": false,
+    "playlistIntervalMinutes": 59,
+    "monitorPlaylists": {},
+    "monitorScenes": {},
+    "sceneSettings": {
+      "3175687247": {
+        "fps": 60,
+        "scaling": "default"
+      }
+    }
+  },
+  "dankLauncherKeys": {
+    "enabled": true
+  },
+  "emojiLauncher": {
+    "enabled": true
+  }
+}

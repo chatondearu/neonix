@@ -108,6 +108,16 @@
   # Nirinit configuration - https://github.com/amaanq/nirinit
   services.nirinit.enable = true;
   users.users.chaton.maid = {
+    # Niri declarative config imported from current machine setup.
+    file.xdg_config."niri/config.kdl".source = "${self}/desktop/niri/config.kdl";
+    file.xdg_config."niri/binds.kdl".source = "${self}/desktop/niri/binds.kdl";
+    file.xdg_config."niri/dms-custom.kdl".source = "${self}/desktop/niri/dms-custom.kdl";
+
+    # DMS stable files (keep settings.json unmanaged for runtime edits via UI).
+    file.xdg_config."DankMaterialShell/plugin_settings.json".source = "${self}/desktop/niri/dank-material-shell/plugin_settings.json";
+    file.xdg_config."DankMaterialShell/firefox.css".source = "${self}/desktop/niri/dank-material-shell/firefox.css";
+    file.xdg_config."DankMaterialShell/zen.css".source = "${self}/desktop/niri/dank-material-shell/zen.css";
+
     file.xdg_config."nirinit/config.toml".source = "${self}/desktop/niri/nirinit/config.toml";
   };
 }
