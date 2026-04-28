@@ -3,8 +3,8 @@
 {
   environment.systemPackages = with pkgs; [
     # OpenCode - https://opencode.ai/
-    unstable.opencode
     unstable.opencode-desktop
+    (callPackage ../pkgs/opencode/default.nix { })
 
     # LM Studio - https://lmstudio.ai/
     unstable.lmstudio
@@ -12,7 +12,7 @@
     # Openwork - https://github.com/different-ai/openwork
     # (callPackage ../pkgs/openwork/default.nix { })
 
-    (pkgs.callPackage ../pkgs/OpenAgentsControl/default.nix { })
+    (callPackage ../pkgs/OpenAgentsControl/default.nix { })
   ];
 
   users.users.chaton.maid = {

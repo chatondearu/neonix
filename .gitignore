@@ -9,6 +9,7 @@ secrets.nix
 
 # Logs et temporaires
 *.log
+*.log.*
 *.tmp
 result
 result-*
@@ -20,3 +21,6 @@ result-*
 
 **/node_modules
 **/__pycache__
+
+.direnv
+.cerbot

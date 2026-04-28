@@ -8,11 +8,16 @@ in {
     android-tools # For ADB (uaccess handled by systemd 258)
 
     # Flake uses nixos-unstable, so these are already unstable packages
-    unstable.cursor-cli
-    #unstable.code-cursor
-
     (pkgs.unstable.callPackage ../pkgs/cursor/default.nix { })
-  ];
+  ] ++ (with unstable; [
+    cursor-cli
+
+    godot
+    godot-mcp
+    pixelorama
+
+    #TODO add Crocotile, itch.io
+  ]);
 
   programs.git = {
     enable = true;

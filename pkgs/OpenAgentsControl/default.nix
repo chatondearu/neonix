@@ -56,7 +56,7 @@ stdenvNoCC.mkDerivation rec {
     homepage = "https://github.com/darrenhinde/OpenAgentsControl";
     platforms = [ "x86_64-linux" ];
     license = licenses.mit;
-    maintainers = with maintainers; [ chaton ];
+    maintainers = with maintainers; [ chatondearu ];
     mainProgram = "oac-install";
   };
 }

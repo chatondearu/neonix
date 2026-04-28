@@ -31,6 +31,9 @@
         p.gtk4
       ];
     })
+
+    itch
+    itch-dl
   ];
 
   programs.gamemode.enable = true;
