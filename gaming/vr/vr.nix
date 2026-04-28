@@ -12,7 +12,7 @@
   services.wivrn = {
     enable = true;
     openFirewall = true; # Required for wireless streaming
-    defaultRuntime = true;
+    # defaultRuntime = true; # not needed anymore bu WinVrn
 
     package = (pkgs.wivrn.override { cudaSupport = true; });
   };

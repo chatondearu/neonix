@@ -1,5 +1,6 @@
 # VR Guide
-see : https://lvra.gitlab.io/docs/distros/nixos/
+
+see : [https://lvra.gitlab.io/docs/distros/nixos/](https://lvra.gitlab.io/docs/distros/nixos/)
 
 # Niri / Wayland compatibility notes
 
@@ -14,6 +15,7 @@ to avoid steamVR to claim sudo at each start use this :
 `sudo setcap CAP_SYS_NICE=eip ~/.local/share/Steam/steamapps/common/SteamVR/bin/linux64/vrcompositor-launcher`
 
 before we used this in nix config file :
+
 ```
 # Set capabilities for SteamVR binaries
   systemd.services.set-steam-vr-capabilities = {
@@ -47,12 +49,13 @@ It can be used with both ALVR and wired headsets.
 
 What it does:
 
-    Whitelist drivers for SpaceCal and ALVR so these will never get blocked
-    Apply bindings spam patch by Plyshka
-    Setcap the compositor after a SteamVR update
-    Start SteamVR and restart it for you in case of a crash
-    Prevent SteamVR processes from getting stuck and putting SteamVR in an inconsistent state
-
+```
+Whitelist drivers for SpaceCal and ALVR so these will never get blocked
+Apply bindings spam patch by Plyshka
+Setcap the compositor after a SteamVR update
+Start SteamVR and restart it for you in case of a crash
+Prevent SteamVR processes from getting stuck and putting SteamVR in an inconsistent state
+```
 
 ## Optional: Disable SteamVR dashboard
 

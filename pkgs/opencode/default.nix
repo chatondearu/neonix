@@ -113,7 +113,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     runHook preBuild
 
     cd ./packages/opencode
-    bun --bun ./script/build.ts --single --skip-install
+    bun --bun ./script/build.ts --single --skip-install --skip-embed-web-ui
     bun --bun ./script/schema.ts config.json tui.json
 
     runHook postBuild
