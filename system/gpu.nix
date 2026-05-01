@@ -40,6 +40,9 @@
     nvidiaSettings = true; # Enable Nvidia settings
     modesetting.enable = true; # Enable modesetting
 
+    powerManagement.enable = false;
+    powerManagement.finegrained = false;
+
     # Add these for VR:
     prime = {
       offload.enable = false; # You don't have hybrid graphics

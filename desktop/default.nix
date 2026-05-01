@@ -20,6 +20,9 @@
   };
 
   imports = [
-    ./niri/niri.nix
+    ./wayland.nix
+    ./niri.nix
+    ./shell.dank.nix
+    ./greeter.dank.nix
   ];
 }

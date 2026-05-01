@@ -26,7 +26,13 @@ in {
         name = secrets.githubUser;
         email = secrets.githubEmail;
       };
+
+      safe.directory = "/etc/nixos";
       init.defaultBranch = "main";
+    };
+
+    settings = {
+      push = { autoSetupRemote = true; };
     };
   };
 

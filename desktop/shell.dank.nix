@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputs, self, ... }:
 
 {
   # DANK LINUX - https://danklinux.com/docs/dankmaterialshell/nixos
@@ -67,5 +67,12 @@
         done
       '';
     };
+  };
+
+  users.users.chaton.maid = {
+    # DMS stable files (keep settings.json unmanaged for runtime edits via UI).
+    file.xdg_config."DankMaterialShell/plugin_settings.json".source = "${self}/desktop/dank-material-shell/plugin_settings.json";
+    file.xdg_config."DankMaterialShell/firefox.css".source = "${self}/desktop/dank-material-shell/firefox.css";
+    file.xdg_config."DankMaterialShell/zen.css".source = "${self}/desktop/dank-material-shell/zen.css";
   };
 }
