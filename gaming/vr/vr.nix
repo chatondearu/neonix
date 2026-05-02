@@ -57,7 +57,7 @@
       9757
     ]; # SteamVR web interface
     allowedUDPPorts = [
-      10400
+      10400 # not sure of what is behind for VR stuff
       9757
       5353
     ]; # VRLink UDP

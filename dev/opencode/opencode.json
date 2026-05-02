@@ -1,61 +1,57 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "provider": {
-    "google": {
+    "llama-cpp": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "llama-swap (local)",
+      "options": {
+        "baseURL": "http://localhost:9292/v1"
+      },
       "models": {
-        "gemini-2.5-flash": {
-          "options": {
-            "thinkingConfig": {
-              "thinkingBudget": 8192,
-              "includeThoughts": true
-            }
-          }
+        "gemma-4:31b-q4": {
+          "name": "gemma-4:31b-q4",
+          "limit": { "context": 65536, "output": 32768 }
         },
-        "gemini-2.5-pro": {
-          "options": {
-            "thinkingConfig": {
-              "thinkingBudget": 8192,
-              "includeThoughts": true
-            }
-          }
+        "gemma-4:31b-q4-nothink": {
+          "name": "gemma-4:31b-q4-nothink",
+          "limit": { "context": 65536, "output": 32768 }
         },
-        "gemini-3-flash-preview": {
-          "options": {
-            "thinkingConfig": {
-              "thinkingLevel": "high",
-              "includeThoughts": true
-            }
-          }
+        "qwen3.5:35b-a3b-q4": {
+          "name": "Qwen3.5",
+          "limit": { "context": 65536, "output": 32768 }
         },
-        "gemini-3-pro-preview": {
-          "options": {
-            "thinkingConfig": {
-              "thinkingLevel": "high",
-              "includeThoughts": true
-            }
-          }
+        "glm-4.7-flash:q4": {
+          "name": "GLM-4.7 Flash Q4 (local)",
+          "limit": { "context": 200000, "output": 32768 }
+        },
+        "devstral-2:24b-q4": {
+          "name": "Devstral-2 24B Q4 (local)",
+          "limit": { "context": 65536, "output": 32768 }
+        },
+        "devstral-2:24b-q8": {
+          "name": "Devstral-2 24B Q8 (local)",
+          "limit": { "context": 65536, "output": 32768 }
+        },
+        "gpt-oss-low:20b": {
+          "name": "GPT-OSS 20B Low (local)",
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "gpt-oss-medium:20b": {
+          "name": "GPT-OSS 20B Medium (local)",
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "gpt-oss-high:20b": {
+          "name": "GPT-OSS 20B High (local)",
+          "limit": { "context": 131072, "output": 32768 }
         }
       }
     },
-    "lmstudio": {
+    "litellm": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "LM Studio (local)",
+      "name": "LiteLLM",
       "options": {
-        "baseURL": "http://127.0.0.1:1234/v1"
-      },
-      "models": {
-        "google/gemma-4-31b": {
-          "name": "Gemma 4-31b (local)"
-        },
-        "google/gemma-4-e4b": {
-          "name": "Gemma 4-e4b (local)"
-        },
-        "mistralai/devstral-small-2-2512": {
-          "name": "Mistral Devstral Small 2 2512 (local)"
-        },
-        "qwen/qwen3.5-35b-a3b": {
-          "name": "Qwen.3 35b A3B (local)"
-        }
+        "baseURL": "https://litellm.hd.neomatix.net/v1",
+        "apiKey": "sk-****"
       }
     }
   },

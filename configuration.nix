@@ -12,7 +12,7 @@
     ./system/boot.nix
     ./system/locale.nix
     ./system/network.nix
-    ./system/wake-on-lan.nix
+    #./system/wake-on-lan.nix
     ./system/gpu.nix
     ./system/system.nix
     ./system/security.nix

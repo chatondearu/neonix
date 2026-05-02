@@ -29,10 +29,10 @@ in {
 
       safe.directory = "/etc/nixos";
       init.defaultBranch = "main";
-    };
 
-    settings = {
-      push = { autoSetupRemote = true; };
+      settings = {
+        push = { autoSetupRemote = true; };
+      };
     };
   };
 
