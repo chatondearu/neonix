@@ -4,11 +4,10 @@
 
     models:  # Ordered from newest to oldest
 
-      models:
       "gemma-4:31b-q4":
         cmd: |
           @llamaServerPath@
-          -hf unsloth/gemma-4-31B-it-GGUF:gemma-4-31B-it-UD-Q4_K_XL.gguf
+          -hf unsloth/gemma-4-31B-it-GGUF:UD-Q4_K_XL
           --alias "unsloth/gemma-4-31B-it-GGUF"
           --port ${PORT}
           --ctx-size 16384
@@ -24,7 +23,7 @@
       "gemma-4:31b-q4-nothink":
         cmd: |
           @llamaServerPath@
-          -hf unsloth/gemma-4-31B-it-GGUF:gemma-4-31B-it-UD-Q4_K_XL.gguf
+          -hf unsloth/gemma-4-31B-it-GGUF:UD-Q4_K_XL
           --alias "unsloth/gemma-4-31B-it-GGUF"
           --port ${PORT}
           --ctx-size 16384
@@ -57,7 +56,7 @@
       "glm-4.7-flash:q4":
         cmd: |
           @llamaServerPath@
-          -hf unsloth/GLM-4.7-Flash-GGUF:GLM-4.7-Flash-UD-Q4_K_XL.gguf
+          -hf unsloth/GLM-4.7-Flash-GGUF:UD-Q4_K_XL
           --alias "unsloth/GLM-4.7-Flash"
           --port ${PORT}
           --ctx-size 32768
@@ -76,7 +75,7 @@
       "devstral-2:24b-q4":
         cmd: |
           @llamaServerPath@
-          -hf unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF:Devstral-Small-2-24B-Instruct-2512-UD-Q4_K_XL.gguf
+          -hf unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF:UD-Q4_K_XL
           --alias "unsloth/Devstral-Small-2-24B-Instruct-2512"
           --n-gpu-layers 999
           --prio 3
@@ -92,7 +91,7 @@
       "devstral-2:24b-q8":
         cmd: |
           @llamaServerPath@
-          -hf unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF:Devstral-Small-2-24B-Instruct-2512-UD-Q8_K_XL.gguf
+          -hf unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF:UD-Q8_K_XL
           --alias "unsloth/Devstral-Small-2-24B-Instruct-2512"
           --n-gpu-layers 999
           --prio 3
