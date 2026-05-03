@@ -53,12 +53,31 @@
 
   fileSystems."/games" = {
     device = "/dev/disk/by-partuuid/fac02d23-340d-499a-8a90-3c799fa1a3c6";
-    fsType = "ntfs";
+    fsType = "ntfs3";
     options = [
       "nofail" # Allows system to continue to boot if drive cannot be mounted
-      "users" # Allows any user to mount/unmount
+      "rw"
       "exec" # Allows execution of files
-      "uid=1000,gid=100" # Allows the user to mount/unmount
+      "uid=1000"     # Assigne la propriété à ton utilisateur
+      "gid=100"      # Assigne au groupe 'users'
+      "umask=022"    # Permissions 755 pour les dossiers, 644 pour les fichiers
+      "windows_names" # Allows Windows-style file names
+      "x-systemd.device-timeout=5s"
+    ];
+  };
+
+  fileSystems."/hdd" = {
+    device = "/dev/disk/by-uuid/CCE4A03CE4A02AA2";
+    fsType = "ntfs3";
+    options = [
+      "rw"
+      "uid=1000"     # Assigne la propriété à ton utilisateur
+      "gid=100"      # Assigne au groupe 'users'
+      "umask=022"    # Permissions 755 pour les dossiers, 644 pour les fichiers
+      "nofail"       # Boot sans kernel panic si le HDD crashe
+      "windows_names" # Allows Windows-style file names
+      "x-systemd.device-timeout=5s"
+      "x-systemd.idle-timeout=10min"
     ];
   };
 }

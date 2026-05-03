@@ -1,0 +1,59 @@
+models:
+  "3090-only":
+    proxy: "http://127.0.0.1:9503"
+    cmd: >
+      /mnt/nvme/llama-server/llama-server-f3252055
+      --host 127.0.0.1 --port 9503
+      --flash-attn
+      --slots
+
+      --model /mnt/nvme/models/Qwen2.5-Coder-32B-Instruct-Q4_K_M.gguf
+      -ngl 99
+      --device CUDA0
+
+      --ctx-size 32768
+      --cache-type-k q8_0 --cache-type-v q8_0
+
+  "3090-with-draft":
+    proxy: "http://127.0.0.1:9503"
+    # --ctx-size 28500 max that can fit on 3090 after draft model
+    cmd: >
+      /mnt/nvme/llama-server/llama-server-f3252055
+      --host 127.0.0.1 --port 9503
+      --flash-attn
+      --slots
+
+      --model /mnt/nvme/models/Qwen2.5-Coder-32B-Instruct-Q4_K_M.gguf
+      -ngl 99
+      --device CUDA0
+
+      --model-draft /mnt/nvme/models/Qwen2.5-Coder-0.5B-Instruct-Q8_0.gguf
+      -ngld 99
+      --draft-max 16
+      --draft-min 4
+      --draft-p-min 0.4
+      --device-draft CUDA0
+
+      --ctx-size 28500
+      --cache-type-k q8_0 --cache-type-v q8_0
+
+  "3090-P40-draft":
+    proxy: "http://127.0.0.1:9503"
+    cmd: >
+      /mnt/nvme/llama-server/llama-server-f3252055
+      --host 127.0.0.1 --port 9503
+      --flash-attn --metrics
+      --slots
+      --model /mnt/nvme/models/Qwen2.5-Coder-32B-Instruct-Q4_K_M.gguf
+      -ngl 99
+      --device CUDA0
+
+      --model-draft /mnt/nvme/models/Qwen2.5-Coder-0.5B-Instruct-Q8_0.gguf
+      -ngld 99
+      --draft-max 16
+      --draft-min 4
+      --draft-p-min 0.4
+      --device-draft CUDA1
+
+      --ctx-size 32768
+      --cache-type-k q8_0 --cache-type-v q8_0
