@@ -1,6 +1,8 @@
 { pkgs, ... }:
 
-{
+let
+  huggingfaceCache = "/hdd/huggingface";
+in {
   imports = [
     ../pkgs/overrides.nix
   ];
@@ -26,7 +28,7 @@
     # for opencode
     #OLLAMA_CONTEXT_LENGTH=64000;
     # for llama-swap
-    HF_HUB_CACHE="/hdd/huggingface"; # cache for huggingface models
+    HF_HUB_CACHE=huggingfaceCache; # cache for huggingface models
   };
 
   # AI & Machine Learning services
@@ -59,6 +61,7 @@
       Environment = [
         "PATH=/run/current-system/sw/bin"
         "LD_LIBRARY_PATH=/run/opengl-driver/lib:/run/opengl-driver-32/lib"
+        "HF_HUB_CACHE=${huggingfaceCache}"
       ];
       # Environment needs access to cache directories for model downloads
       # Simplified security settings to avoid namespace issues

@@ -61,5 +61,11 @@
     "@tarquinen/opencode-dcp@latest",
     "opencode-agent-skills",
     "@simonwjackson/opencode-direnv"
-  ]
+  ],
+  "mcp": {
+    "gitnexus": {
+      "type": "local",
+      "command": ["gitnexus", "mcp"]
+    }
+  }
 }

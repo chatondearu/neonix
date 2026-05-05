@@ -58,11 +58,22 @@
       "nofail" # Allows system to continue to boot if drive cannot be mounted
       "rw"
       "exec" # Allows execution of files
-      "uid=1000"     # Assigne la propriété à ton utilisateur
-      "gid=100"      # Assigne au groupe 'users'
-      "umask=022"    # Permissions 755 pour les dossiers, 644 pour les fichiers
+      "uid=1000"     # Assign ownership to the user
+      "gid=100"      # Assign to the 'users' group
+      "umask=022"    # Permissions 755 for directories, 644 for files
       "windows_names" # Allows Windows-style file names
       "x-systemd.device-timeout=5s"
+    ];
+  };
+
+  # Steam library mount for NTFS disk - allows to use the steam library on the NTFS disk
+  fileSystems."/games/SteamLibrary/steamapps/compatdata" = {
+    device = "/home/chaton/.local/share/Steam/compatdata_ntfs";
+    fsType = "none";
+    options = [ 
+      "bind" 
+      # Security : force systemd to mount the NTFS disk before applying this bind mount
+      "x-systemd.requiresMountsFor=/games" 
     ];
   };
 
@@ -71,10 +82,10 @@
     fsType = "ntfs3";
     options = [
       "rw"
-      "uid=1000"     # Assigne la propriété à ton utilisateur
-      "gid=100"      # Assigne au groupe 'users'
-      "umask=022"    # Permissions 755 pour les dossiers, 644 pour les fichiers
-      "nofail"       # Boot sans kernel panic si le HDD crashe
+      "uid=1000"     # Assign ownership to the user
+      "gid=100"      # Assign to the 'users' group
+      "umask=022"    # Permissions 755 for directories, 644 for files
+      "nofail"       # Boot without kernel panic if the HDD crashes
       "windows_names" # Allows Windows-style file names
       "x-systemd.device-timeout=5s"
       "x-systemd.idle-timeout=10min"

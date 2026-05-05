@@ -80,12 +80,12 @@
           --n-gpu-layers 999
           --prio 3
           --min-p 0.01
-          --ctx-size 16384
+          --ctx-size 65536
           --port ${PORT}
           --threads 8
           --flash-attn on
-          --cache-type-k q8_0
-          --cache-type-v q8_0
+          --cache-type-k q4_0
+          --cache-type-v q4_0
           --jinja
 
       "devstral-2:24b-q8":
