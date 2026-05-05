@@ -11,20 +11,24 @@
   installShellFiles,
   versionCheckHook,
   writableTmpDirAsHomeHook,
+  overrideVersion ? null,
+  overrideHash ? null,
 }:
 
 let
   sourcesJson = lib.importJSON ./sources.json;
+  activeVersion = if overrideVersion != null then overrideVersion else sourcesJson.version;
+  activeHash = if overrideHash != null then overrideHash else sourcesJson.hash;
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "opencode";
-  version = sourcesJson.version;
+  version = activeVersion;
 
   src = fetchFromGitHub {
     owner = "anomalyco";
     repo = "opencode";
     tag = "v${finalAttrs.version}";
-    hash = sourcesJson.hash;
+    hash = activeHash;
   };
 
   node_modules = stdenvNoCC.mkDerivation {
@@ -48,7 +52,6 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
       bun install \
         --cpu="*" \
-        --frozen-lockfile \
         --filter ./packages/app \
         --filter ./packages/desktop \
         --filter ./packages/opencode \

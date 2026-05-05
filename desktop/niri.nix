@@ -71,6 +71,7 @@
 
   # Enable GVFS for network shares
   services.gvfs.enable = true;
+  services.gnome.gnome-keyring.enable = true; # secret service
 
   # Nirinit configuration - https://github.com/amaanq/nirinit
   services.nirinit.enable = true;
@@ -82,4 +83,31 @@
 
     file.xdg_config."nirinit/config.toml".source = "${self}/desktop/niri/nirinit/config.toml";
   };
+
+  # Limit free buffer pool in Wayland compositors
+  # https://github.com/NVIDIA/egl-wayland/issues/126#issuecomment-2379945259
+  environment.etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json".text = ''
+    {
+      "rules": [
+        {
+          "pattern": {
+            "feature": "procname",
+            "matches": "niri"
+          },
+          "profile": "Limit Free Buffer Pool On Wayland Compositors"
+        }
+      ],
+      "profiles": [
+        {
+          "name": "Limit Free Buffer Pool On Wayland Compositors",
+          "settings": [
+            {
+              "key": "GLVidHeapReuseRatio",
+              "value": 0
+            }
+          ]
+        }
+      ]
+    }
+  '';
 }

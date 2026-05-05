@@ -2,9 +2,11 @@
 // "/-" comments out the following node.
 // Check the wiki for a full description of the configuration:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Introduction
+
 config-notification {
     disable-failed
 }
+
 // Outputs from existing configuration
 /-output "eDP-1" {
     // Uncomment this line to disable this output.
@@ -94,24 +96,53 @@ layout {
     }
     struts {
     }
+    tab-indicator {
+        width 8
+        gap 8
+        length total-proportion=1.0
+        position "top"
+        place-within-column
+    }
+    insert-hint {
+        // off
+        color "#ffc87f80"
+        gradient from="#ffbb6680" to="#ffc88080" angle=45 relative-to="workspace-view"
+    }
 }
-layer-rule {
-    match namespace="^quickshell$"
-    place-within-backdrop true
+
+blur {
+    // off
+    passes 3
+    offset 3.0
+    noise 0.02
+    saturation 1.5
 }
+
 overview {
     workspace-shadow {
         off
     }
 }
-environment {
-  XDG_CURRENT_DESKTOP "niri"
+
+xwayland-satellite {
+    // off
+    path "xwayland-satellite"
 }
+
+environment {
+  QT_QPA_PLATFORM "wayland"
+  XDG_CURRENT_DESKTOP "niri"
+  ELECTRON_OZONE_PLATFORM_HINT "auto"
+}
+
 hotkey-overlay {
     skip-at-startup
 }
+
 prefer-no-csd
+
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
 animations {
     workspace-switch {
         spring damping-ratio=0.80 stiffness=523 epsilon=0.0001
@@ -144,16 +175,19 @@ animations {
         spring damping-ratio=0.85 stiffness=800 epsilon=0.0001
     }
 }
+
 window-rule {
     match app-id=r#"^org\.wezfurlong\.wezterm$"#
     default-column-width {}
 }
+
 window-rule {
     match app-id=r#"^org\.gnome\."#
     draw-border-with-background false
     geometry-corner-radius 12
     clip-to-geometry true
 }
+
 window-rule {
     match app-id=r#"^gnome-control-center$"#
     match app-id=r#"^pavucontrol$"#
@@ -161,6 +195,7 @@ window-rule {
     default-column-width { proportion 0.5; }
     open-floating false
 }
+
 window-rule {
     match app-id=r#"^gnome-calculator$"#
     match app-id=r#"^galculator$"#
@@ -170,6 +205,7 @@ window-rule {
     match app-id=r#"^xdg-desktop-portal$"#
     open-floating true
 }
+
 window-rule {
     match app-id=r#"^org\.wezfurlong\.wezterm$"#
     match app-id="Alacritty"
@@ -178,21 +214,66 @@ window-rule {
     match app-id="kitty"
     draw-border-with-background false
 }
+
 window-rule {
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
     match app-id="zoom"
     open-floating true
 }
+
 window-rule {
     match app-id="steam" title=r#"^notificationtoasts_\d+_desktop$"#
     default-floating-position x=10 y=10 relative-to="bottom-right"
 }
+
 window-rule {
     match app-id=r#"org.quickshell$"#
     open-floating true
 }
+
+// Block out mako notifications from screencasts.
+layer-rule {
+    match namespace="^notifications$"
+
+    block-out-from "screencast"
+}
+
+// Block out password managers from screencasts.
+window-rule {
+    match app-id=r#"^org\.keepassxc\.KeePassXC$"#
+    match app-id=r#"^org\.gnome\.World\.Secrets$"#
+
+    block-out-from "screencast"
+}
+
+// Indicate screencasted windows with red colors.
+window-rule {
+    match is-window-cast-target=true
+
+    focus-ring {
+        active-color "#f38ba8"
+        inactive-color "#7d0d2d"
+    }
+
+    border {
+        inactive-color "#7d0d2d"
+    }
+
+    shadow {
+        color "#7d0d2d70"
+    }
+
+    tab-indicator {
+        active-color "#f38ba8"
+        inactive-color "#7d0d2d"
+    }
+}
+
 debug {
     honor-xdg-activation-with-invalid-serial
+    wait-for-frame-completion-before-queueing
+    // Disabled dmabuf for screensharing on Discord electron app
+    disable-screencast-dmabuf true
 }
 
 recent-windows {

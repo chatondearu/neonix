@@ -38,7 +38,10 @@ BUILD_LOG=$(
   nix build --impure --no-link --expr "
     let
       pkgs = import <nixpkgs> {};
-      pkg = pkgs.callPackage $(pwd)/default.nix {};
+      pkg = pkgs.callPackage $(pwd)/default.nix {
+        overrideVersion = \"$VERSION\";
+        overrideHash = \"$HASH\";
+      };
     in
       pkg.passthru.node_modules.overrideAttrs (old: { outputHash = pkgs.lib.fakeHash; })
   " 2>&1 >/dev/null || true
