@@ -35,8 +35,10 @@
         extraEnv = {
           OBS_VKCAPTURE = true;
           ENABLE_VKBASALT = "1";
-          GBM_BACKEND = "nvidia-drm";
-          __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+
+          # activated in gpu.nix for screen sharing (Nvidia + Wayland)
+          # GBM_BACKEND = "nvidia-drm";
+          # __GLX_VENDOR_LIBRARY_NAME = "nvidia";
         };
 
         # Patching bubblewrap to allow capabilities for steamVR (required)

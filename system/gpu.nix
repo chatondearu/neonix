@@ -9,9 +9,11 @@
     enable = true;
     enable32Bit = true;
     extraPackages = with pkgs; [
-      intel-gpu-tools
-      intel-media-driver
-      intel-vaapi-driver
+      # Removed Intel GPU tools and drivers (only needed for Intel GPU)
+      #intel-gpu-tools
+      #intel-media-driver
+      #intel-vaapi-driver
+      nvidia-vaapi-driver # added for material encoding with Nvenc behind wayland
       libva-vdpau-driver
       #libvdpau-va-gl
       libva
@@ -19,9 +21,10 @@
       vulkan-validation-layers
     ];
     extraPackages32 = with pkgs; [
-      intel-gpu-tools
-      intel-media-driver
-      intel-vaapi-driver
+      # Removed Intel GPU tools and drivers (only needed for Intel GPU)
+      # intel-gpu-tools
+      # intel-media-driver
+      # intel-vaapi-driver
       libva-vdpau-driver
       #libvdpau-va-gl
       libva
@@ -38,7 +41,7 @@
     # can add latencies for VR
     #forceFullCompositionPipeline = true; # Force the use of the full composition pipeline for better performance
     nvidiaSettings = true; # Enable Nvidia settings
-    modesetting.enable = true; # Enable modesetting
+    modesetting.enable = true; # Enable modesetting required for Wayland
 
     powerManagement.enable = false;
     powerManagement.finegrained = false;
@@ -61,6 +64,11 @@
 
     PROTON_ENABLE_NVAPI = "1";
     DXVK_NVAPI_DRIVER_VERSION = "58011902"; # Match your driver version
+
+    # ADDED REQUIRED FOR SCREEN SHARING (Nvidia + Wayland)
+    GBM_BACKEND = "nvidia-drm";
+    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+    LIBVA_DRIVER_NAME = "nvidia"; # Force the usage of nvidia-vaapi-driver
   };
 
   # Services systemd for suspend/resume/hibernate
