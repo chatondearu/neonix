@@ -272,8 +272,6 @@ window-rule {
 debug {
     honor-xdg-activation-with-invalid-serial
     wait-for-frame-completion-before-queueing
-    // Disabled dmabuf for screensharing on Discord electron app
-    disable-screencast-dmabuf true
 }
 
 recent-windows {
