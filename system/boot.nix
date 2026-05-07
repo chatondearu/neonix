@@ -9,6 +9,9 @@
       systemd.enable = true;
     };
 
+    # Enable cross-compilation for ARMv7l to build the SD image for Raspberry Pi 2
+    binfmt.emulatedSystems = [ "armv7l-linux" ];
+
     loader = {
       # systemd-boot on UEFI
       #systemd-boot.enable = true; # Disabled because it's not working with limine
