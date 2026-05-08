@@ -60,20 +60,10 @@
       "exec" # Allows execution of files
       "uid=1000"     # Assign ownership to the user
       "gid=100"      # Assign to the 'users' group
-      "umask=022"    # Permissions 755 for directories, 644 for files
-      "windows_names" # Allows Windows-style file names
+      "umask=000"    # Permissions 755 for directories, 644 for files
+      "prealloc"
+      "discard" # Allows the filesystem to discard unused blocks
       "x-systemd.device-timeout=5s"
-    ];
-  };
-
-  # Steam library mount for NTFS disk - allows to use the steam library on the NTFS disk
-  fileSystems."/games/SteamLibrary/steamapps/compatdata" = {
-    device = "/home/chaton/.local/share/Steam/compatdata_ntfs";
-    fsType = "none";
-    options = [ 
-      "bind" 
-      # Security : force systemd to mount the NTFS disk before applying this bind mount
-      "x-systemd.requiresMountsFor=/games" 
     ];
   };
 
@@ -84,9 +74,8 @@
       "rw"
       "uid=1000"     # Assign ownership to the user
       "gid=100"      # Assign to the 'users' group
-      "umask=022"    # Permissions 755 for directories, 644 for files
+      "umask=000"    # Permissions 755 for directories, 644 for files
       "nofail"       # Boot without kernel panic if the HDD crashes
-      "windows_names" # Allows Windows-style file names
       "x-systemd.device-timeout=5s"
       "x-systemd.idle-timeout=10min"
     ];

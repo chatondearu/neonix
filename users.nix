@@ -13,6 +13,7 @@
       "greeter"
       "docker"
       "audio"
+      "render"
     ];
   };
 

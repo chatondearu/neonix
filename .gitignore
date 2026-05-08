@@ -24,3 +24,5 @@ result-*
 
 .direnv
 .cerbot
+
+.env

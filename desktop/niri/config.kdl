@@ -130,7 +130,7 @@ xwayland-satellite {
 }
 
 environment {
-  QT_QPA_PLATFORM "wayland"
+  QT_QPA_PLATFORM "wayland;xcb"
   XDG_CURRENT_DESKTOP "niri"
   ELECTRON_OZONE_PLATFORM_HINT "auto"
 }

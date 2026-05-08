@@ -1,23 +1,31 @@
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   secrets = import ./../secrets.nix;
-in {
-  environment.systemPackages = with pkgs; [
-    git
-    gh
-    lazygit
-    android-tools # For ADB (uaccess handled by systemd 258)
+in
+{
+  environment.systemPackages =
+    with pkgs;
+    [
+      git
+      gh
+      lazygit
+      android-tools # For ADB (uaccess handled by systemd 258)
 
-    # Flake uses nixos-unstable, so these are already unstable packages
-    (pkgs.unstable.callPackage ../pkgs/cursor/default.nix { })
-  ] ++ (with unstable; [
-    cursor-cli
+      # Flake uses nixos-unstable, so these are already unstable packages
+      (pkgs.unstable.callPackage ../pkgs/cursor/default.nix { })
+      
+      # gitnexus - https://github.com/abhigyanpatwari/GitNexus
+      #(pkgs.unstable.callPackage ../pkgs/gitnexus/default.nix { })
+    ]
+    ++ (with unstable; [
+      cursor-cli
 
-    godot
-    godot-mcp
-    pixelorama
+      godot
+      godot-mcp
+      pixelorama
 
-    #TODO add Crocotile, itch.io
-  ]);
+      #TODO add Crocotile, itch.io
+    ]);
 
   programs.git = {
     enable = true;
@@ -31,7 +39,9 @@ in {
       init.defaultBranch = "main";
 
       settings = {
-        push = { autoSetupRemote = true; };
+        push = {
+          autoSetupRemote = true;
+        };
       };
     };
   };

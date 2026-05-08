@@ -19,6 +19,11 @@
     LC_TIME = "fr_FR.UTF-8";
   };
 
+  i18n.supportedLocales = [
+    "en_US.UTF-8/UTF-8"
+    "fr_FR.UTF-8/UTF-8"
+  ];
+
   # Configure keymap
   services.xserver.xkb = {
     layout = "us";

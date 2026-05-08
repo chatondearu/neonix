@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 {
   ## TO TEST :
@@ -12,7 +12,7 @@
   services.wivrn = {
     enable = true;
     openFirewall = true; # Required for wireless streaming
-    # defaultRuntime = true; # not needed anymore bu WinVrn
+    # defaultRuntime = true; # not needed anymore by WinVrn
 
     package = (pkgs.wivrn.override { cudaSupport = true; });
   };

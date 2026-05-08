@@ -18,11 +18,11 @@
     ];
 
     config = {
-      common.default = [ "gnome" ];
-
       niri = {
         default = [ "gnome" "gtk" ];
+        "org.freedesktop.impl.portal.OpenURI" = "gtk";
         "org.freedesktop.impl.portal.FileChooser" = "gtk";
+        "org.freedesktop.impl.portal.AppChooser" = "gtk";
         "org.freedesktop.impl.portal.ScreenCast" = "gnome";
         "org.freedesktop.impl.portal.Screenshot" = "gnome";
       };
