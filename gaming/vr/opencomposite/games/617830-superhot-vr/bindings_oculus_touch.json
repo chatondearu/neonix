@@ -1,0 +1,170 @@
+{
+   "action_manifest_version" : 0,
+   "alias_info" : {},
+
+   "bindings" : {
+      "/actions/buggy" : {
+         "chords" : [],
+         "haptics" : [],
+         "poses" : [],
+         "skeleton" : [],
+         "sources" : []
+      },
+      "/actions/default" : {
+         "chords" : [],
+         "haptics" : [
+            {
+               "output" : "/actions/default/out/haptic",
+               "path" : "/user/hand/left/output/haptic"
+            },
+            {
+               "output" : "/actions/default/out/haptic",
+               "path" : "/user/hand/right/output/haptic"
+            }
+         ],
+         "poses" : [
+            {
+               "output" : "/actions/default/in/pose",
+               "path" : "/user/hand/left/pose/raw"
+            },
+            {
+               "output" : "/actions/default/in/pose",
+               "path" : "/user/hand/right/pose/raw"
+            }
+         ],
+         "skeleton" : [
+            {
+               "output" : "/actions/default/in/skeletonlefthand",
+               "path" : "/user/hand/left/input/skeleton/left"
+            },
+            {
+               "output" : "/actions/default/in/skeletonrighthand",
+               "path" : "/user/hand/right/input/skeleton/right"
+            }
+         ],
+         "sources" : [
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/default/in/shoot"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/left/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/default/in/grab"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/left/input/grip"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/default/in/grab"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/right/input/grip"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/default/in/shoot"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/right/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/mindwave"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/b"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/mindwave"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/y"
+            },
+            {
+               "inputs" : {
+                  "long" : {
+                     "output" : "/actions/default/in/menu"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/x"
+            },
+            {
+               "inputs" : {
+                  "long" : {
+                     "output" : "/actions/default/in/menu"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/a"
+            },
+            {
+               "inputs" : {
+                  "position" : {
+                     "output" : "/actions/default/in/ui_navigation"
+                  }
+               },
+               "mode" : "joystick",
+               "path" : "/user/hand/left/input/joystick"
+            },
+            {
+               "inputs" : {
+                  "position" : {
+                     "output" : "/actions/default/in/ui_navigation"
+                  }
+               },
+               "mode" : "joystick",
+               "path" : "/user/hand/right/input/joystick"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/menu"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/system"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/menu"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/system"
+            }
+         ]
+      },
+      "/actions/platformer" : {
+         "chords" : [],
+         "haptics" : [],
+         "poses" : [],
+         "skeleton" : [],
+         "sources" : []
+      }
+   },
+   "category" : "steamvr_input",
+   "controller_type" : "oculus_touch",
+   "description" : "",
+   "name" : "SUPERHOT VR custom Touch bindings (oc-launch override)",
+   "options" : {},
+   "simulated_actions" : []
+}

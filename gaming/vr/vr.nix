@@ -1,12 +1,17 @@
-{ pkgs, inputs, ... }:
-
-let
-  # Single WiVRn derivation for service, OpenXR manifest, and Steam mounts.
-  wivrnPkg = pkgs.wivrn.override { cudaSupport = true; };
-in
 {
+  pkgs,
+  inputs,
+  ...
+}: let
+  # Single WiVRn derivation for service, OpenXR manifest, and Steam mounts.
+  wivrnPkg = pkgs.wivrn.override {cudaSupport = true;};
+in {
   ## TO TEST :
   # - Stardust XR runtime https://github.com/StardustXR
+
+  imports = [
+    ./opencomposite
+  ];
 
   programs.adb.enable = true;
 
