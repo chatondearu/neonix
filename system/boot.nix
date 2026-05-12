@@ -2,9 +2,7 @@
   lib,
   pkgs,
   ...
-}:
-
-{
+}: {
   # Bootloader.
   boot = {
     initrd = {
@@ -20,7 +18,7 @@
       limine = {
         enable = true;
         efiSupport = true;
-        style.wallpapers = [ pkgs.nixos-artwork.wallpapers.simple-dark-gray-bootloader.gnomeFilePath ];
+        style.wallpapers = [pkgs.nixos-artwork.wallpapers.simple-dark-gray-bootloader.gnomeFilePath];
         maxGenerations = 10;
         secureBoot.enable = true;
       };
@@ -58,24 +56,41 @@
       "nofail" # Allows system to continue to boot if drive cannot be mounted
       "rw"
       "exec" # Allows execution of files
-      "uid=1000"     # Assign ownership to the user
-      "gid=100"      # Assign to the 'users' group
-      "umask=000"    # Permissions 755 for directories, 644 for files
+      "uid=1000" # Assign ownership to the user
+      "gid=100" # Assign to the 'users' group
+      "umask=000" # Permissions 755 for directories, 644 for files
       "prealloc"
       "discard" # Allows the filesystem to discard unused blocks
       "x-systemd.device-timeout=5s"
     ];
   };
 
+  # Keep Proton prefixes off NTFS while preserving a Steam library on /games.
+  systemd.mounts = [
+    {
+      what = "/home/chaton/.local/share/Steam/compatdata";
+      where = "/games/SteamLibrary/steamapps/compatdata";
+      type = "none";
+      options = "bind";
+      requires = ["games.mount"];
+      after = ["games.mount"];
+      wantedBy = ["multi-user.target"];
+    }
+  ];
+
+  systemd.tmpfiles.rules = [
+    "d /home/chaton/.local/share/Steam/compatdata 0755 chaton users - -"
+  ];
+
   fileSystems."/hdd" = {
     device = "/dev/disk/by-uuid/CCE4A03CE4A02AA2";
     fsType = "ntfs3";
     options = [
       "rw"
-      "uid=1000"     # Assign ownership to the user
-      "gid=100"      # Assign to the 'users' group
-      "umask=000"    # Permissions 755 for directories, 644 for files
-      "nofail"       # Boot without kernel panic if the HDD crashes
+      "uid=1000" # Assign ownership to the user
+      "gid=100" # Assign to the 'users' group
+      "umask=000" # Permissions 755 for directories, 644 for files
+      "nofail" # Boot without kernel panic if the HDD crashes
       "x-systemd.device-timeout=5s"
       "x-systemd.idle-timeout=10min"
     ];

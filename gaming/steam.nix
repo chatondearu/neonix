@@ -1,6 +1,28 @@
-{ pkgs, config, ... }:
-
 {
+  pkgs,
+  config,
+  ...
+}: let
+  # Same WiVRn build as services.wivrn (CUDA) so Steam + ~/.config/openxr match the runtime.
+  wivrnPkg = config.services.wivrn.package or (pkgs.wivrn.override {cudaSupport = true;});
+in {
+  # WayVR / xdg-open use portal + MIME DB; register steam schemes so GTK finds Steam.
+  xdg.mime.enable = true;
+  xdg.mime.addedAssociations = {
+    "x-scheme-handler/steam" = [
+      "com.valvesoftware.Steam.desktop"
+      "steam.desktop"
+    ];
+    "x-scheme-handler/steamlink" = [
+      "com.valvesoftware.Steam.desktop"
+      "steam.desktop"
+    ];
+  };
+  xdg.mime.defaultApplications = {
+    "x-scheme-handler/steam" = "com.valvesoftware.Steam.desktop";
+    "x-scheme-handler/steamlink" = "com.valvesoftware.Steam.desktop";
+  };
+
   environment.systemPackages = with pkgs; [
     opencomposite # OpenComposite is a runtime for wireless VR devices - nixpkgs-xr
     xdg-utils # Utilities for XDG (e.g. xdg-open) used by SteamVR
@@ -8,74 +30,77 @@
   ];
 
   # Install Steam.
-  programs.steam =
-    let
-      patchedBwrap = pkgs.bubblewrap.overrideAttrs (o: {
-        patches = (o.patches or [ ]) ++ [
+  programs.steam = let
+    patchedBwrap = pkgs.bubblewrap.overrideAttrs (o: {
+      patches =
+        (o.patches or [])
+        ++ [
           ./vr/steam-vr/bwrap.patch
         ];
-      });
-    in
-    {
-      enable = true;
-      gamescopeSession.enable = true;
+    });
+  in {
+    enable = true;
+    gamescopeSession.enable = true;
 
-      remotePlay.openFirewall = true;
-      dedicatedServer.openFirewall = true;
-      localNetworkGameTransfers.openFirewall = true;
+    remotePlay.openFirewall = true;
+    dedicatedServer.openFirewall = true;
+    localNetworkGameTransfers.openFirewall = true;
 
-      protontricks.enable = true;
+    protontricks.enable = true;
 
-      package = pkgs.steam.override {
-        extraPkgs = pkgs: with pkgs; [
+    package = pkgs.steam.override {
+      extraPkgs = pkgs:
+        with pkgs; [
           libkrb5
           keyutils
         ];
 
-        extraProfile = ''
-          # Fixes timezones on VRChat
-          unset TZ
+      extraProfile = ''
+        # Fixes timezones on VRChat
+        unset TZ
 
-          # Allows Monado to be used for VR
-          #export PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1
+        # Import host OpenXR runtimes inside Pressure Vessel (Steam runtime).
+        export PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1
 
-          export PROTON_LOG=1
+        export PROTON_LOG=1
 
-          export STEAM_COMPAT_DATA_PATH="${config.users.users.chaton.home}/.local/share/Steam/compatdata_ntfs"
+        # Prefixes are kept on a Linux filesystem through a bind mount
+        # declared in system/boot.nix (/games/.../compatdata -> ~/.local/.../compatdata).
+        export STEAM_COMPAT_MOUNTS="${wivrnPkg}:${pkgs.opencomposite}"
+      '';
 
-          export STEAM_COMPAT_MOUNTS="${pkgs.wivrn}:${pkgs.opencomposite}"
-        '';
-        
-        extraEnv = {
-          OBS_VKCAPTURE = true;
-          ENABLE_VKBASALT = "1";
+      extraEnv = {
+        OBS_VKCAPTURE = true;
+        ENABLE_VKBASALT = "1";
 
-          XR_RUNTIME_JSON = "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json";
+        XR_RUNTIME_JSON = "${wivrnPkg}/share/openxr/1/openxr_wivrn.json";
+        # Force Steam/SteamVR Qt apps to use XWayland plugin only.
+        # This avoids vrmonitor crashes when Wayland Qt plugin is unavailable.
+        QT_QPA_PLATFORM = "xcb";
 
-          # activated in gpu.nix for screen sharing (Nvidia + Wayland)
-          GBM_BACKEND = "nvidia-drm";
-          __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-        };
-
-        # Patching bubblewrap to allow capabilities for steamVR (required)
-        buildFHSEnv = (
-          args:
-          (
-            (pkgs.buildFHSEnv.override {
-              bubblewrap = patchedBwrap;
-            })
-            (
-              args
-              // {
-                extraBwrapArgs = (args.extraBwrapArgs or [ ]) ++ [ "--cap-add ALL" ];
-              }
-            )
-          )
-        );
+        # activated in gpu.nix for screen sharing (Nvidia + Wayland)
+        GBM_BACKEND = "nvidia-drm";
+        __GLX_VENDOR_LIBRARY_NAME = "nvidia";
       };
 
-      extraCompatPackages = with pkgs; [ proton-ge-bin proton-ge-rtsp-bin ];
+      # Patching bubblewrap to allow capabilities for steamVR (required)
+      buildFHSEnv = (
+        args: (
+          (pkgs.buildFHSEnv.override {
+            bubblewrap = patchedBwrap;
+          })
+          (
+            args
+            // {
+              extraBwrapArgs = (args.extraBwrapArgs or []) ++ ["--cap-add ALL"];
+            }
+          )
+        )
+      );
     };
+
+    extraCompatPackages = with pkgs; [proton-ge-bin proton-ge-rtsp-bin];
+  };
 
   # Issues with adding steam library on new disk
   # to add it manualy : '$ steam steam://open/console'
@@ -90,18 +115,30 @@
     SUBSYSTEM=="input", ATTRS{idVendor}=="2dc8", ATTRS{idProduct}=="3106", MODE="0660", GROUP="input"
   '';
 
-  users.users.chaton.maid = {
-    file.xdg_config."openxr/1/active_runtime.json".source = "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json";
+  users.users.chaton.maid = let
+    # OpenVR shim -> OpenXR (WiVRn). Store path updates on rebuild; never hand-edit in ~/.config.
+    openCompositeRuntime = "${pkgs.opencomposite}/lib/opencomposite";
+  in {
+    file.xdg_config."openxr/1/active_runtime.json".source = "${wivrnPkg}/share/openxr/1/openxr_wivrn.json";
     file.xdg_config."openvr/openvrpaths.vrpath".text = let
-        steam = "${config.users.users.chaton.home}/.steam/steam";
-      in builtins.toJSON {
+      steam = "${config.users.users.chaton.home}/.steam/steam";
+    in
+      builtins.toJSON {
         version = 1;
         jsonid = "vrpathreg";
         external_drivers = null;
-        config = [ "${steam}/config" ];
-        log = [ "${steam}/logs" ];
-        runtime = [ "${pkgs.opencomposite}/lib/opencomposite" ];
+        config = ["${steam}/config"];
+        log = ["${steam}/logs"];
+        # OpenComposite-first: OpenVR games use WiVRn via OpenXR without starting SteamVR.
+        # For stubborn titles, install SteamVR and temporarily point runtime to SteamVR.
+        runtime = [openCompositeRuntime];
       };
+    file.xdg_config."wivrn/config.json".text = builtins.toJSON {
+      debug-gui = false;
+      hid-forwarding = false;
+      use-steamvr-lh = false;
+      "openvr-compat-path" = openCompositeRuntime;
+    };
   };
 
   # Set capabilities for SteamVR binaries
@@ -109,8 +146,8 @@
   # `sudo setcap CAP_SYS_NICE=eip ~/.local/share/Steam/steamapps/common/SteamVR/bin/linux64/vrcompositor-launcher`
   systemd.services.set-steam-vr-capabilities = {
     description = "Set capabilities for SteamVR binaries";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "local-fs.target" ];
+    wantedBy = ["multi-user.target"];
+    after = ["local-fs.target"];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;

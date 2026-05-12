@@ -14,6 +14,7 @@
   environment.shellAliases = {
     # VR
     neo-monado = "systemctl --user start monado.service";
+    neo-vr = "bash \"$HOME/etc/nixos/scripts/neo-vr.sh\"";
 
     # Flake-based system update workflow
     neo-update = "cd \"$HOME/etc/nixos\" && nix flake update";
