@@ -14,6 +14,8 @@
       "docker"
       "audio"
       "render"
+      # Polkit allows GameMode pkexec helpers only for this group (see gamemode.rules).
+      "gamemode"
     ];
   };
 

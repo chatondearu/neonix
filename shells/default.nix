@@ -20,6 +20,7 @@
     neo-update = "cd \"$HOME/etc/nixos\" && nix flake update";
     neo-build = "cd \"$HOME/etc/nixos\" && sudo nixos-rebuild build --flake .#neo-nix";
     neo-switch = "cd \"$HOME/etc/nixos\" && sudo nixos-rebuild switch --flake .#neo-nix";
+    neo-boot = "cd \"$HOME/etc/nixos\" && sudo nixos-rebuild boot --flake .#neo-nix";
     neo-safe-update = "bash \"$HOME/etc/nixos/scripts/safe-flake-update.sh\"";
     neo-rollback = "sudo nixos-rebuild switch --rollback";
 

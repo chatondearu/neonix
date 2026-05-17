@@ -83,7 +83,7 @@
   ];
 
   fileSystems."/hdd" = {
-    device = "/dev/disk/by-uuid/CCE4A03CE4A02AA2";
+    device = "/dev/disk/by-uuid/2109E2FB562F3EC4";
     fsType = "ntfs3";
     options = [
       "rw"
