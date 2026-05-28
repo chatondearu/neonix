@@ -47,9 +47,19 @@
   } @ inputs: let
     system = "x86_64-linux";
     pkgs = import nixpkgs {inherit system;};
+    pkgsCuda = import nixpkgs {
+      inherit system;
+      config.allowUnfree = true;
+      config.cudaSupport = true;
+    };
   in {
     packages.${system} = {
       goxlr-router = pkgs.callPackage ./pkgs/goxlr-router {};
+
+      # Build separately: nix build .#llama-cpp-cuda  (slow CUDA compile)
+      llama-cpp-cuda = pkgsCuda.callPackage ./pkgs/llama-cpp/default.nix {
+        inherit (pkgsCuda) llama-cpp;
+      };
     };
 
     nixosConfigurations = {

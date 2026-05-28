@@ -17,11 +17,14 @@
     neo-vr = "bash \"$HOME/etc/nixos/scripts/neo-vr.sh\"";
 
     # Flake-based system update workflow
-    neo-update = "cd \"$HOME/etc/nixos\" && nix flake update";
+    neo-update = "bash \"$HOME/etc/nixos/scripts/update-custom-packages.sh\"";
+    neo-update-light = "bash \"$HOME/etc/nixos/scripts/update-custom-packages.sh\" --light";
+    neo-update-flake = "cd \"$HOME/etc/nixos\" && nix flake update";
+    neo-safe-update = "bash \"$HOME/etc/nixos/scripts/safe-flake-update.sh\"";
+    neo-build-llama = "cd \"$HOME/etc/nixos\" && nix build .#llama-cpp-cuda --no-link";
     neo-build = "cd \"$HOME/etc/nixos\" && sudo nixos-rebuild build --flake .#neo-nix";
     neo-switch = "cd \"$HOME/etc/nixos\" && sudo nixos-rebuild switch --flake .#neo-nix";
     neo-boot = "cd \"$HOME/etc/nixos\" && sudo nixos-rebuild boot --flake .#neo-nix";
-    neo-safe-update = "bash \"$HOME/etc/nixos/scripts/safe-flake-update.sh\"";
     neo-rollback = "sudo nixos-rebuild switch --rollback";
 
     # Update release-note workflow

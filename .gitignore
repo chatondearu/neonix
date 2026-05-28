@@ -1,5 +1,6 @@
 # Secrets et données sensibles
 secrets.nix
+local.nix
 *.key
 *.pem
 *.p12

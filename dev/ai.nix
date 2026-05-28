@@ -1,23 +1,18 @@
 {pkgs, ...}: let
   huggingfaceCache = "/hdd/huggingface";
-
-  llama-cpp-pkg = pkgs.callPackage ../pkgs/llama-cpp/default.nix {
-    inherit (pkgs) llama-cpp;
-  };
-
   # Build / runtime cost notes (see pkgs/packaging.md):
-  # - llama-cpp (nixpkgs-cuda): long first compile, cacheable; required for GPU llama-server
+  # - llama-cpp CUDA: see dev/ai-llama.nix (optional, slow compile)
   # - llama-swap / ollama / opencode: prebuilt, fast
-  # - wyoming.faster-whisper (CUDA, large-v3-turbo): heavy Python+CTranslate2; downloads GB of weights at runtime
+  # - wyoming.faster-whisper (CUDA, large-v3-turbo): heavy service closure; model download at runtime
   # - wyoming.piper (useCUDA): moderate; voice model download at runtime
   # - wyoming.openwakeword: light
 in {
   imports = [
     ../pkgs/overrides.nix
+    ./ai-llama.nix
   ];
 
   environment.systemPackages = with pkgs; [
-    llama-cpp-pkg
     (callPackage ../pkgs/opencode/default.nix {})
     (callPackage ../pkgs/OpenAgentsControl/default.nix {})
   ];
@@ -33,36 +28,11 @@ in {
 
   # services.ollama = {
   #   enable = true;
-  #   package = pkgs.ollama; # prebuilt GitHub release (pkgs/ollama)
+  #   package = pkgs.ollama;
   #   host = "0.0.0.0";
   #   openFirewall = true;
   #   environmentVariables.OLLAMA_KEEP_ALIVE = "1h";
   # };
-
-  environment.etc."llama-swap/config.yaml".source = pkgs.replaceVars ./llama-swap/config.yaml.template {
-    llamaServerPath = "${llama-cpp-pkg}/bin/llama-server";
-  };
-
-  systemd.services.llama-swap = {
-    description = "llama-swap - OpenAI compatible proxy with automatic model swapping";
-    after = ["network.target"];
-    wantedBy = ["multi-user.target"];
-    serviceConfig = {
-      Type = "simple";
-      User = "chaton";
-      Group = "users";
-      ExecStart = "${pkgs.llama-swap}/bin/llama-swap --config /etc/llama-swap/config.yaml --listen 0.0.0.0:9292 --watch-config";
-      Restart = "always";
-      RestartSec = 10;
-      Environment = [
-        "PATH=/run/current-system/sw/bin"
-        "LD_LIBRARY_PATH=/run/opengl-driver/lib:/run/opengl-driver-32/lib"
-        "HF_HUB_CACHE=${huggingfaceCache}"
-      ];
-      PrivateTmp = true;
-      NoNewPrivileges = true;
-    };
-  };
 
   services.wyoming.faster-whisper = {
     servers.english = {
@@ -101,7 +71,6 @@ in {
     10300
     10301
     # 11434 # Ollama
-    9292
     61337
   ];
 }

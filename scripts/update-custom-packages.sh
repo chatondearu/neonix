@@ -8,6 +8,7 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 flake_ref="${FLAKE_REF:-.#neo-nix}"
 update_packages=1
 run_flake_update=1
+skip_llama=0
 dry_run=0
 do_build=0
 
@@ -21,6 +22,7 @@ refreshes flake.lock. Does not run nixos-rebuild; use neo-safe-update after.
 Options:
   --no-flake       Skip "nix flake update"
   --flake-only     Only run "nix flake update" (skip custom packages)
+  --light          Skip llama-cpp update and flake update (fast path for app pins)
   --build          Run "nixos-rebuild build" after updates
   --dry-run        Print steps without changing files
   -h, --help       Show this help
@@ -32,6 +34,7 @@ Examples:
   bash scripts/update-custom-packages.sh
   bash scripts/update-custom-packages.sh --no-flake
   bash scripts/update-custom-packages.sh --flake-only
+  bash scripts/update-custom-packages.sh --light
 EOF
 }
 
@@ -70,6 +73,10 @@ while [[ $# -gt 0 ]]; do
     --flake-only)
       update_packages=0
       ;;
+    --light)
+      skip_llama=1
+      run_flake_update=0
+      ;;
     --build)
       do_build=1
       ;;
@@ -100,7 +107,11 @@ if (( update_packages )); then
   run_pkg_update "$repo_root/pkgs/OpenAgentsControl"
   run_pkg_update "$repo_root/pkgs/llama-swap"
   run_pkg_update "$repo_root/pkgs/ollama"
-  run_pkg_update "$repo_root/pkgs/llama-cpp"
+  if (( ! skip_llama )); then
+    run_pkg_update "$repo_root/pkgs/llama-cpp"
+  else
+    log 'Skipping llama-cpp (use --light only for fast app updates)'
+  fi
 fi
 
 if (( run_flake_update )); then
