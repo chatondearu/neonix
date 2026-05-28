@@ -1,0 +1,8 @@
+{
+  "build": "nixpkgs-cuda",
+  "cudaArchitectures": "86",
+  "prebuilt": {
+    "version": "8708",
+    "hash": "sha256-ZoRiK7jQbm5mbYJN8LwlNpoEd5jltQyfW/KIyugp7GI="
+  }
+}

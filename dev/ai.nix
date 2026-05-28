@@ -1,22 +1,25 @@
-{ pkgs, ... }:
-
-let
+{pkgs, ...}: let
   huggingfaceCache = "/hdd/huggingface";
+
+  llama-cpp-pkg = pkgs.callPackage ../pkgs/llama-cpp/default.nix {
+    inherit (pkgs) llama-cpp;
+  };
+
+  # Build / runtime cost notes (see pkgs/packaging.md):
+  # - llama-cpp (nixpkgs-cuda): long first compile, cacheable; required for GPU llama-server
+  # - llama-swap / ollama / opencode: prebuilt, fast
+  # - wyoming.faster-whisper (CUDA, large-v3-turbo): heavy Python+CTranslate2; downloads GB of weights at runtime
+  # - wyoming.piper (useCUDA): moderate; voice model download at runtime
+  # - wyoming.openwakeword: light
 in {
   imports = [
     ../pkgs/overrides.nix
   ];
 
   environment.systemPackages = with pkgs; [
-    unstable.llama-cpp
-
-    # OpenCode - https://opencode.ai/
-    # unstable.opencode-desktop
-    (callPackage ../pkgs/opencode/default.nix { })
-
-    (callPackage ../pkgs/OpenAgentsControl/default.nix { })
-
-    #agent-cli # special commands for ai powered dev https://github.com/basnijholt/agent-cli
+    llama-cpp-pkg
+    (callPackage ../pkgs/opencode/default.nix {})
+    (callPackage ../pkgs/OpenAgentsControl/default.nix {})
   ];
 
   users.users.chaton.maid = {
@@ -25,31 +28,25 @@ in {
   };
 
   environment.sessionVariables = {
-    # for opencode
-    #OLLAMA_CONTEXT_LENGTH=64000;
-    # for llama-swap
-    HF_HUB_CACHE=huggingfaceCache; # cache for huggingface models
+    HF_HUB_CACHE = huggingfaceCache;
   };
 
-  # AI & Machine Learning services
   # services.ollama = {
   #   enable = true;
-  #   package = pkgs.ollama-cuda;
+  #   package = pkgs.ollama; # prebuilt GitHub release (pkgs/ollama)
   #   host = "0.0.0.0";
   #   openFirewall = true;
-  #   environmentVariables = {
-  #     OLLAMA_KEEP_ALIVE = "1h";
-  #   };
+  #   environmentVariables.OLLAMA_KEEP_ALIVE = "1h";
   # };
 
   environment.etc."llama-swap/config.yaml".source = pkgs.replaceVars ./llama-swap/config.yaml.template {
-    llamaServerPath = "${pkgs.llama-cpp}/bin/llama-server";
+    llamaServerPath = "${llama-cpp-pkg}/bin/llama-server";
   };
 
   systemd.services.llama-swap = {
     description = "llama-swap - OpenAI compatible proxy with automatic model swapping";
-    after = [ "network.target" ];
-    wantedBy = [ "multi-user.target" ];
+    after = ["network.target"];
+    wantedBy = ["multi-user.target"];
     serviceConfig = {
       Type = "simple";
       User = "chaton";
@@ -57,14 +54,11 @@ in {
       ExecStart = "${pkgs.llama-swap}/bin/llama-swap --config /etc/llama-swap/config.yaml --listen 0.0.0.0:9292 --watch-config";
       Restart = "always";
       RestartSec = 10;
-      # Environment for CUDA support
       Environment = [
         "PATH=/run/current-system/sw/bin"
         "LD_LIBRARY_PATH=/run/opengl-driver/lib:/run/opengl-driver-32/lib"
         "HF_HUB_CACHE=${huggingfaceCache}"
       ];
-      # Environment needs access to cache directories for model downloads
-      # Simplified security settings to avoid namespace issues
       PrivateTmp = true;
       NoNewPrivileges = true;
     };
@@ -75,18 +69,15 @@ in {
       enable = true;
       model = "large-v3-turbo";
       language = "auto";
-      device = "cuda"; # or "cpu" if no GPU
+      device = "cuda";
       uri = "tcp://0.0.0.0:10300";
     };
   };
 
-  # --- Wyoming Faster Whisper Hardening ---
-  # Auto-restart on failure (including OOM kills)
   systemd.services.wyoming-faster-whisper-main = {
     serviceConfig = {
       Restart = "on-failure";
       RestartSec = 10;
-      # Memory limits to prevent system-wide OOM
       MemoryMax = "16G";
       MemoryHigh = "14G";
     };
@@ -104,16 +95,13 @@ in {
     uri = "tcp://0.0.0.0:10400";
   };
 
-  # Firewall rules for Wyoming services and Llama
-  networking.firewall = {
-    allowedTCPPorts = [
-      10400 # Wyoming OpenWakeboard
-      10200 # Wyoming Piper
-      10300 # Wyoming Whisper
-      10301
-      # 11434 # Ollama
-      9292 # Llama-swap
-      61337 # Agent-cli
-    ];
-  };
+  networking.firewall.allowedTCPPorts = [
+    10400
+    10200
+    10300
+    10301
+    # 11434 # Ollama
+    9292
+    61337
+  ];
 }
