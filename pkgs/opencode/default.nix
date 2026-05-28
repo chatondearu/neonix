@@ -1,182 +1,63 @@
 {
   lib,
   stdenvNoCC,
-  bun,
-  fetchFromGitHub,
-  makeBinaryWrapper,
-  models-dev,
-  nodejs,
-  ripgrep,
-  sysctl,
+  fetchurl,
   installShellFiles,
-  versionCheckHook,
-  writableTmpDirAsHomeHook,
-  overrideVersion ? null,
-  overrideHash ? null,
-}:
-
-let
+  makeBinaryWrapper,
+  ripgrep,
+}: let
   sourcesJson = lib.importJSON ./sources.json;
-  activeVersion = if overrideVersion != null then overrideVersion else sourcesJson.version;
-  activeHash = if overrideHash != null then overrideHash else sourcesJson.hash;
 in
-stdenvNoCC.mkDerivation (finalAttrs: {
-  pname = "opencode";
-  version = activeVersion;
+  stdenvNoCC.mkDerivation (finalAttrs: {
+    pname = "opencode";
+    version = sourcesJson.version;
 
-  src = fetchFromGitHub {
-    owner = "anomalyco";
-    repo = "opencode";
-    tag = "v${finalAttrs.version}";
-    hash = activeHash;
-  };
-
-  node_modules = stdenvNoCC.mkDerivation {
-    pname = "${finalAttrs.pname}-node_modules";
-    inherit (finalAttrs) version src;
-
-    impureEnvVars = lib.fetchers.proxyImpureEnvVars ++ [
-      "GIT_PROXY_COMMAND"
-      "SOCKS_SERVER"
-    ];
+    # Official Linux CLI binary from GitHub releases.
+    src = fetchurl {
+      url = "https://github.com/anomalyco/opencode/releases/download/v${finalAttrs.version}/opencode-linux-x64.tar.gz";
+      hash = sourcesJson.hash;
+    };
 
     nativeBuildInputs = [
-      bun
-      writableTmpDirAsHomeHook
+      installShellFiles
+      makeBinaryWrapper
     ];
 
-    dontConfigure = true;
-
-    buildPhase = ''
-      runHook preBuild
-
-      bun install \
-        --cpu="*" \
-        --filter ./packages/app \
-        --filter ./packages/desktop \
-        --filter ./packages/opencode \
-        --ignore-scripts \
-        --no-progress \
-        --os="*"
-
-      bun --bun ./nix/scripts/canonicalize-node-modules.ts
-      bun --bun ./nix/scripts/normalize-bun-binaries.ts
-
-      runHook postBuild
-    '';
+    dontUnpack = true;
+    dontBuild = true;
 
     installPhase = ''
       runHook preInstall
 
-      mkdir -p $out
-      find . -type d -name node_modules -exec cp -R --parents {} $out \;
+      mkdir -p $out/bin
+      tar -xzf $src -C $out/bin
+      chmod +x $out/bin/opencode
+
+      # Prebuilt ELF: use makeBinaryWrapper (wrapProgram breaks native binaries).
+      mv $out/bin/opencode $out/bin/.opencode-unwrapped
+      makeBinaryWrapper $out/bin/.opencode-unwrapped $out/bin/opencode \
+        --prefix PATH : ${lib.makeBinPath [ripgrep]}
 
       runHook postInstall
     '';
 
-    # NOTE: Required else we get errors that our fixed-output derivation references store paths
-    dontFixup = true;
+    postInstall = lib.optionalString (stdenvNoCC.buildPlatform.canExecute stdenvNoCC.hostPlatform) ''
+      if $out/bin/opencode completion --help >/dev/null 2>&1; then
+        installShellCompletion --cmd opencode \
+          --bash <($out/bin/opencode completion) \
+          --zsh <(SHELL=/bin/zsh $out/bin/opencode completion)
+      fi
+    '';
 
-    outputHash = sourcesJson.node_modules_hash;
-    outputHashAlgo = "sha256";
-    outputHashMode = "recursive";
-  };
+    updateScript = ./update.sh;
 
-  nativeBuildInputs = [
-    bun
-    nodejs
-    installShellFiles
-    makeBinaryWrapper
-    models-dev
-    writableTmpDirAsHomeHook
-  ];
-
-  postPatch = ''
-    # NOTE: Relax Bun version check to be a warning instead of an error
-    substituteInPlace packages/script/src/index.ts \
-      --replace-fail 'throw new Error(`This script requires bun@''${expectedBunVersionRange}' \
-                     'console.warn(`Warning: This script requires bun@''${expectedBunVersionRange}'
-  '';
-
-  configurePhase = ''
-    runHook preConfigure
-
-    cp -R ${finalAttrs.node_modules}/. .
-    patchShebangs node_modules
-    patchShebangs packages/*/node_modules
-
-    runHook postConfigure
-  '';
-
-  env.MODELS_DEV_API_JSON = "${models-dev}/dist/_api.json";
-  env.OPENCODE_VERSION = finalAttrs.version;
-  env.OPENCODE_CHANNEL = "stable";
-
-  buildPhase = ''
-    runHook preBuild
-
-    cd ./packages/opencode
-    bun --bun ./script/build.ts --single --skip-install --skip-embed-web-ui
-    bun --bun ./script/schema.ts config.json tui.json
-
-    runHook postBuild
-  '';
-
-  installPhase = ''
-    runHook preInstall
-
-    install -Dm755 dist/opencode-*/bin/opencode $out/bin/opencode
-    wrapProgram $out/bin/opencode \
-     --prefix PATH : ${
-       lib.makeBinPath (
-         [
-           ripgrep
-         ]
-         ++ lib.optionals stdenvNoCC.hostPlatform.isDarwin [
-           sysctl
-         ]
-       )
-     }
-
-    install -Dm644 config.json $out/share/opencode/config.json
-    install -Dm644 tui.json $out/share/opencode/tui.json
-
-    runHook postInstall
-  '';
-
-  postInstall = lib.optionalString (stdenvNoCC.buildPlatform.canExecute stdenvNoCC.hostPlatform) ''
-    installShellCompletion --cmd opencode \
-      --bash <($out/bin/opencode completion) \
-      --zsh <(SHELL=/bin/zsh $out/bin/opencode completion)
-  '';
-
-  nativeInstallCheckInputs = [
-    versionCheckHook
-    writableTmpDirAsHomeHook
-  ];
-  doInstallCheck = true;
-  versionCheckKeepEnvironment = [ "HOME" ];
-  versionCheckProgramArg = "--version";
-
-  passthru = {
-    jsonschema = {
-      config = "${placeholder "out"}/share/opencode/config.json";
-      tui = "${placeholder "out"}/share/opencode/tui.json";
+    meta = with lib; {
+      description = "AI coding agent built for the terminal";
+      homepage = "https://github.com/anomalyco/opencode";
+      license = licenses.mit;
+      maintainers = with maintainers; [chatondearu];
+      sourceProvenance = with sourceTypes; [binaryNativeCode];
+      platforms = ["x86_64-linux"];
+      mainProgram = "opencode";
     };
-    node_modules = finalAttrs.node_modules;
-  };
-
-  updateScript = ./update.sh;
-
-  meta = with lib;{
-    description = "AI coding agent built for the terminal";
-    homepage = "https://github.com/anomalyco/opencode";
-    license = licenses.mit;
-    maintainers = with maintainers; [ chatondearu ];
-    sourceProvenance = with sourceTypes; [ fromSource ];
-    platforms = [
-      "x86_64-linux"
-    ];
-    mainProgram = "opencode";
-  };
-})
+  })
