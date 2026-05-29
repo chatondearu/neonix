@@ -1,18 +1,14 @@
 # Optional llama.cpp + llama-swap stack (CUDA build is slow).
-# Disable with: neo.ai.llama.enable = false; in local.nix for fast neo-switch.
+# Enabled by default; disable in configuration if you want a smaller closure.
 {
   config,
   lib,
   pkgs,
-  inputs,
+  self,
   ...
 }: let
   cfg = config.neo.ai.llama;
   huggingfaceCache = "/hdd/huggingface";
-
-  llama-cpp-pkg =
-    cfg.package
-    or inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.llama-cpp-cuda;
 in {
   options.neo.ai.llama = {
     enable =
@@ -21,7 +17,6 @@ in {
         default = true;
         description = ''
           When disabled, llama-swap and llama-cpp are omitted from the system closure.
-          Use this for faster `nixos-rebuild` when only updating other software.
         '';
       };
 
@@ -43,7 +38,11 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf cfg.enable (let
+    llama-cpp-pkg =
+      cfg.package
+      or self.packages.${pkgs.stdenv.hostPlatform.system}.llama-cpp-cuda;
+  in {
     environment.systemPackages = lib.optionals cfg.toolsInPath [llama-cpp-pkg];
 
     environment.etc."llama-swap/config.yaml".source = pkgs.replaceVars ./llama-swap/config.yaml.template {
@@ -64,7 +63,8 @@ in {
         Environment = [
           "PATH=/run/current-system/sw/bin"
           "LD_LIBRARY_PATH=/run/opengl-driver/lib:/run/opengl-driver-32/lib"
-          "HF_HUB_CACHE=${huggingfaceCache}"
+          "HF_HOME=${huggingfaceCache}"
+          "HF_HUB_CACHE=${huggingfaceCache}/hub"
         ];
         PrivateTmp = true;
         NoNewPrivileges = true;
@@ -74,5 +74,5 @@ in {
     networking.firewall.allowedTCPPorts = [
       9292
     ];
-  };
+  });
 }
