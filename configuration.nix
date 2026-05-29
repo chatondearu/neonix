@@ -5,8 +5,6 @@
   ...
 }: {
   imports = [
-    (lib.optional (builtins.pathExists ./local.nix) ./local.nix)
-
     # Core
     ./nix.nix
     ./unstable.nix

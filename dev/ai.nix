@@ -23,7 +23,8 @@ in {
   };
 
   environment.sessionVariables = {
-    HF_HUB_CACHE = huggingfaceCache;
+    HF_HOME = huggingfaceCache;
+    HF_HUB_CACHE = "${huggingfaceCache}/hub";
   };
 
   # services.ollama = {

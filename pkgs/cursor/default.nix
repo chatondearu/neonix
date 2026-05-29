@@ -61,4 +61,11 @@ in
       platforms = ["x86_64-linux"];
       mainProgram = "cursor";
     };
+  }).overrideAttrs (oldAttrs: {
+    # cursor-agent-exec ships a musl .node; glibc NixOS does not need it (nixpkgs code-cursor).
+    autoPatchelfIgnoreMissingDeps =
+      (oldAttrs.autoPatchelfIgnoreMissingDeps or [])
+      ++ lib.optionals (hostPlatform.isLinux && !hostPlatform.isMusl) [
+        "libc.musl-*.so.*"
+      ];
   })
