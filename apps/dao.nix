@@ -22,7 +22,7 @@ in {
   };
 
   config = {
-    nixpkgs.overlays = [ affinity-nix.overlays.default ];
+    nixpkgs.overlays = [ inputs.affinity-nix.overlays.default ];
 
     environment.systemPackages =
       lib.optionals cfg.affinity.enable [
