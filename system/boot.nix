@@ -83,14 +83,24 @@
   ];
 
   fileSystems."/hdd" = {
-    device = "/dev/disk/by-uuid/2109E2FB562F3EC4";
+    device = "/dev/disk/by-label/hdd-dev";
+    fsType = "ext4";
+    options = [
+      "defaults"
+      "nofail"
+      "x-systemd.device-timeout=5s"
+    ];
+  };
+
+  fileSystems."/hdd/share" = {
+    device = "/dev/disk/by-label/hdd-share";
     fsType = "ntfs3";
     options = [
       "rw"
-      "uid=1000" # Assign ownership to the user
-      "gid=100" # Assign to the 'users' group
-      "umask=000" # Permissions 755 for directories, 644 for files
-      "nofail" # Boot without kernel panic if the HDD crashes
+      "uid=1000"
+      "gid=100"
+      "umask=000"
+      "nofail"
       "x-systemd.device-timeout=5s"
       "x-systemd.idle-timeout=10min"
     ];
