@@ -1,0 +1,5 @@
+{
+  githubEmail = "your-github-email@example.com";
+  githubUser = "your-github-username";
+  githubGpgSigningKey = "YOUR_40_CHAR_GPG_FINGERPRINT";
+}
