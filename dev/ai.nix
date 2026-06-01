@@ -40,7 +40,8 @@ in {
       enable = true;
       model = "large-v3-turbo";
       language = "auto";
-      device = "cuda";
+      # Keep CPU backend until the packaged ctranslate2 build has CUDA enabled.
+      device = "cpu";
       uri = "tcp://0.0.0.0:10300";
     };
   };

@@ -40,8 +40,9 @@ in {
 
   config = lib.mkIf cfg.enable (let
     llama-cpp-pkg =
-      cfg.package
-      or self.packages.${pkgs.stdenv.hostPlatform.system}.llama-cpp-cuda;
+      if cfg.package != null
+      then cfg.package
+      else self.packages.${pkgs.stdenv.hostPlatform.system}.llama-cpp-cuda;
   in {
     environment.systemPackages = lib.optionals cfg.toolsInPath [llama-cpp-pkg];
 
