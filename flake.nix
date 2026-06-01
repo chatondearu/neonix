@@ -12,6 +12,7 @@
 
     # nix-maid
     nix-maid.url = "github:viperML/nix-maid";
+    agenix.url = "github:ryantm/agenix";
 
     # quickshell
     quickshell.url = "git+https://git.outfoxxed.me/quickshell/quickshell";
@@ -43,6 +44,7 @@
     nixpkgs,
     alejandra,
     nix-maid,
+    agenix,
     ...
   } @ inputs: let
     system = "x86_64-linux";
@@ -73,11 +75,13 @@
           {
             environment.systemPackages = [
               alejandra.defaultPackage.${system}
+              agenix.packages.${system}.default
               #self.packages.${system}.rtk
             ];
           }
 
           nix-maid.nixosModules.default
+          agenix.nixosModules.default
 
           # NixOS configuration
           ./configuration.nix

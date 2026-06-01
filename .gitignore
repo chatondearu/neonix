@@ -1,11 +1,14 @@
 # Secrets et données sensibles
-secrets.nix
+/secrets.nix
 *.key
 *.pem
 *.p12
 *.pfx
 *.age
 *.gpg
+!secrets/*.age
+!secrets/secrets.nix
+!system/secrets.nix
 
 # Logs et temporaires
 *.log

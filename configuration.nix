@@ -19,6 +19,7 @@
     ./system/gpu.nix
     ./system/system.nix
     ./system/security.nix
+    ./system/secrets.nix
     ./system/devices.nix
     ./system/update-notifier.nix
     ./system/debug.nix

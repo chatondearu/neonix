@@ -1,19 +1,22 @@
-{ pkgs, ... }:
-let
-  secrets = import ./../secrets.nix;
-in
 {
-  environment.systemPackages =
-    with pkgs;
+  lib,
+  pkgs,
+  ...
+}: let
+  identity = import ./../identity.nix;
+in {
+  environment.systemPackages = with pkgs;
     [
       git
       gh
+      gnupg
+      pinentry-curses
       lazygit
       android-tools # For ADB (uaccess handled by systemd 258)
 
       # Flake uses nixos-unstable, so these are already unstable packages
-      (pkgs.unstable.callPackage ../pkgs/cursor/default.nix { })
-      
+      (pkgs.unstable.callPackage ../pkgs/cursor/default.nix {})
+
       # gitnexus - https://github.com/abhigyanpatwari/GitNexus
       #(pkgs.unstable.callPackage ../pkgs/gitnexus/default.nix { })
     ]
@@ -29,21 +32,30 @@ in
 
   programs.git = {
     enable = true;
-    config = {
-      user = {
-        name = secrets.githubUser;
-        email = secrets.githubEmail;
-      };
-
-      safe.directory = "/etc/nixos";
-      init.defaultBranch = "main";
-
-      settings = {
-        push = {
-          autoSetupRemote = true;
+    config =
+      {
+        user = {
+          name = identity.githubUser;
+          email = identity.githubEmail;
         };
+
+        safe.directory = "/etc/nixos";
+        init.defaultBranch = "main";
+
+        settings = {
+          push = {
+            autoSetupRemote = true;
+          };
+        };
+      }
+      // lib.optionalAttrs (
+        (identity ? githubGpgSigningKey) && (identity.githubGpgSigningKey != "")
+      ) {
+        user.signingkey = identity.githubGpgSigningKey;
+        commit.gpgsign = true;
+        tag.gpgSign = true;
+        gpg.format = "openpgp";
       };
-    };
   };
 
   imports = [

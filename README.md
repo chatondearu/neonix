@@ -38,9 +38,9 @@ Custom NixOS configuration with Niri (scrollable window manager), integrating ni
 git clone <your-repo-url> /etc/nixos
 cd /etc/nixos
 
-# Configure secrets
-cp secrets.nix.example secrets.nix
-# Edit secrets.nix with your values
+# Configure public identity values (safe to version)
+cp identity.nix.example identity.nix
+# Edit identity.nix with your values
 
 # Apply the configuration
 sudo nixos-rebuild switch --flake .#neo-nix
@@ -139,13 +139,25 @@ sudo nixos-rebuild switch --rollback
 
 ### 🔧 Secrets Configuration
 
-Secrets are stored in the `secrets/` folder and imported via `secrets.nix`. To secure your secrets:
+This flake uses a split model:
 
-1. Copy the template: `cp secrets.nix.example secrets.nix`
-2. Edit `secrets.nix` with your values
-3. The file is automatically gitignored
+1. `identity.nix` for non-sensitive values (GitHub user/email/signing key fingerprint).
+2. `agenix` for real secrets encrypted as `secrets/*.age` and committed safely to git.
 
-**Note:** Currently, secrets are managed manually. See the TODO section for more robust solutions.
+Quick start for agenix:
+
+```sh
+# 1) Edit recipients
+vim secrets/secrets.nix
+
+# 2) Create a secret file encrypted for those recipients
+agenix -e secrets/example-secret.age -i /etc/ssh/ssh_host_ed25519_key
+
+# 3) Declare it in a Nix module
+# age.secrets.example-secret.file = ../secrets/example-secret.age;
+```
+
+The decrypted files are materialized at activation time under `/run/agenix`.
 
 ### 📚 Resources
 
@@ -177,10 +189,9 @@ Secrets are stored in the `secrets/` folder and imported via `secrets.nix`. To s
 ### 📝 TODO
 
 - [ ] **Improved secrets management**
-  - [ ] Implement [agenix](https://github.com/ryantm/agenix) for secrets encryption with age
-  - [ ] Alternative: [sops-nix](https://github.com/Mic92/sops-nix) for SOPS (Secrets OPerationS)
-  - [ ] Migrate current secrets to the chosen solution
-  - [ ] Document the secrets management workflow
+  - [x] Implement [agenix](https://github.com/ryantm/agenix) for secrets encryption with age
+  - [ ] Migrate secret values to encrypted `secrets/*.age`
+  - [ ] Add rotation and recovery procedure for AGE keys
 
 - [ ] **Configuration improvements**
   - [x] Separate configuration into more modular modules
