@@ -33,6 +33,7 @@ in {
   programs.git = {
     enable = true;
     config =
+      lib.recursiveUpdate
       {
         user = {
           name = identity.githubUser;
@@ -41,21 +42,16 @@ in {
 
         safe.directory = "/etc/nixos";
         init.defaultBranch = "main";
-
-        settings = {
-          push = {
-            autoSetupRemote = true;
-          };
-        };
+        push.autoSetupRemote = true;
       }
-      // lib.optionalAttrs (
-        (identity ? githubSshSigningKey) && (identity.githubSshSigningKey != "")
-      ) {
-        user.signingkey = identity.githubSshSigningKey;
-        commit.gpgsign = true;
-        tag.gpgSign = true;
-        gpg.format = "ssh";
-      };
+      (lib.optionalAttrs (
+          (identity ? githubSshSigningKey) && (identity.githubSshSigningKey != "")
+        ) {
+          user.signingkey = identity.githubSshSigningKey;
+          commit.gpgsign = true;
+          tag.gpgSign = true;
+          gpg.format = "ssh";
+        });
   };
 
   imports = [
