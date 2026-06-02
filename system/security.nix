@@ -1,8 +1,6 @@
 {pkgs, ...}:
 # security tweaks borrowed from @hlissner
 {
-  programs.ssh.startAgent = true;
-
   boot.kernel.sysctl = {
     # The Magic SysRq key is a key combo that allows users connected to the
     # system console of a Linux kernel to perform some low-level commands.

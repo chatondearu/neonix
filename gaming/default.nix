@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   environment.systemPackages = with pkgs; [
     # Gaming tools
     #mesa            # Ensure last mesa stable on GLF OS
@@ -34,6 +35,19 @@
 
     itch
     itch-dl
+
+    (prismlauncher.override {
+      # Add binary required by some mod
+      additionalPrograms = [ ffmpeg ];
+
+      # Change Java runtimes available to Prism Launcher
+      jdks = [
+        graalvmPackages.graalvm-ce
+        zulu8
+        zulu17
+        zulu
+      ];
+    })
   ];
 
   programs.gamemode.enable = true;
@@ -72,7 +86,10 @@
   };
 
   networking.firewall.allowedUDPPortRanges = [
-    { from = 47998; to = 48000; }  # Sunshine UDP
+    {
+      from = 47998;
+      to = 48000;
+    } # Sunshine UDP
   ];
 
   # Hardware support for devices
