@@ -49,12 +49,12 @@ in {
         };
       }
       // lib.optionalAttrs (
-        (identity ? githubGpgSigningKey) && (identity.githubGpgSigningKey != "")
+        (identity ? githubSshSigningKey) && (identity.githubSshSigningKey != "")
       ) {
-        user.signingkey = identity.githubGpgSigningKey;
+        user.signingkey = identity.githubSshSigningKey;
         commit.gpgsign = true;
         tag.gpgSign = true;
-        gpg.format = "openpgp";
+        gpg.format = "ssh";
       };
   };
 

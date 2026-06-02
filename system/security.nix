@@ -1,6 +1,8 @@
-{ pkgs, ... }:
+{pkgs, ...}:
 # security tweaks borrowed from @hlissner
 {
+  programs.ssh.startAgent = true;
+
   boot.kernel.sysctl = {
     # The Magic SysRq key is a key combo that allows users connected to the
     # system console of a Linux kernel to perform some low-level commands.
@@ -44,9 +46,9 @@
 
     ## Network performance optimizations
     # Increase network buffer sizes
-    "net.core.rmem_max" = 134217728;  # 128 MB
+    "net.core.rmem_max" = 134217728; # 128 MB
     "net.core.wmem_max" = 134217728;
-    "net.core.rmem_default" = 16777216;  # 16 MB
+    "net.core.rmem_default" = 16777216; # 16 MB
     "net.core.wmem_default" = 16777216;
 
     # TCP buffer sizes
@@ -88,11 +90,13 @@
 
   services.fail2ban = {
     enable = true;
-   # Ban IP after 5 failures
+    # Ban IP after 5 failures
     maxretry = 5;
     ignoreIP = [
       # Whitelist some subnets
-      "10.0.0.0/8" "172.16.0.0/12" "192.168.0.0/16"
+      "10.0.0.0/8"
+      "172.16.0.0/12"
+      "192.168.0.0/16"
       "8.8.8.8" # whitelist a specific IP
       "cypher.yt" # resolve the IP via DNS
     ];
