@@ -24,8 +24,8 @@ else
   exit 1
 fi
 
-echo "[1/3] Compilation de l'image SD (ARMv7)..."
-nix build .#packages.armv7l-linux.sdImage --impure
+echo "[1/3] Compilation de l'image SD (aarch64 / Pi Zero 2 W)..."
+nix build .#packages.aarch64-linux.sdImage --impure --accept-flake-config
 
 IMG=$(find result/sd-image -name "*.img" -type f | head -n 1)
 

@@ -1,105 +1,80 @@
-{ config, pkgs, lib, ... }:
-
-let
-  # secrets = import ./secrets.nix;
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}: let
   wifiSsid = builtins.getEnv "WIFI_SSID";
   wifiPsk = builtins.getEnv "WIFI_PSK";
-  musicAssistantUrl = builtins.getEnv "MUSIC_ASSISTANT_URL";
   sshPublicKey = builtins.getEnv "SSH_PUBLIC_KEY";
   hostname = "pi-sound";
   usbCard = "CODEC";
   i2sCard = "sndrpimerusamp";
-in
-{
-  nixpkgs.overlays = [
-    (final: prev: {
-      efivar = prev.efivar.overrideAttrs (oldAttrs: {
-        # Désactivation de la transformation des warnings en erreurs fatales
-        env = (oldAttrs.env or {}) // {
-          NIX_CFLAGS_COMPILE = toString (oldAttrs.env.NIX_CFLAGS_COMPILE or "") + " -Wno-error";
-        };
-      });
-    })
-  ];
-
-  nixpkgs.config = {
-    allowBroken = true;  # pkgs.efivar is marked broken for armv7l
-    config.allowUnsupportedSystem = true; # pkgs.uboot-rpi_0_w_defconfig-2025.10 not supported for armv7l
-  };
-
+in {
   system.stateVersion = "25.11";
 
-  nix = {
-    settings = {
-      auto-optimise-store = true;
-      builders-use-substitutes = true;
-      warn-dirty = false;
-      experimental-features = [ "nix-command" "flakes" ];
-      download-buffer-size = 524288000; # 500MB
+  nix.settings.experimental-features = ["nix-command" "flakes"];
 
-      # Limit build parallelism to prevent OOM during heavy builds
-      max-jobs = 2;
-      cores = 2;
+  # --- Pi Zero 2 W boot (nixos-raspberrypi) ---
 
-      # Add niri cache to speed up builds
-      substituters = [
-        "https://cache.nixos.org"
-        "https://nix-community.cachix.org"
-      ];
-      trusted-public-keys = [
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      ];
+  boot.loader.raspberry-pi.bootloader = "kernel";
+  boot.supportedFilesystems = ["vfat" "ext4"];
 
-      trusted-users = [ "root" "nixos" "chaton" ];
+  hardware.raspberry-pi.config = {
+    all = {
+      options = {
+        camera_auto_detect.enable = lib.mkForce false;
+        display_auto_detect.enable = lib.mkForce false;
+        max_framebuffers.enable = lib.mkForce false;
+        disable_fw_kms_setup.enable = lib.mkForce true;
+        arm_boost.enable = lib.mkForce false;
+      };
+      base-dt-params.i2s = {
+        enable = true;
+        value = "on";
+      };
+      dt-overlays = {
+        vc4-kms-v3d.enable = lib.mkForce false;
+        dwc2.enable = lib.mkForce false;
+        merus-amp.enable = true;
+      };
     };
+    cm4.options.otg_mode.enable = lib.mkForce false;
+    cm5.dt-overlays.dwc2.enable = lib.mkForce false;
   };
 
-  sdImage.compressImage = false;
-
-  # --- Optimisation Matérielle et Boot ---
-  boot.initrd.systemd.enable = true;
-  boot.zfs.forceImportRoot = false;
-
-  # Only ZFS and vfat (for boot) - disable others to shrink image
-  # Default SD image enables cifs/ntfs/btrfs etc which pulls in samba (~600MB)
-  boot.supportedFilesystems = lib.mkForce [ "vfat" "zfs" ];
-
-  systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
-
-  # Verrouillage noyau de l'index USB (Méthode ALSA standard, plus fiable que Udev seul)
-  boot.extraModprobeConfig = ''
-    options snd-usb-audio index=1
-  '';
-
-  # Désactivation de la génération de ce fichier pour débloquer la cross-compilation
-  environment.etc."sysctl.d/55-nixos-aslr-entropy.conf".enable = false;
-
-  ## Réseau
-  systemd.network = {
-    enable = true;
-    networks."10-wired" = {
-      matchConfig.Name = "eth0"; # Ajuster selon la sortie de `ip link`
-      networkConfig.DHCP = "yes";
-    };
+  # nixos-raspberrypi leaves stray "dtoverlay=" lines that confuse some firmware parsers
+  boot.loader.raspberry-pi.configTxtPackage = pkgs.writeTextFile {
+    name = "config.txt";
+    text =
+      lib.concatStringsSep "\n"
+      (lib.filter (
+          line:
+            line
+            != ""
+            && line != "dtoverlay="
+            && line != "[cm4]"
+            && line != "[cm5]"
+        ) (
+          lib.splitString "\n" config.hardware.raspberry-pi.config-generated
+        ))
+      + "\n";
   };
+
+  # --- Network and access ---
 
   networking = {
     hostName = hostname;
-    useDHCP = false; # Suffisant pour Ethernet filaire (KISS)
-
+    useDHCP = lib.mkDefault true;
     wireless = {
       iwd.enable = true;
-      interfaces = [ "wlan0" ];
-      networks = {
-        "${wifiSsid}" = {
-          psk = wifiPsk;
-        };
+      interfaces = ["wlan0"];
+      networks."${wifiSsid}" = {
+        psk = wifiPsk;
       };
     };
   };
 
-  # Découverte mDNS (facilite la connexion via ssh root@rpi-audio.local)
   services.avahi = {
     enable = true;
     nssmdns4 = true;
@@ -107,7 +82,6 @@ in
     publish.addresses = true;
   };
 
-  # Serveur SSH
   services.openssh = {
     enable = true;
     settings = {
@@ -118,66 +92,13 @@ in
 
   users.users.pisound = {
     isNormalUser = true;
-    description = "RPI Admin";
-    extraGroups = [ "wheel" "audio" ];
-    openssh.authorizedKeys.keys = [
-      "${sshPublicKey}"
-    ];
+    description = "Pi sound node admin";
+    extraGroups = ["wheel" "audio"];
+    openssh.authorizedKeys.keys = ["${sshPublicKey}"];
   };
 
   security.sudo.wheelNeedsPassword = false;
 
-  # --- Socle Audio (ALSA pur) ---
-  hardware.alsa.enable = true;
-  services.pulseaudio.enable = false;
-
-  # Injecter les paramètres I2S directement dans la partition FAT32 (Bootloader)
-  sdImage.populateFirmwareCommands = lib.mkAfter ''
-    echo "dtparam=i2s=on" >> config.txt
-    echo "dtoverlay=merus-amp" >> config.txt
-  '';
-
-  # Définition des alias ALSA purs
-  environment.etc."asound.conf".text = ''
-    pcm.merus {
-      type hw
-      card ${i2sCard}
-    }
-    
-    type plug
-      slave.pcm {
-        type hw
-        card ${usbCard}
-      }
-    }
-  '';
-
-  # Règle Udev pour symlink persistant (sécurité supplémentaire)
-  services.udev.extraRules = ''
-    SUBSYSTEM=="sound", ATTRS{id}="${usbCard}", SYMLINK+="snd/usb_codec"
-  '';
-
-  # --- Intégration Music Assistant (SlimProto) ---
-  services.squeezelite = {
-    enable = true;
-    # -o : Périphérique de sortie audio (alias ALSA "merus")
-    # -n : Nom exposé sur le réseau
-    extraArgs = "-o merus -n ${hostname}";
-  };
-
-  # --- Routage direct PC USB -> I2S ---
-  systemd.services.usb-audio-loop = {
-    description = "ALSA loopback USB to I2S";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "sound.target" ];
-    serviceConfig = {
-      ExecStart = "${pkgs.alsa-utils}/bin/alsaloop -C usbcodec -P merus -t 50000";
-      Restart = "always";
-      RestartSec = "5";
-    };
-  };
-
-  # --- Réduction d'empreinte système ---
   environment.defaultPackages = lib.mkForce [];
   services.udisks2.enable = false;
 
@@ -188,4 +109,48 @@ in
     parted
     gptfdisk
   ];
+
+  # --- Audio stack (debug over SSH; do not change without testing on hardware) ---
+
+  boot.extraModprobeConfig = ''
+    options snd-usb-audio index=1
+  '';
+
+  hardware.alsa.enable = true;
+  services.pulseaudio.enable = false;
+
+  environment.etc."asound.conf".text = ''
+    pcm.merus {
+      type hw
+      card ${i2sCard}
+    }
+
+    pcm.usbcodec {
+      type plug
+      slave.pcm {
+        type hw
+        card ${usbCard}
+      }
+    }
+  '';
+
+  services.udev.extraRules = ''
+    SUBSYSTEM=="sound", ENV{ID_ID}=="${usbCard}", SYMLINK+="snd/usb_codec"
+  '';
+
+  services.squeezelite = {
+    enable = true;
+    extraArguments = "-o merus -n ${hostname}";
+  };
+
+  systemd.services.usb-audio-loop = {
+    description = "ALSA loopback USB to I2S";
+    wantedBy = ["multi-user.target"];
+    after = ["sound.target"];
+    serviceConfig = {
+      ExecStart = "${pkgs.alsa-utils}/bin/alsaloop -C usbcodec -P merus -t 50000";
+      Restart = "always";
+      RestartSec = "5";
+    };
+  };
 }

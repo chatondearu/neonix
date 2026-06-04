@@ -1,1 +1,2 @@
-# TO COPY FROM dc-cache HOST
+# Optional host-specific hardware overrides (not used by the SD image flake)
+{...}: {}

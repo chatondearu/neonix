@@ -9,8 +9,8 @@
       systemd.enable = true;
     };
 
-    # Enable cross-compilation for ARMv7l to build the SD image for Raspberry Pi 2
-    binfmt.emulatedSystems = [ "armv7l-linux" ];
+    # QEMU user emulation for cross-building aarch64 SD images (e.g. pi-sound on Pi Zero 2 W)
+    binfmt.emulatedSystems = ["aarch64-linux"];
 
     loader = {
       # systemd-boot on UEFI
