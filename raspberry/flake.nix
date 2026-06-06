@@ -1,5 +1,5 @@
 {
-  description = "Raspberry Pi Imager + odio HW validation (Pi Zero 2 W / Merus AMP)";
+  description = "Raspberry Pi Imager + odio HW validation (Pi Zero W / Merus AMP)";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -20,13 +20,14 @@
         rpi-imager-odio = pkgs.writeShellScriptBin "rpi-imager-odio" ''
           set -euo pipefail
           cat <<EOF
-          odio flash (Pi Zero 2 W, arm64)
-          ─────────────────────────────────
+          odio flash (Pi Zero W / WH, armhf)
+          ────────────────────────────────────
           1. Imager → Options → Content Repository → Use custom URL
           2. URL: ${manifestUrl}
-          3. Select odio (arm64)
+          3. Select odio (armhf) — not arm64 on Zero W
           4. Settings: user "odio", enable SSH, Wi-Fi if needed
           5. Flash SD, then: apply-merus-config /dev/sdX
+          Or use: flash-odio-cli /dev/sdX
           EOF
           exec ${pkgs.rpi-imager}/bin/rpi-imager "$@"
         '';
@@ -55,11 +56,12 @@
 
           shellHook = ''
             export RASPBERRY_ODIO_DIR="$PWD/odio"
-            echo " raspberry/ — odio HW validation (Pi Zero 2 W + Merus AMP)"
+            echo " raspberry/ — odio HW validation (Pi Zero W/WH + Merus AMP)"
             echo ""
-            echo "  flash-odio-cli /dev/sdX     Recommended: CLI flash + Merus (uses odio/.env)"
-            echo "  apply-merus-config /dev/sdX  Merus overlay only (after manual flash)"
-            echo "  rpi-imager-odio              GUI Imager (needs Polkit / display)"
+            echo "  flash-odio-cli /dev/sdX     odio armhf + Merus (Pi Zero W/WH)"
+            echo "  flash-odio-cli /dev/sdX --arm64   Pi Zero 2 W / Pi 3+ only"
+            echo "  apply-merus-config /dev/sdX  Merus overlay only"
+            echo "  rpi-imager-odio              GUI Imager"
             echo ""
             echo "  Manifest: ${manifestUrl}"
             echo "  Docs: odio/README.md"

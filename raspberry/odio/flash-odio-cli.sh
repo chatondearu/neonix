@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Flash odio arm64 via rpi-imager CLI, then apply Merus boot config.
+# Flash odio via rpi-imager CLI, then apply Merus boot config.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,8 +21,10 @@ if [ -f "${CONFIG_DIR}/manifest.url" ]; then
 else
   MANIFEST_URL="$(tr -d '[:space:]' <"${BUNDLE_DIR}/manifest.url")"
 fi
+
 TARGET_DEV=""
 SKIP_MERUS=false
+CLI_ODIO_IMAGE=""
 TMP_DIR=""
 USER_DATA=""
 NETWORK_CONFIG=""
@@ -34,10 +36,13 @@ trap cleanup EXIT
 
 usage() {
   cat <<'EOF'
-Usage: flash-odio-cli.sh /dev/sdX [--skip-merus]
+Usage: flash-odio-cli.sh /dev/sdX [--armhf | --arm64] [--skip-merus]
 
-Flashes odio arm64 from the official manifest using rpi-imager --cli
+Flashes odio from the official manifest using rpi-imager --cli
 (Wi-Fi / SSH / hostname from odio/.env), then merges Merus AMP boot config.
+
+Default image: odio (armhf) for Raspberry Pi Zero W / WH.
+Use --arm64 for Pi Zero 2 W, Pi 3/4/5 (not Pi Zero W — causes 7 LED flashes).
 
 Requires: odio/.env (copy from .env.example), sudo for block device write.
 EOF
@@ -58,6 +63,12 @@ for arg in "$@"; do
       ;;
     --skip-merus)
       SKIP_MERUS=true
+      ;;
+    --armhf)
+      CLI_ODIO_IMAGE="armhf"
+      ;;
+    --arm64)
+      CLI_ODIO_IMAGE="arm64"
       ;;
     *)
       if [ -n "$TARGET_DEV" ]; then
@@ -106,6 +117,21 @@ set -a
 source "$ENV_FILE"
 set +a
 
+if [ -n "$CLI_ODIO_IMAGE" ]; then
+  ODIO_IMAGE="$CLI_ODIO_IMAGE"
+else
+  ODIO_IMAGE="${ODIO_IMAGE:-armhf}"
+fi
+
+case "$ODIO_IMAGE" in
+  armhf) ODIO_MANIFEST_NAME="odio (armhf)" ;;
+  arm64) ODIO_MANIFEST_NAME="odio (arm64)" ;;
+  *)
+    echo "Invalid ODIO_IMAGE: $ODIO_IMAGE (use armhf or arm64)" >&2
+    exit 1
+    ;;
+esac
+
 : "${HOSTNAME:?HOSTNAME required in .env}"
 : "${SSH_PUBLIC_KEY:?SSH_PUBLIC_KEY required in .env}"
 
@@ -146,18 +172,24 @@ else
   echo "Note: WIFI_SSID/WIFI_PSK not set — flash without Wi-Fi cloud-init."
 fi
 
-echo "[1/3] Resolving odio arm64 image from manifest..."
+echo "[1/3] Resolving ${ODIO_MANIFEST_NAME} from manifest..."
 MANIFEST="$(curl -fsSL "$MANIFEST_URL")"
-IMAGE_URL="$(echo "$MANIFEST" | jq -r '.os_list[] | select(.name == "odio (arm64)") | .url')"
-IMAGE_SHA256="$(echo "$MANIFEST" | jq -r '.os_list[] | select(.name == "odio (arm64)") | .image_download_sha256')"
+IMAGE_URL="$(echo "$MANIFEST" | jq -r --arg name "$ODIO_MANIFEST_NAME" '.os_list[] | select(.name == $name) | .url')"
+# rpi-imager --sha256 verifies the decompressed .img, not the .xz download
+IMAGE_SHA256="$(echo "$MANIFEST" | jq -r --arg name "$ODIO_MANIFEST_NAME" '.os_list[] | select(.name == $name) | .extract_sha256')"
 
 if [ -z "$IMAGE_URL" ] || [ "$IMAGE_URL" = "null" ]; then
-  echo "Could not find odio (arm64) in manifest." >&2
+  echo "Could not find ${ODIO_MANIFEST_NAME} in manifest." >&2
   exit 1
 fi
 
+echo "      Image: ${ODIO_MANIFEST_NAME}"
 echo "      URL: $IMAGE_URL"
-echo "      SHA256: $IMAGE_SHA256"
+echo "      SHA256 (extracted .img): $IMAGE_SHA256"
+
+if [ "$ODIO_IMAGE" = "arm64" ]; then
+  echo "      Warning: arm64 will not boot on Pi Zero W/WH (7 LED flashes)."
+fi
 
 echo "[2/3] Flashing to $TARGET_DEV (sudo, rpi-imager --cli)..."
 sudo umount "${TARGET_DEV}"* 2>/dev/null || true
@@ -183,7 +215,7 @@ echo "[3/3] Applying Merus AMP boot overlay..."
 
 cat <<EOF
 
-OK. SD ready for Pi Zero 2 W.
+OK. SD ready (${ODIO_MANIFEST_NAME}, Pi Zero W/WH).
 
   ssh odio@${HOSTNAME}.local
   aplay -l

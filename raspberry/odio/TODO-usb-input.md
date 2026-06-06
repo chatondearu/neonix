@@ -1,6 +1,7 @@
 # TODO — entrée USB → enceintes Merus (phase 2)
 
 **Statut :** hors scope de l’env Nix `raspberry/` pour l’instant.  
+**Matériel actuel :** Pi Zero W / WH + odio armhf.  
 **Objectif :** reproduire le comportement de [`pi-sound`](../../nixos/hosts/pi-sound/configuration.nix) — codec USB Behringer UCA202/UCA222 (`CODEC`) routé vers le Merus (`sndrpimerusamp`).
 
 Ne pas intégrer au workflow SD (`apply-merus-config`) tant que le prototype SSH n’est pas validé sur le hardware.
