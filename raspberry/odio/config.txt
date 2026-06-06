@@ -1,0 +1,17 @@
+# Merus AMP fragment for InnoMaker MA12070P (Pi Zero 2 W)
+# Merged into boot config.txt by apply-merus-config.sh
+
+# Disable onboard audio (required for Merus I2S)
+dtparam=audio=off
+
+# Enable I2S (matches pi-sound)
+dtparam=i2s=on
+
+# InnoMaker MA12070P / MERUS amp HAT
+dtoverlay=merus-amp
+
+# Headless Pi Zero 2 W (mirrors pi-sound)
+disable_fw_kms_setup=1
+camera_auto_detect=0
+display_auto_detect=0
+max_framebuffers=0
