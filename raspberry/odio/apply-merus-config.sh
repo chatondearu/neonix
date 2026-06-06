@@ -21,7 +21,7 @@ usage() {
   cat <<'EOF'
 Usage: apply-merus-config.sh /dev/sdX
 
-After flashing an odio arm64 image, merges Merus AMP settings from
+After flashing an odio image, merges Merus AMP settings from
 odio/config.txt into the SD boot partition (config.txt or firmware/config.txt).
 
 Requires sudo to mount the boot partition.
