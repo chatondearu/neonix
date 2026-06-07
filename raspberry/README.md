@@ -31,7 +31,8 @@ cp odio/.env.example odio/.env
 flash-odio-cli /dev/sdX
 ```
 
-Par défaut : **odio (armhf)** + cloud-init depuis `odio/.env` + overlay Merus.
+Par défaut : **odio (armhf)** + cloud-init depuis `odio/.env` + overlay Merus.  
+Réseau caché : `WIFI_HIDDEN=true` dans `.env`.
 
 Options :
 

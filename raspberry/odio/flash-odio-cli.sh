@@ -157,6 +157,10 @@ users:
 EOF
 
 if [ -n "${WIFI_SSID:-}" ] && [ -n "${WIFI_PSK:-}" ]; then
+  WIFI_HIDDEN_LINE=""
+  case "${WIFI_HIDDEN:-false}" in
+    true | 1 | yes | YES | True) WIFI_HIDDEN_LINE="        hidden: true" ;;
+  esac
   cat >"$NETWORK_CONFIG" <<EOF
 version: 2
 wifis:
@@ -166,6 +170,7 @@ wifis:
     access-points:
       "${WIFI_SSID}":
         password: "${WIFI_PSK}"
+${WIFI_HIDDEN_LINE}
 EOF
 else
   NETWORK_CONFIG=""
