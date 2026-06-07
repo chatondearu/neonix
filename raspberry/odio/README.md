@@ -13,7 +13,7 @@ Le NixOS [`pi-sound`](../../nixos/hosts/pi-sound/) vise un **Pi Zero 2 W** — o
 
 ```bash
 cd raspberry
-cp odio/.env.example odio/.env   # HOSTNAME, ODIO_IMAGE=armhf, Wi‑Fi, SSH
+cp odio/.env.example odio/.env   # HOSTNAME, ODIO_IMAGE, WIFI_*, WIFI_HIDDEN, SSH
 nix develop
 flash-odio-cli /dev/sdX
 ```
@@ -25,6 +25,8 @@ Lit `odio/.env` depuis **ton dépôt** (`raspberry/odio/.env`), pas le store Nix
 | (défaut) | odio **armhf** — Pi Zero W / WH |
 | `--arm64` | Pi Zero **2 W**, Pi 3/4/5 uniquement |
 | `--skip-merus` | Pas de fusion `config.txt` |
+
+Réseau Wi‑Fi caché : `WIFI_HIDDEN=true` dans `odio/.env` (netplan `hidden: true`).
 
 ## Pi Zero W vs Zero 2 W
 
