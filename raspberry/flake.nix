@@ -39,6 +39,10 @@
         flash-odio-cli = pkgs.writeShellScriptBin "flash-odio-cli" ''
           exec ${odioDir}/flash-odio-cli.sh "$@"
         '';
+
+        deploy-usb-route = pkgs.writeShellScriptBin "deploy-usb-route" ''
+          exec ${odioDir}/deploy-usb-route.sh "$@"
+        '';
       in {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
@@ -46,12 +50,14 @@
             rpi-imager-odio
             flash-odio-cli
             apply-merus-config
+            deploy-usb-route
             jq
             curl
             util-linux
             dosfstools
             parted
             zstd
+            openssh
           ];
 
           shellHook = ''
@@ -61,6 +67,7 @@
             echo "  flash-odio-cli /dev/sdX     odio armhf + Merus (Pi Zero W/WH)"
             echo "  flash-odio-cli /dev/sdX --arm64   Pi Zero 2 W / Pi 3+ only"
             echo "  apply-merus-config /dev/sdX  Merus overlay only"
+            echo "  deploy-usb-route odio@host --status   phase 2 USB → Merus"
             echo "  rpi-imager-odio              GUI Imager"
             echo ""
             echo "  Manifest: ${manifestUrl}"

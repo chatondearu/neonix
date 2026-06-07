@@ -1,13 +1,13 @@
 # odio — Pi Zero W / WH + Merus AMP (phase 1)
 
-Validation matérielle avec une image [odio](https://odio.love/) **armhf** sur **Raspberry Pi Zero W / WH**.
+Hardware validation with an **armhf** [odio](https://odio.love/) image on **Raspberry Pi Zero W / WH**.
 
-Le NixOS [`pi-sound`](../../nixos/hosts/pi-sound/) vise un **Pi Zero 2 W** — on l’alignera sur ce matériel dans un second temps.
+NixOS [`pi-sound`](../../nixos/hosts/pi-sound/) targets a **Pi Zero 2 W** — alignment with this hardware will come later.
 
-## Matériel
+## Hardware
 
-- Raspberry Pi **Zero W** ou **Zero WH**
-- InnoMaker MA12070P (overlay `merus-amp`, ALSA `sndrpimerusamp`)
+- Raspberry Pi **Zero W** or **Zero WH**
+- InnoMaker MA12070P (`merus-amp` overlay, ALSA `sndrpimerusamp`)
 
 ## Flash (CLI)
 
@@ -18,29 +18,30 @@ nix develop
 flash-odio-cli /dev/sdX
 ```
 
-Lit `odio/.env` depuis **ton dépôt** (`raspberry/odio/.env`), pas le store Nix.
+Reads `odio/.env` from **your checkout** (`raspberry/odio/.env`), not the Nix store.
 
 | Option | Usage |
 |--------|--------|
-| (défaut) | odio **armhf** — Pi Zero W / WH |
-| `--arm64` | Pi Zero **2 W**, Pi 3/4/5 uniquement |
-| `--skip-merus` | Pas de fusion `config.txt` |
+| (default) | odio **armhf** — Pi Zero W / WH |
+| `--arm64` | Pi Zero **2 W**, Pi 3/4/5 only |
+| `--skip-merus` | Skip `config.txt` merge |
 
-Réseau Wi‑Fi caché : `WIFI_HIDDEN=true` dans `odio/.env` (netplan `hidden: true`).
+Hidden Wi‑Fi: `WIFI_HIDDEN=true` in `odio/.env` (netplan `hidden: true`).  
+Regulatory domain: `WIFI_COUNTRY=FR` (default **FR** — required for headless Wi‑Fi).
 
 ## Pi Zero W vs Zero 2 W
 
-| Carte | Image odio |
+| Board | odio image |
 |-------|------------|
 | Zero W / WH | **armhf** (`odio (armhf)`) |
 | Zero 2 W | arm64 (`--arm64`) |
 
-arm64 sur un Zero W → **7 clignotements** LED (kernel introuvable).
+arm64 on a Zero W → **7 LED flashes** (kernel not found).
 
 ## Flash (GUI)
 
-Manifest : `https://beta.odio.love/odio.rpi-imager-manifest`  
-Choisir **odio (armhf)**, puis :
+Manifest: `https://beta.odio.love/odio.rpi-imager-manifest`  
+Select **odio (armhf)**, then:
 
 ```bash
 apply-merus-config /dev/sdX
@@ -48,15 +49,15 @@ apply-merus-config /dev/sdX
 
 ## Merus overlay
 
-Le script fusionne [`config.txt`](config.txt) sur la partition boot (overlay `merus-amp` — HAT prévu pour le Zero W).
+The script merges [`config.txt`](config.txt) onto the boot partition (`merus-amp` overlay — HAT designed for Zero W).
 
-Option PBTL :
+PBTL option:
 
 ```ini
 gpio=8=op,dl
 ```
 
-## Tests sur le Pi
+## Tests on the Pi
 
 ```bash
 ssh odio@<hostname>.local
@@ -64,13 +65,23 @@ aplay -l
 speaker-test -D hw:sndrpimerusamp,0 -c 2 -t wav
 ```
 
-| Test | Attendu | Si échec |
-|------|---------|----------|
-| Boot + SSH | Shell | SD, alim 2 A+, Wi‑Fi |
-| `aplay -l` | `sndrpimerusamp` | HAT, overlay, alim amp |
-| `speaker-test` | Son HP | câblage, PBTL |
+| Test | Expected | On failure |
+|------|----------|------------|
+| Boot + SSH | Shell | SD, 2 A+ PSU, Wi‑Fi |
+| `aplay -l` | `sndrpimerusamp` | HAT, overlay, amp PSU |
+| `speaker-test` | Speaker sound | wiring, PBTL |
 
-## Suite
+## Phase 2 — USB line-in → Merus
 
-- Entrée USB : [`TODO-usb-input.md`](TODO-usb-input.md)
-- pi-sound NixOS pour Zero 2 W : à venir
+From the dev machine (UCA202 codec connected to the Pi):
+
+```bash
+deploy-usb-route odio@<hostname>.local --status
+deploy-usb-route odio@<hostname>.local --install
+```
+
+Full docs: [`usb-input.md`](usb-input.md).
+
+## Next steps
+
+- pi-sound NixOS for Zero 2 W: coming soon
