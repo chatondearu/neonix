@@ -1,21 +1,21 @@
-# raspberry/ — validation matérielle odio (Pi Zero W / WH)
+# raspberry/ — odio hardware validation (Pi Zero W / WH)
 
-Environnement Nix pour flasher une image **odio armhf** et appliquer l'overlay **Merus AMP** (InnoMaker MA12070P).
+Nix environment to flash an **odio armhf** image and apply the **Merus AMP** overlay (InnoMaker MA12070P).
 
-Matériel cible actuel : **Raspberry Pi Zero W / WH** (32-bit).  
-Le projet NixOS [`pi-sound`](../nixos/hosts/pi-sound/) reste calibré **Pi Zero 2 W** — adaptation prévue plus tard.
+Current target hardware: **Raspberry Pi Zero W / WH** (32-bit).  
+The NixOS [`pi-sound`](../nixos/hosts/pi-sound/) project is still tuned for **Pi Zero 2 W** — adaptation planned later.
 
-**Phase 1** (ce dossier) : boot + I2S Merus sur Zero W.  
-**Phase 2** (reportée) : entrée USB → enceintes — voir [`odio/TODO-usb-input.md`](odio/TODO-usb-input.md).
+**Phase 1**: boot + I2S Merus on Zero W.  
+**Phase 2**: USB input → speakers — see [`odio/usb-input.md`](odio/usb-input.md).
 
-## Prérequis
+## Prerequisites
 
-- Carte SD + lecteur USB
-- **Pi Zero W / WH** + HAT InnoMaker MA12070P (alim amp externe si requis)
-- Alim **5 V / 2 A** minimum (Zero W + amp = gourmand)
-- `direnv` (optionnel) ou `nix develop`
+- SD card + USB reader
+- **Pi Zero W / WH** + InnoMaker MA12070P HAT (external amp PSU if required)
+- **5 V / 2 A** PSU minimum (Zero W + amp is power-hungry)
+- `direnv` (optional) or `nix develop`
 
-> **Ne pas** flasher **odio arm64** sur un Zero W — le firmware clignote **7 fois** (kernel introuvable).
+> **Do not** flash **odio arm64** on a Zero W — firmware blinks **7 times** (kernel not found).
 
 ## Setup
 
@@ -31,27 +31,40 @@ cp odio/.env.example odio/.env
 flash-odio-cli /dev/sdX
 ```
 
-Par défaut : **odio (armhf)** + cloud-init depuis `odio/.env` + overlay Merus.  
-Réseau caché : `WIFI_HIDDEN=true` dans `.env`.
+By default: **odio (armhf)** + cloud-init from `odio/.env` + Merus overlay.  
+Hidden network: `WIFI_HIDDEN=true` in `.env`.  
+Regulatory domain: `WIFI_COUNTRY=FR` (defaults to FR if omitted).
 
-Options :
+Options:
 
-- `--skip-merus` — flash odio seulement
-- `--arm64` — Pi Zero **2 W** / Pi 3+ (pas Zero W)
+- `--skip-merus` — flash odio only
+- `--arm64` — Pi Zero **2 W** / Pi 3+ (not Zero W)
 
-## Outils du shell
+## Shell tools
 
-| Commande | Rôle |
-|----------|------|
+| Command | Role |
+|---------|------|
 | `flash-odio-cli /dev/sdX` | odio **armhf** + Merus (**Zero W/WH**) |
 | `flash-odio-cli /dev/sdX --arm64` | odio arm64 (Zero 2 W / Pi 3+) |
-| `apply-merus-config /dev/sdX` | Merus seulement, après flash manuel |
-| `rpi-imager-odio` | GUI Imager + rappel manifest |
+| `apply-merus-config /dev/sdX` | Merus only, after manual flash |
+| `deploy-usb-route odio@host --install` | Phase 2: USB line-in → Merus (SSH) |
+| `rpi-imager-odio` | GUI Imager + manifest reminder |
 
-## Interprétation
+## Phase 2 — USB → Merus
 
-| Résultat | Conclusion |
-|----------|------------|
-| odio + Merus OK, NixOS KO | Problème stack Nix pi-sound (Zero 2 W), pas le HAT |
-| 7 flashs LED | arm64 sur Zero W, ou SD / image incorrecte |
-| Boot OK, pas de `sndrpimerusamp` | HAT, overlay, alim amp |
+After phase 1 is validated, connect the UCA202 and run:
+
+```bash
+deploy-usb-route odio@pi-odio.local --status
+deploy-usb-route odio@pi-odio.local --install
+```
+
+Details: [`odio/usb-input.md`](odio/usb-input.md).
+
+## Interpretation
+
+| Result | Conclusion |
+|--------|------------|
+| odio + Merus OK, NixOS fails | Nix pi-sound stack issue (Zero 2 W), not the HAT |
+| 7 LED flashes | arm64 on Zero W, or wrong SD / image |
+| Boot OK, no `sndrpimerusamp` | HAT, overlay, amp PSU |

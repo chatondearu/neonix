@@ -157,6 +157,7 @@ users:
 EOF
 
 if [ -n "${WIFI_SSID:-}" ] && [ -n "${WIFI_PSK:-}" ]; then
+  WIFI_COUNTRY="${WIFI_COUNTRY:-FR}"
   WIFI_HIDDEN_LINE=""
   case "${WIFI_HIDDEN:-false}" in
     true | 1 | yes | YES | True) WIFI_HIDDEN_LINE="        hidden: true" ;;
@@ -167,6 +168,7 @@ wifis:
   wlan0:
     dhcp4: true
     optional: true
+    regulatory-domain: ${WIFI_COUNTRY}
     access-points:
       "${WIFI_SSID}":
         password: "${WIFI_PSK}"
