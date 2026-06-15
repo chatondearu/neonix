@@ -1,13 +1,21 @@
-{ pkgs, inputs, ... }:
-
 {
+  pkgs,
+  inputs,
+  ...
+}: {
   environment.systemPackages = with pkgs; [
-    (wrapFirefox
+    (
+      wrapFirefox
       inputs.zen-browser.packages.${stdenv.hostPlatform.system}.zen-browser-unwrapped
       {
         extraPolicies = {
           DisableTelemetry = true;
         };
+        # Required for screencast on niri (Google Meet, etc.)
+        # https://github.com/niri-wm/niri/wiki/Application-Issues#zen-browser
+        extraPrefs = ''
+          defaultPref("widget.dmabuf.force-enabled", true);
+        '';
       }
     )
 
@@ -31,5 +39,22 @@
     };
   };
 
-  environment.sessionVariables.MOZ_ENABLE_WAYLAND = "0";
+  # Nixpkgs vesktop runs via the electron wrapper; block its auto mic gain adjustments.
+  # Verify with: pactl list source-outputs (during a call) → application.process.*
+  services.pipewire.extraConfig.pipewire-pulse."10-vesktop-block-source-volume" = {
+    "pulse.rules" = [
+      {
+        matches = [
+          {"application.process.binary" = "vesktop";}
+          {
+            "application.process.binary" = "electron";
+            "application.process.command" = "~.*Vesktop.*";
+          }
+        ];
+        actions = {
+          quirks = ["block-source-volume"];
+        };
+      }
+    ];
+  };
 }
