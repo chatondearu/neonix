@@ -48,7 +48,7 @@ Modular structure directly serves the goal of easy maintenance. When adding a ne
 
 **Technical Implementation**:
 - Solution: `flake.nix` with pinned inputs, committed `flake.lock`
-- Architecture: Core system pinned to `nixos-25.11`, with selected unstable inputs for specific desktop/gaming components
+- Architecture: Core system pinned to `nixos-26.05`, with selected unstable inputs for specific desktop/gaming components
 - Trade-offs: Must run `nix flake update` manually for new versions vs automatic updates
 
 **Connection**:
@@ -90,7 +90,7 @@ When personal needs and technical constraints conflict, document the decision:
 
 | Situation | Personal Priority | Technical Constraint | Decision Made | Rationale |
 |-----------|-------------------|---------------------|---------------|----------|
-| **Package freshness vs stability** | Latest software features | Unstable modules may regress faster than stable | Keep a stable base (`nixos-25.11`) and use unstable only where needed | Reduces blast radius while keeping fast-moving desktop/gaming components |
+| **Package freshness vs stability** | Latest software features | Unstable modules may regress faster than stable | Keep a stable base (`nixos-26.05`) and use unstable only where needed | Reduces blast radius while keeping fast-moving desktop/gaming components |
 | **Simplicity vs automation** | Easy to understand config | Home Manager provides more automation | Chose nix-maid over HM | Simpler setup doesn't need HM complexity; can migrate later if needed |
 | **Wayland compatibility** | Modern compositor features | Some apps don't work perfectly on Wayland | Use niri with XWayland fallback | Benefits outweigh minor compatibility issues; most critical apps have native support |
 

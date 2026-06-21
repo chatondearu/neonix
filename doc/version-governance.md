@@ -4,7 +4,7 @@ This document defines how versions are managed to balance stability and feature 
 
 ## Current policy
 
-- Stable base: `nixos-25.11` (`nixpkgs` input).
+- Stable base: `nixos-26.05` (`nixpkgs` input).
 - Targeted unstable surface:
   - `niri`
   - `dms-shell`

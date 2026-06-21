@@ -1,8 +1,14 @@
-{ pkgs, inputs, self, ... }:
-
 {
+  pkgs,
+  inputs,
+  self,
+  ...
+}: {
   # DANK LINUX - https://danklinux.com/docs/dankmaterialshell/nixos
-  
+
+  # Disable the stable dms-shell module (present since nixos-26.05)
+  disabledModules = ["programs/wayland/dms-shell.nix"];
+
   imports = [
     # Import the dms-shell module from unstable
     "${inputs.nixpkgs-unstable}/nixos/modules/programs/wayland/dms-shell.nix"
@@ -31,17 +37,17 @@
     quickshell.package = inputs.quickshell.packages.${pkgs.stdenv.hostPlatform.system}.quickshell;
 
     systemd = {
-      enable = true;             # Systemd service for auto-start
-      restartIfChanged = true;   # Auto-restart dms.service when dms-shell changes
+      enable = true; # Systemd service for auto-start
+      restartIfChanged = true; # Auto-restart dms.service when dms-shell changes
     };
 
     # Core features
-    enableSystemMonitoring = true;     # System monitoring widgets (dgop)
-    enableVPN = true;                  # VPN management widget
-    enableDynamicTheming = true;       # Wallpaper-based theming (matugen)
-    enableAudioWavelength = true;      # Audio visualizer (cava)
-    enableCalendarEvents = true;       # Calendar integration (khal)
-    enableClipboardPaste = true;       # Clipboard paste (wtype)
+    enableSystemMonitoring = true; # System monitoring widgets (dgop)
+    enableVPN = true; # VPN management widget
+    enableDynamicTheming = true; # Wallpaper-based theming (matugen)
+    enableAudioWavelength = true; # Audio visualizer (cava)
+    enableCalendarEvents = true; # Calendar integration (khal)
+    enableClipboardPaste = true; # Clipboard paste (wtype)
 
     plugins = {
       dockerManager.enable = true;
@@ -53,7 +59,7 @@
   # and can trigger a crash in QObjectWrapper::wrap_slowPath)
   systemd.user.services.fix-desktop-entries = {
     description = "Fix malformed .desktop files";
-    wantedBy = [ "graphical-session.target" ];
+    wantedBy = ["graphical-session.target"];
     serviceConfig = {
       Type = "oneshot";
       ExecStart = pkgs.writeShellScript "fix-desktop-entries" ''

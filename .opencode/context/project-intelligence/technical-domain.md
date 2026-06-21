@@ -14,7 +14,7 @@
 
 | Layer | Technology | Version | Rationale |
 |-------|-----------|---------|----------|
-| OS | NixOS | 25.11 (stable base) + targeted unstable inputs | Stable core with selective fast-moving desktop/gaming components |
+| OS | NixOS | 26.05 (stable base) + targeted unstable inputs | Stable core with selective fast-moving desktop/gaming components |
 | Config System | Nix Flakes | Current flake.nix | Reproducible, locked dependencies |
 | Personalization | nix-maid | viperML/nix-maid | User-level dotfiles without Home Manager |
 | Formatter | alejandra | 4.0.0 | Consistent Nix formatting (RFC style) |
@@ -115,7 +115,7 @@ Diagram: See project structure below
 | Constraint | Origin | Impact |
 |------------|--------|--------|
 | **No Home Manager** | Design decision | User dotfiles managed via nix-maid only |
-| **NixOS 25.11 channel** | Stability vs freshness trade-off | Must update flake.lock periodically for security patches |
+| **NixOS 26.05 channel** | Stability vs freshness trade-off | Must update flake.lock periodically for security patches |
 | **Wayland-only (niri)** | Modern compositor requirement | X11 apps run via XWayland, some legacy tools may have issues |
 | **Secrets in secrets.nix** | Security best practice | Never commit secrets; must be present on system |
 

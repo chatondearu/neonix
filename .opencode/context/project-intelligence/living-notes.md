@@ -39,17 +39,17 @@
 
 | Question | Stakeholders | Status | Next Action |
 |----------|--------------|--------|-------------|
-| Should we migrate to nixos-25.05 for LTS stability? | System administrator | Open | Evaluate LTS benefits vs newer packages in 25.11 |
+| Validate the migration to the `nixos-26.05` stable base | System administrator | In progress | Build + switch + smoke tests per `doc/version-governance.md` |
 | Is Home Manager worth adopting later for more complex user config? | System administrator | Open | Review when dotfiles grow beyond current scope |
 
 ### Open Question Details
 
-**Should we migrate to nixos-25.05 for LTS stability?**  
-*Context*: NixOS releases annual LTS versions; currently on nixos-unstable (25.11) channel  
+**Validate the migration to the `nixos-26.05` stable base**  
+*Context*: Stable base moved from `nixos-25.11` to `nixos-26.05` (latest stable, "Yarara"); `nixos-25.11` reaches end-of-life on 2026-06-30  
 *Stakeholders*: System administrator (chaton)  
-*Options*: Stay on unstable for newest packages vs migrate to LTS for stability  
-*Timeline*: Evaluate in Q3 2026 after using current setup for 6 months  
-*Status*: Open
+*Options*: Validate build/switch/smoke tests then keep, or rollback to previous generation if regressions appear  
+*Timeline*: Validate during the next rebuild window per `doc/version-governance.md`  
+*Status*: In progress
 
 **Is Home Manager worth adopting later?**  
 *Context*: Currently using nix-maid for user-level config; HM provides more comprehensive tooling  

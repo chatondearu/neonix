@@ -140,7 +140,7 @@ in {
 
   services.squeezelite = {
     enable = true;
-    extraArguments = "-o merus -n ${hostname}";
+    extraArgs = "-o merus -n ${hostname}";
   };
 
   systemd.services.usb-audio-loop = {

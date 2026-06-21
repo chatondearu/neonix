@@ -176,7 +176,7 @@ The decrypted files are materialized at activation time under `/run/agenix`.
 
 ### Niri / Wayland setup notes
 
-- **Base channel:** system base is pinned to `nixos-25.11` through `flake.nix` and `flake.lock`.
+- **Base channel:** system base is pinned to `nixos-26.05` through `flake.nix` and `flake.lock`.
 - **Targeted unstable composition:** `niri`, `dms-*`, and `steam` are pulled from unstable through `unstable.nix`.
 - **Niri module source:** the stable Niri module is disabled and replaced by the unstable module in `desktop/niri/niri.nix` on purpose.
 - **XWayland support:** `services.xserver.enable = true` is kept to support legacy X11 apps through XWayland.

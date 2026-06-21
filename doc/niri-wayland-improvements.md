@@ -4,7 +4,7 @@ This document tracks safe improvements for the current NixOS + Niri + Wayland st
 
 ## Current baseline
 
-- Core system channel: `nixos-25.11` (`flake.nix`, `flake.lock`).
+- Core system channel: `nixos-26.05` (`flake.nix`, `flake.lock`).
 - Selected fast-moving desktop/gaming pieces come from unstable (`unstable.nix`, `desktop/niri/niri.nix`).
 - Session chain: `greetd` -> `dms-greeter` -> `niri` -> `dms-shell`.
 
@@ -14,7 +14,7 @@ This document tracks safe improvements for the current NixOS + Niri + Wayland st
 
 1. **Version composition coupling is strong**
    - Evidence:
-     - `flake.nix`: stable base (`nixpkgs.url = github:NixOS/nixpkgs/nixos-25.11`).
+     - `flake.nix`: stable base (`nixpkgs.url = github:NixOS/nixpkgs/nixos-26.05`).
      - `desktop/niri/niri.nix`: stable module disabled, unstable Niri module imported.
      - `unstable.nix`: `niri`, `dms-*`, and `steam` sourced from unstable.
    - Why this matters:

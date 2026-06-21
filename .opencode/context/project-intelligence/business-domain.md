@@ -67,7 +67,7 @@ Flexibility: Easy to experiment and rollback if something breaks
 ## Roadmap Context
 
 **Current Focus**: Maintain stable NixOS setup with latest packages via nixos-unstable channel
-**Next Milestone**: Evaluate LTS migration (nixos-25.05) in Q3 2026 for better stability
+**Next Milestone**: Validate migration to the `nixos-26.05` stable base (latest stable, Q2 2026)
 **Long-term Vision**: Personal workstation as fully reproducible infrastructure, potentially extend to team deployment
 
 ## Constraints & Trade-offs

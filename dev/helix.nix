@@ -1,6 +1,4 @@
-{ pkgs, ... }:
-
-{
+{pkgs, ...}: {
   users.users.chaton.maid = {
     file.xdg_config."helix/config.toml".source = "{{home}}/etc/nixos/dev/helix/config.toml";
     file.xdg_config."helix/languages.toml".source = "{{home}}/etc/nixos/dev/helix/languages.toml";
@@ -17,12 +15,12 @@
 
     # Nix (system config, flakes, shell.nix)
     nil
-    nixfmt-rfc-style
+    nixfmt
 
     # Config files common to all projects
-    taplo               # TOML (Cargo.toml, flake.nix, pyproject.toml)
+    taplo # TOML (Cargo.toml, flake.nix, pyproject.toml)
     yaml-language-server
-    marksman            # Markdown
+    marksman # Markdown
 
     # Generic formatter (used as fallback)
     prettierd

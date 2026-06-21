@@ -1,8 +1,12 @@
-{ pkgs, ... }:
-
 {
-  # Bluetooth (disabled: no hardware adapter detected)
-  hardware.bluetooth.enable = false;
+  pkgs,
+  lib,
+  ...
+}: {
+  # Bluetooth (disabled: no hardware adapter detected).
+  # mkForce overrides hardware.xpadneo (nixos-26.05 module enables bluetooth);
+  # the Xbox controller here uses the proprietary wireless dongle, not bluetooth.
+  hardware.bluetooth.enable = lib.mkForce false;
   services.blueman.enable = false;
 
   # Power management (required by DMS and wireplumber)

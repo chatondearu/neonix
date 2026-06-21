@@ -21,7 +21,7 @@ Use this template after each `nix flake update` to keep version-impact tracking 
 
 ## Version/composition notes
 
-- Stable base still on `nixos-25.11`: yes/no
+- Stable base still on `nixos-26.05`: yes/no
 - Unstable overlay scope changed: yes/no
 - Niri module source changed (`disabledModules` + unstable import): yes/no
 - Quickshell drift status:

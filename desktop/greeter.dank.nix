@@ -1,6 +1,12 @@
-{ lib, pkgs, inputs, ... }:
-
 {
+  lib,
+  pkgs,
+  inputs,
+  ...
+}: {
+  # Disable the stable dms-greeter module (present since nixos-26.05)
+  disabledModules = ["services/display-managers/dms-greeter.nix"];
+
   imports = [
     # Import the dms-greeter module from unstable
     "${inputs.nixpkgs-unstable}/nixos/modules/services/display-managers/dms-greeter.nix"
@@ -24,11 +30,11 @@
 
     # Save the logs to a file
     logs = {
-      save = true; 
+      save = true;
       path = "/tmp/dms-greeter.log";
     };
 
-    # Custom Quickshell Package    
+    # Custom Quickshell Package
     quickshell.package = inputs.quickshell.packages.${pkgs.stdenv.hostPlatform.system}.quickshell;
   };
 
