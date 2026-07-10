@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{pkgs, lib, ...}:
 {
   environment.systemPackages = with pkgs; [
     # Gaming tools
@@ -75,6 +75,14 @@
     };
   };
 
+  # Sunshine may start before niri exposes a GTK-friendly display, causing
+  # gtk_widget_get_scale_factor assertion warnings at boot.
+  systemd.user.services.sunshine = {
+    unitConfig.After = lib.mkAfter ["graphical-session.target" "pipewire.service"];
+    unitConfig.Wants = ["graphical-session.target"];
+    serviceConfig.Environment = ["GDK_BACKEND=wayland"];
+  };
+
   # Firewall rules for Sunshine
   networking.firewall = {
     allowedTCPPorts = [
@@ -93,9 +101,10 @@
   ];
 
   # Hardware support for devices
-  hardware.xone.enable = true; # Xbox One Controller (disabled: firmware not installed, causes init radio failed)
+  # Dongle Microsoft (045e:02fe) via xone; do not enable xpadneo unless Bluetooth is on.
+  hardware.xone.enable = true;
   hardware.enableAllFirmware = true;
-  hardware.xpadneo.enable = true; # Xbox One Controller with wireless dongle
+  hardware.xpadneo.enable = false;
   # hardware.opentabletdriver.enable = true; # Disabled: no tablet detected, wastes resources scanning
   services.ratbagd.enable = true; # Ratbagd is a daemon for managing input devices like Logitech G502
 

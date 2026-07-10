@@ -24,6 +24,9 @@
     jack.enable = true;
 
     raopOpenFirewall = true; # AirPlay/RAOP support (requires avahi)
+
+    # pipewire-pulse "setsockopt(SO_PRIORITY) failed" is a benign upstream warning on 1.6.x
+    # when Pulse clients connect over UNIX sockets; safe to ignore if audio works.
   };
 
   # Keyboard: ZSA

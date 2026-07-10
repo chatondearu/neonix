@@ -56,8 +56,6 @@
     };
   in {
     packages.${system} = {
-      goxlr-router = pkgs.callPackage ./pkgs/goxlr-router {};
-
       # Build separately: nix build .#llama-cpp-cuda  (slow CUDA compile)
       llama-cpp-cuda = pkgsCuda.callPackage ./pkgs/llama-cpp/default.nix {
         inherit (pkgsCuda) llama-cpp;

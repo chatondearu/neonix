@@ -94,7 +94,9 @@ in {
         __GLX_VENDOR_LIBRARY_NAME = "nvidia";
       };
 
-      # Patching bubblewrap to allow capabilities for steamVR (required)
+      # SteamVR pressure-vessel uses --cap-add ALL inside the FHS bwrap sandbox.
+      # patchedBwrap skips the "unexpected capabilities but not setuid" guard;
+      # set-steam-vr-capabilities handles cap_sys_nice on vrcompositor/vrserver.
       buildFHSEnv = (
         args: (
           (pkgs.buildFHSEnv.override {

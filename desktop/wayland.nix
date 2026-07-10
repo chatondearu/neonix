@@ -1,6 +1,4 @@
-{ pkgs, ... }:
-
-{
+{pkgs, lib, ...}: {
   environment.systemPackages = with pkgs; [
     # Wayland essentials
     xwayland-satellite
@@ -29,4 +27,17 @@
 
   # Enable Xwayland support
   programs.xwayland.enable = true;
+
+  # Portal GTK/GNOME backends need a live Wayland display; starting them with the
+  # generic user session races niri startup and spams "cannot open display".
+  systemd.user.services.xdg-desktop-portal-gtk = {
+    unitConfig.After = lib.mkAfter ["graphical-session.target"];
+    unitConfig.BindsTo = ["graphical-session.target"];
+    unitConfig.PartOf = ["graphical-session.target"];
+  };
+  systemd.user.services.xdg-desktop-portal-gnome = {
+    unitConfig.After = lib.mkAfter ["graphical-session.target"];
+    unitConfig.BindsTo = ["graphical-session.target"];
+    unitConfig.PartOf = ["graphical-session.target"];
+  };
 }

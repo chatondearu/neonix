@@ -8,14 +8,12 @@ Votre système NixOS est maintenant correctement configuré pour utiliser WiVRn 
 
 #### 1. `/home/chaton/etc/nixos/users.nix`
 - Ajout du groupe `adbusers` pour l'utilisateur `chaton`
-- Permet l'accès aux appareils Android via ADB
+- Permet l'accès aux appareils Android via ADB (uaccess géré par systemd 258+ ; `programs.adb` n'existe plus en 26.05)
 
-#### 2. `/home/chaton/etc/nixos/gaming/default.nix` (current layout)
-- Activation de `programs.adb.enable = true`
-- Mise à jour des règles udev pour les casques Meta Quest
+#### 2. `/home/chaton/etc/nixos/gaming/vr/vr.nix`
+- Paquet `android-tools` (ADB) installé côté système
+- Règles udev pour les casques Meta Quest (vendor `2833`)
 - Documentation des Product IDs (Quest 1: 0183/0186, Quest 2: 01a0/01a1, Quest 3: 0360/0361)
-
-Note: in the current repository layout, gaming configuration is split under `/home/chaton/etc/nixos/gaming/` (for example `default.nix` and `vr/vr.nix`) instead of a single `gaming.nix` file.
 
 ## 📱 Installation de WiVRn sur le Quest
 
