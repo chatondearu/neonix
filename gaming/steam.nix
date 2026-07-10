@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   config,
   ...
 }: let
@@ -28,6 +29,16 @@ in {
     xdg-utils # Utilities for XDG (e.g. xdg-open) used by SteamVR
     protonup-qt # Proton Updater for Steam Play
   ];
+
+  # bubblewrap 0.11.2+ rejects setuid. nixpkgs still installs a setuid bwrap wrapper
+  # when gamescopeSession and capSysNice are both enabled; gamescope already has its
+  # own cap_sys_nice wrapper, so force a non-setuid bwrap until upstream drops this.
+  # https://github.com/NixOS/nixpkgs/issues/523200
+  security.wrappers.bwrap = lib.mkForce {
+    owner = "root";
+    group = "root";
+    source = "${pkgs.bubblewrap}/bin/bwrap";
+  };
 
   # Install Steam.
   programs.steam = let
