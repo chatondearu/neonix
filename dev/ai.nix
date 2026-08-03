@@ -10,6 +10,7 @@ in {
   imports = [
     ../pkgs/overrides.nix
     ./ai-llama.nix
+    ./ai-stt.nix
   ];
 
   environment.systemPackages = with pkgs; [
