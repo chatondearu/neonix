@@ -16,11 +16,11 @@
       Type = "simple";
       User = "chaton";
       Group = "users";
-      ExecStart = ''${pkgs.callPackage ../pkgs/parakeet-asr/default.nix {}}/bin/parakeet -port 10310 -gpu cuda -models /hdd/parakeet'';
+      ExecStart = ''${pkgs.callPackage ../pkgs/parakeet-asr/default.nix {}}/bin/parakeet -port 10310 -gpu cpu -models /hdd/parakeet'';
       Restart = "on-failure";
       RestartSec = 5;
       Environment = [
-        "PARAKEET_GPU=cuda"
+        "PARAKEET_GPU=cpu"
         "HOME=/home/chaton"
         "ONNXRUNTIME_LIB=${pkgs.callPackage ../pkgs/parakeet-asr/default.nix {}}/lib/libonnxruntime.so"
       ];
