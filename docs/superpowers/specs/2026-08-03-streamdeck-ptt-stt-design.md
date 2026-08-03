@@ -109,8 +109,18 @@ Stream Deck hold
 - `start` while already recording: no-op or restart cleanly (pick: **restart** recording)
 - `stop` with no active recording: exit 0, no paste
 - Empty / silence transcript: do not paste
-- Whisper unreachable: notify (stderr + optional desktop notification), exit non-zero, no paste
-- Missing mic / PipeWire failure: same as above
+- Whisper unreachable: notify, exit non-zero, no paste
+- Missing mic / PipeWire failure: notify, exit non-zero, no paste
+- Model/process failures (service down, CUDA/load error surfaced by client, timeout, non-empty stderr from capture): notify, exit non-zero, no paste
+
+### Notifications
+
+Use desktop notifications (e.g. `notify-send`) for user-visible failures so Stream Deck usage does not depend on a terminal:
+
+- Title/prefix stable, e.g. `Dictation`
+- Cover at least: mic/PipeWire failure, Whisper unreachable or timeout, empty unexpected error from STT client, paste tool missing
+- Success path: no notification by default (avoid noise); optional brief “Recording…” on start is out of scope unless added later
+- Always mirror the same message on stderr for logs/debugging
 
 ### Packaging / NixOS
 
@@ -133,3 +143,4 @@ Phase 1 leaves a clear seam: **trigger** (Stream Deck) vs **pipeline** (record �
 
 - Phase 0: black spots listed above fixed; Whisper usable on localhost with FR bias and CUDA when possible
 - Phase 1: hold-to-talk dictation works end-to-end from Stream Deck into the focused window without cloud services
+- Failures (mic, model/process, STT timeout) surface via desktop notification titled `Dictation`, not only stderr
