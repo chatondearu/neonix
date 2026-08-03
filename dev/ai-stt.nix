@@ -2,10 +2,10 @@
   pkgs,
   lib,
   ...
-}: {
-  environment.systemPackages = [
-    (pkgs.callPackage ../pkgs/parakeet-asr/default.nix {})
-  ];
+}: let
+  parakeetAsr = pkgs.parakeet-asr;
+in {
+  environment.systemPackages = [parakeetAsr];
 
   systemd.services.parakeet-asr = {
     description = "Parakeet TDT OpenAI-compatible STT (localhost)";
@@ -16,18 +16,21 @@
       Type = "simple";
       User = "chaton";
       Group = "users";
-      ExecStart = ''${pkgs.callPackage ../pkgs/parakeet-asr/default.nix {}}/bin/parakeet -port 10310 -gpu cpu -models /hdd/parakeet'';
+      ExecStart = "${parakeetAsr}/bin/parakeet -port 10310 -gpu cpu -models /hdd/parakeet";
       Restart = "on-failure";
       RestartSec = 5;
       Environment = [
         "PARAKEET_GPU=cpu"
         "HOME=/home/chaton"
-        "ONNXRUNTIME_LIB=${pkgs.callPackage ../pkgs/parakeet-asr/default.nix {}}/lib/libonnxruntime.so"
+        "ONNXRUNTIME_LIB=${parakeetAsr}/lib/libonnxruntime.so"
       ];
       WorkingDirectory = "/hdd/parakeet";
       PrivateTmp = true;
+      # Upstream parakeet only exposes -port (binds *:port); restrict clients to loopback.
+      IPAddressDeny = "any";
+      IPAddressAllow = ["localhost" "127.0.0.1" "::1"];
     };
-    path = [ pkgs.ffmpeg ];
+    path = [pkgs.ffmpeg];
   };
 
   systemd.services.parakeet-asr-models = {
