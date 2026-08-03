@@ -4,8 +4,9 @@
   ...
 }: let
   parakeetAsr = pkgs.parakeet-asr;
+  whisperCpp = pkgs.whisper-cpp.override { cudaSupport = true; };
 in {
-  environment.systemPackages = [parakeetAsr];
+  environment.systemPackages = [parakeetAsr whisperCpp];
 
   systemd.services.parakeet-asr = {
     description = "Parakeet TDT OpenAI-compatible STT (localhost)";
@@ -58,6 +59,45 @@ in {
           ${pkgs.curl}/bin/curl -L -o "$file" "https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx/resolve/main/$file"
         fi
       done
+    '';
+  };
+
+  systemd.services.whisper-cpp-asr = {
+    description = "whisper.cpp CUDA STT (localhost)";
+    after = ["network.target" "whisper-cpp-models.service"];
+    requires = ["whisper-cpp-models.service"];
+    wantedBy = ["multi-user.target"];
+    serviceConfig = {
+      Type = "simple";
+      User = "chaton";
+      Group = "users";
+      ExecStart = "${whisperCpp}/bin/whisper-server --host 127.0.0.1 --port 10311 -m /hdd/whisper/ggml-large-v3-turbo.bin -l fr";
+      Restart = "on-failure";
+      RestartSec = 5;
+      WorkingDirectory = "/hdd/whisper";
+      PrivateTmp = true;
+      IPAddressDeny = "any";
+      IPAddressAllow = ["localhost" "127.0.0.1" "::1"];
+    };
+  };
+
+  systemd.services.whisper-cpp-models = {
+    description = "Download whisper.cpp models";
+    after = ["network.target"];
+    wantedBy = ["multi-user.target"];
+    before = ["whisper-cpp-asr.service"];
+    serviceConfig = {
+      Type = "oneshot";
+      User = "chaton";
+      Group = "users";
+    };
+    script = ''
+      mkdir -p /hdd/whisper
+      cd /hdd/whisper
+
+      if [ ! -f "ggml-large-v3-turbo.bin" ]; then
+        ${pkgs.curl}/bin/curl -L -o ggml-large-v3-turbo.bin "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin"
+      fi
     '';
   };
 }

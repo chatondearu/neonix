@@ -8,9 +8,10 @@ WAV_FILE="$STATE_DIR/capture.wav"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 TRANSCRIBE="${DICTATION_TRANSCRIBE:-$SCRIPT_DIR/wyoming_transcribe.py}"
 OPENAI_TRANSCRIBE="${DICTATION_OPENAI_TRANSCRIBE:-$SCRIPT_DIR/openai_transcribe.py}"
+WHISPER_CPP_TRANSCRIBE="${DICTATION_WHISPER_CPP_TRANSCRIBE:-$SCRIPT_DIR/whisper_cpp_transcribe.py}"
 WYOMING_URI="${DICTATION_WYOMING_URI:-tcp://127.0.0.1:10300}"
 PARAKEET_URL="${DICTATION_PARAKEET_URL:-http://127.0.0.1:10310/v1}"
-WHISPER_URL="${DICTATION_WHISPER_URL:-http://127.0.0.1:10311/v1}"
+WHISPER_URL="${DICTATION_WHISPER_URL:-http://127.0.0.1:10311}"
 STT_MODE="${DICTATION_STT:-auto}"
 STT_TIMEOUT="${DICTATION_STT_TIMEOUT:-60}"
 NOTIFY_TITLE="Dictation"
@@ -140,14 +141,18 @@ cmd_stop() {
     python3 "$TRANSCRIBE" --uri "$WYOMING_URI" --language fr "$WAV_FILE"
   }
 
+  run_whisper() {
+    python3 "$WHISPER_CPP_TRANSCRIBE" --base-url "$WHISPER_URL" --language fr --timeout "$STT_TIMEOUT" "$WAV_FILE"
+  }
+
   transcribe_routed() {
     case "$STT_MODE" in
       parakeet) run_openai "$PARAKEET_URL" ;;
-      whisper) run_openai "$WHISPER_URL" ;;
+      whisper) run_whisper ;;
       wyoming) run_wyoming ;;
       auto)
         if backend_up "$PARAKEET_URL"; then run_openai "$PARAKEET_URL"
-        elif backend_up "$WHISPER_URL"; then run_openai "$WHISPER_URL"
+        elif backend_up "$WHISPER_URL"; then run_whisper
         else run_wyoming
         fi
         ;;

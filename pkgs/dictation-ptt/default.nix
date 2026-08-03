@@ -24,6 +24,7 @@ in
         --prefix PATH : ${lib.makeBinPath [py pipewire wl-clipboard wtype libnotify curl]} \
         --set DICTATION_TRANSCRIBE $out/lib/dictation-ptt/wyoming_transcribe.py \
         --set DICTATION_OPENAI_TRANSCRIBE $out/lib/dictation-ptt/openai_transcribe.py \
+        --set DICTATION_WHISPER_CPP_TRANSCRIBE $out/lib/dictation-ptt/whisper_cpp_transcribe.py \
         --add-flags "$out/lib/dictation-ptt/dictation-ptt.sh"
     '';
     meta = {
