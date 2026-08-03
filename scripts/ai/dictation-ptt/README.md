@@ -6,10 +6,44 @@ Hold-to-talk local dictation: PipeWire record → STT backend → clipboard past
 
 ### Stream Deck (hold-to-talk)
 
-1. Create a button on your Stream Deck profile.
-2. Add action **press** (or key down): `dictation-ptt start`
-3. Add action **release** (or key up): `dictation-ptt stop`
-4. Prefer running StreamController from the Nix package (not the old Flatpak) so PATH matches the system.
+StreamController page `default.json` key **1x0** (label **STT**) is configured for hold-to-talk:
+
+| Physical event | Action | Command |
+|----------------|--------|---------|
+| Key Down (press) | RunCommand | `/run/current-system/sw/bin/dictation-ptt start` |
+| Key Up (release) | RunCommand | `/run/current-system/sw/bin/dictation-ptt stop` |
+
+**Important:** `RunCommand` only *runs* the command on its “Key Down” assigner, but it also tracks a `registered_down` flag that must be cleared by a “Key Up” assigner — otherwise the action fires only once.
+
+| Action | Physical Key Down | Physical Key Up |
+|--------|-------------------|-----------------|
+| Start | → Key Down (run start) | → Key Up (reset flag) |
+| Stop | → Key Up (reset flag) | → Key Down (run stop) |
+
+If you recreate the button in the UI:
+
+1. Open StreamController → page **default** → key for STT.
+2. Add **OS Plugin → Run Command** → `dictation-ptt start`. Event Assigner: Key Down→Key Down, Key Up→Key Up.
+3. Add a **second** Run Command → `dictation-ptt stop`. Event Assigner: Key Down→Key Up, Key Up→Key Down.
+4. Labels: e.g. top text `STT`. Detached = on.
+5. Prefer the **Nix** StreamController binary (not Flatpak) so PATH sees `dictation-ptt`.
+
+After editing `~/.var/app/com.core447.StreamController/data/pages/default.json` by hand, restart StreamController.
+
+### Backup / restore (repo)
+
+Versioned under `scripts/ai/dictation-ptt/streamcontroller/`:
+
+| File | Role |
+|------|------|
+| `stt-key.json` | Portable STT key (`1x0`) with event assignments |
+| `default-page.snapshot.json` | Full page snapshot (reference) |
+| `install-stt-key.sh` | Merge `stt-key.json` into the live `default.json` |
+
+```bash
+./scripts/ai/dictation-ptt/streamcontroller/install-stt-key.sh
+# then restart StreamController
+```
 
 ### DMS bar widget (click toggle)
 
