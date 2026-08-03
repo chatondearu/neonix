@@ -3,7 +3,7 @@
   # Build / runtime cost notes (see pkgs/packaging.md):
   # - llama-cpp CUDA: see dev/ai-llama.nix (optional, slow compile)
   # - llama-swap / ollama / opencode: prebuilt, fast
-  # - wyoming.faster-whisper (CUDA, large-v3-turbo): heavy service closure; model download at runtime
+  # - wyoming.faster-whisper (large-v3-turbo): heavy service closure; prefers CUDA when ctranslate2 supports it; model download at runtime
   # - wyoming.piper (useCUDA): moderate; voice model download at runtime
   # - wyoming.openwakeword: light
 in {
@@ -39,14 +39,15 @@ in {
     servers.english = {
       enable = true;
       model = "large-v3-turbo";
-      language = "auto";
-      # Keep CPU backend until the packaged ctranslate2 build has CUDA enabled.
-      device = "cpu";
-      uri = "tcp://0.0.0.0:10300";
+      language = "fr";
+      device = "cuda";
+      sttLibrary = "faster-whisper";
+      uri = "tcp://127.0.0.1:10300";
+      initialPrompt = "Dictée technique en français. Termes possibles : API, commit, pull request, TypeScript, NixOS, flake, props, endpoint.";
     };
   };
 
-  systemd.services.wyoming-faster-whisper-main = {
+  systemd.services.wyoming-faster-whisper-english = {
     serviceConfig = {
       Restart = "on-failure";
       RestartSec = 10;
@@ -58,20 +59,16 @@ in {
   services.wyoming.piper.servers.yoda = {
     enable = true;
     voice = "en-us-ryan-high";
-    uri = "tcp://0.0.0.0:10200";
+    uri = "tcp://127.0.0.1:10200";
     useCUDA = true;
   };
 
   services.wyoming.openwakeword = {
     enable = true;
-    uri = "tcp://0.0.0.0:10400";
+    uri = "tcp://127.0.0.1:10400";
   };
 
   networking.firewall.allowedTCPPorts = [
-    10400
-    10200
-    10300
-    10301
     # 11434 # Ollama
     61337
   ];
