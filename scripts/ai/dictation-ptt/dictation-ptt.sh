@@ -2,23 +2,46 @@
 set -euo pipefail
 
 STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}/dictation-ptt"
+STATE_FILE="$STATE_DIR/state"
 PID_FILE="$STATE_DIR/record.pid"
 WAV_FILE="$STATE_DIR/capture.wav"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 TRANSCRIBE="${DICTATION_TRANSCRIBE:-$SCRIPT_DIR/wyoming_transcribe.py}"
 WYOMING_URI="${DICTATION_WYOMING_URI:-tcp://127.0.0.1:10300}"
 NOTIFY_TITLE="Dictation"
+NOTIFY_ID=991031
+
+ensure_state_dir() {
+  mkdir -p "$STATE_DIR"
+}
+
+set_state() {
+  ensure_state_dir
+  printf '%s\n' "$1" >"$STATE_FILE"
+}
+
+get_state() {
+  if [[ -f "$STATE_FILE" ]]; then
+    tr -d '\n' <"$STATE_FILE"
+  else
+    printf 'idle'
+  fi
+}
+
+notify_info() {
+  local body="$1"
+  echo "$NOTIFY_TITLE: $body" >&2
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send -r "$NOTIFY_ID" -u low -a Dictation "$NOTIFY_TITLE" "$body" || true
+  fi
+}
 
 notify_err() {
   local body="$1"
   echo "$NOTIFY_TITLE: $body" >&2
   if command -v notify-send >/dev/null 2>&1; then
-    notify-send -u critical -a Dictation "$NOTIFY_TITLE" "$body" || true
+    notify-send -r "$NOTIFY_ID" -u critical -a Dictation "$NOTIFY_TITLE" "$body" || true
   fi
-}
-
-ensure_state_dir() {
-  mkdir -p "$STATE_DIR"
 }
 
 wait_for_process_exit() {
@@ -49,44 +72,53 @@ stop_recording_process() {
 
 cmd_start() {
   ensure_state_dir
-  # Restart cleanly if already recording
   stop_recording_process
   rm -f "$WAV_FILE"
 
   if ! command -v pw-record >/dev/null 2>&1; then
+    set_state idle
     notify_err "pw-record introuvable (PipeWire)."
     exit 1
   fi
 
-  # 16 kHz mono s16 WAV for Whisper
   pw-record --rate=16000 --channels=1 --format=s16 --container=wav "$WAV_FILE" &
   echo $! >"$PID_FILE"
 
   if ! kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
     rm -f "$PID_FILE"
+    set_state idle
     notify_err "Échec démarrage micro / PipeWire."
     exit 1
   fi
+
+  set_state listening
+  notify_info "Écoute…"
 }
 
 cmd_stop() {
   ensure_state_dir
 
   if [[ ! -f "$PID_FILE" ]]; then
+    set_state idle
     exit 0
   fi
 
   stop_recording_process
 
   if [[ ! -f "$WAV_FILE" ]] || [[ ! -s "$WAV_FILE" ]]; then
+    set_state idle
     notify_err "Enregistrement vide ou manquant."
     exit 1
   fi
 
   if ! command -v wl-copy >/dev/null 2>&1 || ! command -v wtype >/dev/null 2>&1; then
+    set_state idle
     notify_err "wl-copy ou wtype manquant."
     exit 1
   fi
+
+  set_state transcribing
+  notify_info "Transcription…"
 
   local text rc
   set +e
@@ -95,25 +127,42 @@ cmd_stop() {
   set -e
 
   if [[ "$rc" -eq 2 ]]; then
-    # Empty transcript: no paste, no critical noise
+    set_state idle
     exit 0
   fi
 
   if [[ "$rc" -ne 0 ]]; then
     local err
     err="$(cat /tmp/dictation-ptt-transcribe.err 2>/dev/null || echo "erreur inconnue")"
+    set_state idle
     notify_err "STT / modèle: $err"
     exit 1
   fi
 
   printf '%s' "$text" | wl-copy
-  # Small delay so the focused client receives clipboard before paste
   sleep 0.05
   wtype -M ctrl v -m ctrl
+  set_state idle
+}
+
+cmd_status() {
+  get_state
+  echo
+}
+
+cmd_toggle() {
+  case "$(get_state)" in
+    listening) cmd_stop ;;
+    transcribing)
+      echo "Dictation: transcription en cours" >&2
+      exit 1
+      ;;
+    *) cmd_start ;;
+  esac
 }
 
 usage() {
-  echo "Usage: dictation-ptt start|stop" >&2
+  echo "Usage: dictation-ptt start|stop|toggle|status" >&2
   exit 2
 }
 
@@ -121,6 +170,8 @@ main() {
   case "${1:-}" in
     start) cmd_start ;;
     stop) cmd_stop ;;
+    toggle) cmd_toggle ;;
+    status) cmd_status ;;
     *) usage ;;
   esac
 }
