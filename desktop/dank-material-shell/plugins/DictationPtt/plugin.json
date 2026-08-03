@@ -1,0 +1,12 @@
+{
+  "id": "dictationPtt",
+  "name": "Dictation PTT",
+  "description": "Always-on dictation status; click to toggle",
+  "version": "0.1.0",
+  "author": "chaton",
+  "icon": "mic",
+  "type": "widget",
+  "component": "./DictationPtt.qml",
+  "capabilities": ["dankbar-widget"],
+  "permissions": []
+}

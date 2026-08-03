@@ -19,5 +19,8 @@
   },
   "emojiLauncher": {
     "enabled": true
+  },
+  "dictationPtt": {
+    "enabled": true
   }
 }
