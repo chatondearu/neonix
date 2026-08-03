@@ -40,7 +40,8 @@ in {
       enable = true;
       model = "large-v3-turbo";
       language = "fr";
-      device = "cuda";
+      # ctranslate2 in nixpkgs is not built with CUDA; keep CPU until an overlay enables it.
+      device = "cpu";
       sttLibrary = "faster-whisper";
       uri = "tcp://127.0.0.1:10300";
       initialPrompt = "Dictée technique en français. Termes possibles : API, commit, pull request, TypeScript, NixOS, flake, props, endpoint.";
