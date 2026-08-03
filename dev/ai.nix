@@ -15,6 +15,7 @@ in {
   environment.systemPackages = with pkgs; [
     (callPackage ../pkgs/opencode/default.nix {})
     (callPackage ../pkgs/OpenAgentsControl/default.nix {})
+    (callPackage ../pkgs/dictation-ptt/default.nix {})
   ];
 
   users.users.chaton.maid = {
