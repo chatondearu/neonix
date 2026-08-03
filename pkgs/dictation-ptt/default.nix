@@ -8,8 +8,9 @@
   wtype,
   libnotify,
   bash,
+  curl,
 }: let
-  py = python3.withPackages (ps: [ps.wyoming]);
+  py = python3.withPackages (ps: [ps.wyoming ps.httpx]);
 in
   stdenvNoCC.mkDerivation {
     pname = "dictation-ptt";
@@ -20,8 +21,9 @@ in
       mkdir -p $out/lib/dictation-ptt $out/bin
       cp -r . $out/lib/dictation-ptt/
       makeWrapper ${bash}/bin/bash $out/bin/dictation-ptt \
-        --prefix PATH : ${lib.makeBinPath [py pipewire wl-clipboard wtype libnotify]} \
+        --prefix PATH : ${lib.makeBinPath [py pipewire wl-clipboard wtype libnotify curl]} \
         --set DICTATION_TRANSCRIBE $out/lib/dictation-ptt/wyoming_transcribe.py \
+        --set DICTATION_OPENAI_TRANSCRIBE $out/lib/dictation-ptt/openai_transcribe.py \
         --add-flags "$out/lib/dictation-ptt/dictation-ptt.sh"
     '';
     meta = {

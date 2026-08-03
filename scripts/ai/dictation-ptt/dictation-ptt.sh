@@ -7,7 +7,12 @@ PID_FILE="$STATE_DIR/record.pid"
 WAV_FILE="$STATE_DIR/capture.wav"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 TRANSCRIBE="${DICTATION_TRANSCRIBE:-$SCRIPT_DIR/wyoming_transcribe.py}"
+OPENAI_TRANSCRIBE="${DICTATION_OPENAI_TRANSCRIBE:-$SCRIPT_DIR/openai_transcribe.py}"
 WYOMING_URI="${DICTATION_WYOMING_URI:-tcp://127.0.0.1:10300}"
+PARAKEET_URL="${DICTATION_PARAKEET_URL:-http://127.0.0.1:10310/v1}"
+WHISPER_URL="${DICTATION_WHISPER_URL:-http://127.0.0.1:10311/v1}"
+STT_MODE="${DICTATION_STT:-auto}"
+STT_TIMEOUT="${DICTATION_STT_TIMEOUT:-60}"
 NOTIFY_TITLE="Dictation"
 NOTIFY_ID=991031
 
@@ -120,9 +125,39 @@ cmd_stop() {
   set_state transcribing
   notify_info "Transcription…"
 
+  backend_up() {
+    local url="$1"
+    curl -fsS -m 0.3 "${url%/v1}/health" >/dev/null 2>&1 \
+      || curl -fsS -m 0.3 "$url/models" >/dev/null 2>&1
+  }
+
+  run_openai() {
+    local base="$1"
+    python3 "$OPENAI_TRANSCRIBE" --base-url "$base" --language fr --timeout "$STT_TIMEOUT" "$WAV_FILE"
+  }
+
+  run_wyoming() {
+    python3 "$TRANSCRIBE" --uri "$WYOMING_URI" --language fr "$WAV_FILE"
+  }
+
+  transcribe_routed() {
+    case "$STT_MODE" in
+      parakeet) run_openai "$PARAKEET_URL" ;;
+      whisper) run_openai "$WHISPER_URL" ;;
+      wyoming) run_wyoming ;;
+      auto)
+        if backend_up "$PARAKEET_URL"; then run_openai "$PARAKEET_URL"
+        elif backend_up "$WHISPER_URL"; then run_openai "$WHISPER_URL"
+        else run_wyoming
+        fi
+        ;;
+      *) notify_err "DICTATION_STT invalide: $STT_MODE"; return 1 ;;
+    esac
+  }
+
   local text rc
   set +e
-  text="$(python3 "$TRANSCRIBE" --uri "$WYOMING_URI" --language fr "$WAV_FILE" 2>/tmp/dictation-ptt-transcribe.err)"
+  text="$(transcribe_routed 2>/tmp/dictation-ptt-transcribe.err)"
   rc=$?
   set -e
 
