@@ -10,6 +10,7 @@
   bash,
   curl,
   util-linux,
+  ffmpeg,
 }: let
   py = python3.withPackages (ps: [ps.wyoming ps.httpx]);
 in
@@ -22,7 +23,8 @@ in
       mkdir -p $out/lib/dictation-ptt $out/bin
       cp -r . $out/lib/dictation-ptt/
       makeWrapper ${bash}/bin/bash $out/bin/dictation-ptt \
-        --prefix PATH : ${lib.makeBinPath [py pipewire wl-clipboard wtype libnotify curl util-linux]} \
+        --prefix PATH : ${lib.makeBinPath [py pipewire wl-clipboard wtype libnotify curl util-linux ffmpeg]} \
+        --set DICTATION_BIN $out/bin/dictation-ptt \
         --set DICTATION_TRANSCRIBE $out/lib/dictation-ptt/wyoming_transcribe.py \
         --set DICTATION_OPENAI_TRANSCRIBE $out/lib/dictation-ptt/openai_transcribe.py \
         --set DICTATION_WHISPER_CPP_TRANSCRIBE $out/lib/dictation-ptt/whisper_cpp_transcribe.py \

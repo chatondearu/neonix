@@ -40,9 +40,9 @@ load_config() {
   if command -v jq >/dev/null 2>&1; then
     CFG_MODE="$(jq -r '.mode // "hold"' "$CONFIG_FILE")"
     CFG_KEYBOARD_KEY="$(jq -r '.keyboard_key // "ScrollLock"' "$CONFIG_FILE")"
-    CFG_SILENCE_ENABLED="$(jq -r '.silence_enabled // true' "$CONFIG_FILE")"
+    CFG_SILENCE_ENABLED="$(jq -r 'if has("silence_enabled") then (.silence_enabled | tostring) else "true" end' "$CONFIG_FILE")"
     CFG_SILENCE_MS="$(jq -r '.silence_ms // 2500' "$CONFIG_FILE")"
-    CFG_MAX_ENABLED="$(jq -r '.max_duration_enabled // true' "$CONFIG_FILE")"
+    CFG_MAX_ENABLED="$(jq -r 'if has("max_duration_enabled") then (.max_duration_enabled | tostring) else "true" end' "$CONFIG_FILE")"
     CFG_MAX_SEC="$(jq -r '.max_sec // 180' "$CONFIG_FILE")"
   fi
 }
@@ -76,8 +76,32 @@ with_lock() {
   release_lock
 }
 
+start_watchers() {
+  stop_watchers
+  local self="${DICTATION_BIN:-dictation-ptt}"
+  (
+    if [[ "$CFG_MAX_ENABLED" == "true" ]]; then
+      sleep "$CFG_MAX_SEC" || exit 0
+      "$self" stop || true
+    fi
+  ) 9>&- &
+  local max_pid=$!
+  (
+    [[ "$CFG_SILENCE_ENABLED" == "true" ]] || exit 0
+    bash "$SCRIPT_DIR/silence-watch.sh" "$WAV_FILE" "$CFG_SILENCE_MS" "$self"
+  ) 9>&- &
+  local sil_pid=$!
+  printf '%s %s\n' "$max_pid" "$sil_pid" >"$WATCH_PID_FILE"
+}
+
 stop_watchers() {
-  :
+  [[ -f "$WATCH_PID_FILE" ]] || return 0
+  local p
+  for p in $(tr -d '\n' <"$WATCH_PID_FILE"); do
+    [[ "$p" -eq "$PPID" ]] && continue
+    stop_pid "$p"
+  done
+  rm -f "$WATCH_PID_FILE"
 }
 
 set_state() {
@@ -189,6 +213,7 @@ cmd_start() {
 
   set_state listening
   notify_info "Écoute…"
+  start_watchers
 }
 
 stop_prepare_listening() {
@@ -328,7 +353,20 @@ stop_transcribe_and_paste() {
 }
 
 cmd_stop() {
-  acquire_lock
+  if [[ "$(get_state)" != "listening" ]]; then
+    stop_watchers
+    exit 0
+  fi
+  stop_watchers
+
+  ensure_state_dir
+  LOCK_FILE="$STATE_DIR/lock"
+  exec 9>"$LOCK_FILE"
+  if ! flock -n 9; then
+    exec 9>&-
+    exit 0
+  fi
+
   stop_prepare_listening
   local prep_rc=$?
   release_lock
@@ -402,6 +440,7 @@ usage() {
 
 main() {
   load_config
+  DICTATION_BIN="${DICTATION_BIN:-$SCRIPT_DIR/dictation-ptt.sh}"
   WATCH_PID_FILE="$STATE_DIR/watch.pid"
   TRANSCRIBE_PID_FILE="$STATE_DIR/transcribe.pid"
   case "${1:-}" in

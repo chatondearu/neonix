@@ -5,6 +5,11 @@ export XDG_RUNTIME_DIR="${TMPDIR:-/tmp}/dictation-ptt-test-$$"
 mkdir -p "$XDG_RUNTIME_DIR"
 export PATH="$XDG_RUNTIME_DIR/bin:$PATH"
 mkdir -p "$XDG_RUNTIME_DIR/bin"
+export XDG_CONFIG_HOME="$XDG_RUNTIME_DIR/config"
+mkdir -p "$XDG_CONFIG_HOME/dictation-ptt"
+cat >"$XDG_CONFIG_HOME/dictation-ptt/config.json" <<'EOF'
+{"silence_enabled": false}
+EOF
 
 cat >"$XDG_RUNTIME_DIR/bin/notify-send" <<'EOF'
 #!/usr/bin/env bash

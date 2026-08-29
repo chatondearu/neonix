@@ -4,7 +4,10 @@ ROOT="$(cd -- "$(dirname "$0")" && pwd)"
 export XDG_RUNTIME_DIR="${TMPDIR:-/tmp}/dictation-ptt-rec-$$"
 export XDG_CONFIG_HOME="$XDG_RUNTIME_DIR/config"
 export DICTATION_DATA_DIR="$XDG_RUNTIME_DIR/data"
-mkdir -p "$XDG_RUNTIME_DIR/bin" "$DICTATION_DATA_DIR" "$XDG_CONFIG_HOME"
+mkdir -p "$XDG_RUNTIME_DIR/bin" "$DICTATION_DATA_DIR" "$XDG_CONFIG_HOME/dictation-ptt"
+cat >"$XDG_CONFIG_HOME/dictation-ptt/config.json" <<'EOF'
+{"silence_enabled": false}
+EOF
 export PATH="$XDG_RUNTIME_DIR/bin:$PATH"
 
 # Minimal stubs (reuse patterns from test_dictation_state.sh)
