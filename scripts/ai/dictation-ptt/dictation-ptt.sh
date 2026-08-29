@@ -5,6 +5,10 @@ STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}/dictation-ptt"
 # WAV lives under /tmp (not the small XDG_RUNTIME_DIR tmpfs) so long
 # toggle sessions cannot fill the session runtime and orphan pw-record.
 DATA_DIR="${DICTATION_DATA_DIR:-${TMPDIR:-/tmp}/dictation-ptt-${UID:-$(id -u)}}"
+CONFIG_FILE="${DICTATION_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/dictation-ptt/config.json}"
+LOCK_FILE=""
+WATCH_PID_FILE=""
+TRANSCRIBE_PID_FILE=""
 STATE_FILE="$STATE_DIR/state"
 PID_FILE="$STATE_DIR/record.pid"
 ERR_FILE="$STATE_DIR/transcribe.err"
@@ -23,6 +27,39 @@ NOTIFY_ID=991031
 
 ensure_state_dir() {
   mkdir -p "$STATE_DIR" "$DATA_DIR"
+}
+
+load_config() {
+  CFG_MODE=hold
+  CFG_KEYBOARD_KEY=ScrollLock
+  CFG_SILENCE_ENABLED=true
+  CFG_SILENCE_MS=2500
+  CFG_MAX_ENABLED=true
+  CFG_MAX_SEC=180
+  [[ -f "$CONFIG_FILE" ]] || return 0
+  if command -v jq >/dev/null 2>&1; then
+    CFG_MODE="$(jq -r '.mode // "hold"' "$CONFIG_FILE")"
+    CFG_KEYBOARD_KEY="$(jq -r '.keyboard_key // "ScrollLock"' "$CONFIG_FILE")"
+    CFG_SILENCE_ENABLED="$(jq -r '.silence_enabled // true' "$CONFIG_FILE")"
+    CFG_SILENCE_MS="$(jq -r '.silence_ms // 2500' "$CONFIG_FILE")"
+    CFG_MAX_ENABLED="$(jq -r '.max_duration_enabled // true' "$CONFIG_FILE")"
+    CFG_MAX_SEC="$(jq -r '.max_sec // 180' "$CONFIG_FILE")"
+  fi
+}
+
+with_lock() {
+  ensure_state_dir
+  LOCK_FILE="$STATE_DIR/lock"
+  exec 9>"$LOCK_FILE"
+  if ! flock -n 9; then
+    notify_err "Dictation déjà en cours (lock)."
+    exit 1
+  fi
+  "$@"
+}
+
+stop_watchers() {
+  :
 }
 
 set_state() {
@@ -116,7 +153,7 @@ cmd_start() {
     exit 1
   fi
 
-  pw-record --rate=16000 --channels=1 --format=s16 --container=wav "$WAV_FILE" &
+  pw-record --rate=16000 --channels=1 --format=s16 --container=wav "$WAV_FILE" 9>&- &
   local rec_pid=$!
   disown "$rec_pid" 2>/dev/null || true
   printf '%s\n' "$rec_pid" >"$PID_FILE"
@@ -163,17 +200,28 @@ cmd_stop() {
       || curl -fsS -m 0.3 "$url/models" >/dev/null 2>&1
   }
 
+  run_tracked() {
+    local pid rc
+    "$@" 9>&- &
+    pid=$!
+    echo "$pid" >"$TRANSCRIBE_PID_FILE"
+    wait "$pid"
+    rc=$?
+    rm -f "$TRANSCRIBE_PID_FILE"
+    return "$rc"
+  }
+
   run_openai() {
     local base="$1"
-    python3 "$OPENAI_TRANSCRIBE" --base-url "$base" --language fr --timeout "$STT_TIMEOUT" "$WAV_FILE"
+    run_tracked python3 "$OPENAI_TRANSCRIBE" --base-url "$base" --language fr --timeout "$STT_TIMEOUT" "$WAV_FILE"
   }
 
   run_wyoming() {
-    python3 "$TRANSCRIBE" --uri "$WYOMING_URI" --language fr "$WAV_FILE"
+    run_tracked python3 "$TRANSCRIBE" --uri "$WYOMING_URI" --language fr "$WAV_FILE"
   }
 
   run_whisper() {
-    python3 "$WHISPER_CPP_TRANSCRIBE" --base-url "$WHISPER_URL" --language fr --timeout "$STT_TIMEOUT" "$WAV_FILE"
+    run_tracked python3 "$WHISPER_CPP_TRANSCRIBE" --base-url "$WHISPER_URL" --language fr --timeout "$STT_TIMEOUT" "$WAV_FILE"
   }
 
   transcribe_routed() {
@@ -254,25 +302,62 @@ cmd_status() {
 cmd_toggle() {
   case "$(get_state)" in
     listening) cmd_stop ;;
-    transcribing)
-      echo "Dictation: transcription en cours" >&2
-      exit 1
-      ;;
+    transcribing) exit 0 ;;
     *) cmd_start ;;
   esac
 }
 
+cmd_force_stop() {
+  ensure_state_dir
+  stop_watchers
+  stop_recording_process
+  if [[ -f "$TRANSCRIBE_PID_FILE" ]]; then
+    stop_pid "$(tr -d '[:space:]' <"$TRANSCRIBE_PID_FILE")"
+    rm -f "$TRANSCRIBE_PID_FILE"
+  fi
+  local p
+  for p in $(pgrep -f 'whisper_cpp_transcribe|openai_transcribe|wyoming_transcribe' 2>/dev/null || true); do
+    stop_pid "$p"
+  done
+  set_state idle
+  notify_info "Arrêt forcé."
+}
+
+cmd_cancel() {
+  cmd_force_stop
+}
+
+cmd_clean() {
+  ensure_state_dir
+  rm -f "$WAV_FILE" "$DATA_DIR"/*.wav 2>/dev/null || true
+  rm -f "$PID_FILE" "$TRANSCRIBE_PID_FILE"
+  notify_info "Cache audio nettoyé."
+}
+
+cmd_reset() {
+  cmd_force_stop
+  cmd_clean
+  set_state idle
+}
+
 usage() {
-  echo "Usage: dictation-ptt start|stop|toggle|status" >&2
+  echo "Usage: dictation-ptt start|stop|toggle|status|force-stop|cancel|clean|reset" >&2
   exit 2
 }
 
 main() {
+  load_config
+  WATCH_PID_FILE="$STATE_DIR/watch.pid"
+  TRANSCRIBE_PID_FILE="$STATE_DIR/transcribe.pid"
   case "${1:-}" in
-    start) cmd_start ;;
-    stop) cmd_stop ;;
-    toggle) cmd_toggle ;;
-    status) cmd_status ;;
+    start) with_lock cmd_start ;;
+    stop) with_lock cmd_stop ;;
+    toggle) with_lock cmd_toggle ;;
+    status) cmd_status "${2:-}" ;;
+    force-stop) with_lock cmd_force_stop ;;
+    cancel) with_lock cmd_cancel ;;
+    clean) with_lock cmd_clean ;;
+    reset) with_lock cmd_reset ;;
     *) usage ;;
   esac
 }
