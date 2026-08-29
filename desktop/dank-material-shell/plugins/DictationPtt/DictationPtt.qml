@@ -24,13 +24,23 @@ PluginComponent {
 
     Process {
         id: statusProc
-        command: ["dictation-ptt", "status"]
+        command: ["dictation-ptt", "status", "--json"]
         running: false
 
         stdout: StdioCollector {
             onStreamFinished: {
-                const state = text.trim()
-                root.dictationState = state || "idle"
+                const raw = text.trim()
+                if (!raw) {
+                    root.dictationState = "idle"
+                    return
+                }
+                try {
+                    const obj = JSON.parse(raw)
+                    root.dictationState = (obj && obj.state) ? obj.state : "idle"
+                } catch (e) {
+                    // Installed CLI may still return a plain state word.
+                    root.dictationState = raw.split(/\s+/)[0] || "idle"
+                }
             }
         }
     }
@@ -60,6 +70,8 @@ PluginComponent {
     }
 
     pillClickAction: () => {
+        if (root.dictationState === "transcribing")
+            return
         Quickshell.execDetached(["dictation-ptt", "toggle"])
     }
 
