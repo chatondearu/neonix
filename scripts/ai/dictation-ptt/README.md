@@ -1,6 +1,8 @@
 # dictation-ptt
 
-Hold-to-talk local dictation: PipeWire record → STT backend → clipboard paste at focus.
+Local dictation (hold or toggle): PipeWire record → STT backend → clipboard paste at focus (`Ctrl+Shift+V` via `wtype`).
+
+WAV captures go under `/tmp/dictation-ptt-$UID/` (not the small `XDG_RUNTIME_DIR` tmpfs) so long sessions cannot fill the session runtime.
 
 ## Triggers
 
@@ -30,20 +32,14 @@ If you recreate the button in the UI:
 
 After editing `~/.var/app/com.core447.StreamController/data/pages/default.json` by hand, restart StreamController.
 
-### Backup / restore (repo)
-
-Versioned under `scripts/ai/dictation-ptt/streamcontroller/`:
-
-| File | Role |
-|------|------|
-| `stt-key.json` | Portable STT key (`1x0`) with event assignments |
-| `default-page.snapshot.json` | Full page snapshot (reference) |
-| `install-stt-key.sh` | Merge `stt-key.json` into the live `default.json` |
+Or restore from the repo fragment:
 
 ```bash
 ./scripts/ai/dictation-ptt/streamcontroller/install-stt-key.sh
 # then restart StreamController
 ```
+
+Versioned under `scripts/ai/dictation-ptt/streamcontroller/`: `stt-key.json`, `default-page.snapshot.json`, `install-stt-key.sh`.
 
 ### DMS bar widget (click toggle)
 
@@ -55,7 +51,7 @@ Enable in DMS plugin settings if needed.
 
 | Backend | Port | Service | Role |
 |---------|------|---------|------|
-| **Parakeet** TDT 0.6B v3 (ONNX, CPU) | `10310` | `parakeet-asr` | Default — fastest for short FR clips |
+| **Parakeet** TDT 0.6B v3 (ONNX, CPU) | `10310` | `parakeet-asr` | Default — fastest for short FR clips (`-long-audio` for longer takes) |
 | **whisper.cpp** large-v3-turbo (CUDA) | `10311` | `whisper-cpp-asr` | Fallback / quality |
 | **Wyoming** faster-whisper | `10300` | `wyoming-faster-whisper-english` | Legacy fallback |
 

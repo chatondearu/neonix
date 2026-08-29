@@ -1,219 +1,219 @@
 {
-    "background": {
-        "overwrite": false,
-        "path": null,
-        "show": false
-    },
-    "keys": {
-        "1x1": {
-            "states": {
-                "0": {
-                    "actions": [
-                        {
-                            "id": "com_core447_MediaPlugin::PlayPause",
-                            "settings": {
-                                "show_label": true,
-                                "show_thumbnail": false
-                            }
-                        }
-                    ],
-                    "image-control-action": 0,
-                    "label-control-actions": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "background-control-action": 0
-                }
+  "background": {
+    "overwrite": false,
+    "path": null,
+    "show": false
+  },
+  "keys": {
+    "1x1": {
+      "states": {
+        "0": {
+          "actions": [
+            {
+              "id": "com_core447_MediaPlugin::PlayPause",
+              "settings": {
+                "show_label": true,
+                "show_thumbnail": false
+              }
             }
-        },
-        "0x1": {
-            "states": {
-                "0": {
-                    "actions": [
-                        {
-                            "id": "com_core447_MediaPlugin::Previous",
-                            "settings": {
-                                "show_label": true,
-                                "show_thumbnail": true
-                            }
-                        }
-                    ],
-                    "image-control-action": 0,
-                    "label-control-actions": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "background-control-action": 0
-                }
-            }
-        },
-        "2x1": {
-            "states": {
-                "0": {
-                    "actions": [
-                        {
-                            "id": "com_core447_MediaPlugin::Next",
-                            "settings": {
-                                "show_label": true,
-                                "show_thumbnail": true
-                            }
-                        }
-                    ],
-                    "image-control-action": 0,
-                    "label-control-actions": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "background-control-action": 0
-                }
-            }
-        },
-        "2x0": {
-            "states": {
-                "0": {
-                    "actions": [
-                        {
-                            "id": "HomeAssistantPlugin::PerformAction",
-                            "settings": {
-                                "entity": {
-                                    "domain": "ai_task",
-                                    "entity": ""
-                                },
-                                "action": {
-                                    "action": "",
-                                    "parameters": {}
-                                },
-                                "version": 1
-                            }
-                        }
-                    ],
-                    "image-control-action": 0,
-                    "label-control-actions": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "background-control-action": 0,
-                    "media": {
-                        "path": "/home/chaton/.var/app/com.core447.StreamController/data/icons/com_core447_MaterialIcons/icons/lightbulb-inv.png"
-                    }
-                }
-            }
-        },
-        "0x0": {
-            "states": {
-                "0": {
-                    "actions": [
-                        {
-                            "id": "com_core447_DeckPlugin::ChangePage",
-                            "settings": {
-                                "selected_page": "/home/chaton/.var/app/com.core447.StreamController/data/pages/sound.json",
-                                "deck_number": null
-                            }
-                        }
-                    ],
-                    "image-control-action": 0,
-                    "label-control-actions": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "background-control-action": 0
-                }
-            }
-        },
-        "1x0": {
-            "states": {
-                "0": {
-                    "labels": {
-                        "top": {
-                            "text": "STT",
-                            "color": [
-                                255,
-                                255,
-                                255,
-                                255
-                            ],
-                            "outline_width": 1,
-                            "font-family": "Futura",
-                            "style": "normal",
-                            "font-size": 18.0,
-                            "font-weight": 700
-                        }
-                    },
-                    "actions": [
-                        {
-                            "id": "com_core447_OSPlugin::RunCommand",
-                            "name": "Dictation Start",
-                            "settings": {
-                                "command": "/run/current-system/sw/bin/dictation-ptt start",
-                                "detached": true,
-                                "display_output": false,
-                                "auto_run": 0
-                            },
-                            "event-assignments": {
-                                "Key Down": "Key Down",
-                                "Key Up": "Key Up",
-                                "Key Short Up": null,
-                                "Key Hold Start": null,
-                                "Key Hold Stop": null,
-                                "Dial Down": null,
-                                "Dial Up": null,
-                                "Dial Short Up": null,
-                                "Dial Hold Start": null,
-                                "Dial Hold Stop": null,
-                                "Dial Turn CW": null,
-                                "Dial Turn CCW": null,
-                                "Dial Touchscreen Short Press": null,
-                                "Dial Touchscreen Long Press": null,
-                                "Touchscreen Drag Left": null,
-                                "Touchscreen Drag Right": null
-                            }
-                        },
-                        {
-                            "id": "com_core447_OSPlugin::RunCommand",
-                            "name": "Dictation Stop",
-                            "settings": {
-                                "command": "/run/current-system/sw/bin/dictation-ptt stop",
-                                "detached": true,
-                                "display_output": false,
-                                "auto_run": 0
-                            },
-                            "event-assignments": {
-                                "Key Down": "Key Up",
-                                "Key Up": "Key Down",
-                                "Key Short Up": null,
-                                "Key Hold Start": null,
-                                "Key Hold Stop": null,
-                                "Dial Down": null,
-                                "Dial Up": null,
-                                "Dial Short Up": null,
-                                "Dial Hold Start": null,
-                                "Dial Hold Stop": null,
-                                "Dial Turn CW": null,
-                                "Dial Turn CCW": null,
-                                "Dial Touchscreen Short Press": null,
-                                "Dial Touchscreen Long Press": null,
-                                "Touchscreen Drag Left": null,
-                                "Touchscreen Drag Right": null
-                            }
-                        }
-                    ],
-                    "image-control-action": 0,
-                    "label-control-actions": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "background-control-action": 0,
-                    "background": {
-                        "color": null
-                    }
-                }
-            }
+          ],
+          "image-control-action": 0,
+          "label-control-actions": [
+            0,
+            0,
+            0
+          ],
+          "background-control-action": 0
         }
+      }
+    },
+    "0x1": {
+      "states": {
+        "0": {
+          "actions": [
+            {
+              "id": "com_core447_MediaPlugin::Previous",
+              "settings": {
+                "show_label": true,
+                "show_thumbnail": true
+              }
+            }
+          ],
+          "image-control-action": 0,
+          "label-control-actions": [
+            0,
+            0,
+            0
+          ],
+          "background-control-action": 0
+        }
+      }
+    },
+    "2x1": {
+      "states": {
+        "0": {
+          "actions": [
+            {
+              "id": "com_core447_MediaPlugin::Next",
+              "settings": {
+                "show_label": true,
+                "show_thumbnail": true
+              }
+            }
+          ],
+          "image-control-action": 0,
+          "label-control-actions": [
+            0,
+            0,
+            0
+          ],
+          "background-control-action": 0
+        }
+      }
+    },
+    "2x0": {
+      "states": {
+        "0": {
+          "actions": [
+            {
+              "id": "HomeAssistantPlugin::PerformAction",
+              "settings": {
+                "entity": {
+                  "domain": "ai_task",
+                  "entity": ""
+                },
+                "action": {
+                  "action": "",
+                  "parameters": {}
+                },
+                "version": 1
+              }
+            }
+          ],
+          "image-control-action": 0,
+          "label-control-actions": [
+            0,
+            0,
+            0
+          ],
+          "background-control-action": 0,
+          "media": {
+            "path": "/home/chaton/.var/app/com.core447.StreamController/data/icons/com_core447_MaterialIcons/icons/lightbulb-inv.png"
+          }
+        }
+      }
+    },
+    "0x0": {
+      "states": {
+        "0": {
+          "actions": [
+            {
+              "id": "com_core447_DeckPlugin::ChangePage",
+              "settings": {
+                "selected_page": "/home/chaton/.var/app/com.core447.StreamController/data/pages/sound.json",
+                "deck_number": null
+              }
+            }
+          ],
+          "image-control-action": 0,
+          "label-control-actions": [
+            0,
+            0,
+            0
+          ],
+          "background-control-action": 0
+        }
+      }
+    },
+    "1x0": {
+      "states": {
+        "0": {
+          "labels": {
+            "top": {
+              "text": "STT",
+              "color": [
+                255,
+                255,
+                255,
+                255
+              ],
+              "outline_width": 1,
+              "font-family": "Futura",
+              "style": "normal",
+              "font-size": 18.0,
+              "font-weight": 700
+            }
+          },
+          "actions": [
+            {
+              "id": "com_core447_OSPlugin::RunCommand",
+              "name": "Dictation Start",
+              "settings": {
+                "command": "/run/current-system/sw/bin/dictation-ptt start",
+                "detached": true,
+                "display_output": false,
+                "auto_run": 0
+              },
+              "event-assignments": {
+                "Key Down": "Key Down",
+                "Key Up": "Key Up",
+                "Key Short Up": null,
+                "Key Hold Start": null,
+                "Key Hold Stop": null,
+                "Dial Down": null,
+                "Dial Up": null,
+                "Dial Short Up": null,
+                "Dial Hold Start": null,
+                "Dial Hold Stop": null,
+                "Dial Turn CW": null,
+                "Dial Turn CCW": null,
+                "Dial Touchscreen Short Press": null,
+                "Dial Touchscreen Long Press": null,
+                "Touchscreen Drag Left": null,
+                "Touchscreen Drag Right": null
+              }
+            },
+            {
+              "id": "com_core447_OSPlugin::RunCommand",
+              "name": "Dictation Stop",
+              "settings": {
+                "command": "/run/current-system/sw/bin/dictation-ptt stop",
+                "detached": true,
+                "display_output": false,
+                "auto_run": 0
+              },
+              "event-assignments": {
+                "Key Down": "Key Up",
+                "Key Up": "Key Down",
+                "Key Short Up": null,
+                "Key Hold Start": null,
+                "Key Hold Stop": null,
+                "Dial Down": null,
+                "Dial Up": null,
+                "Dial Short Up": null,
+                "Dial Hold Start": null,
+                "Dial Hold Stop": null,
+                "Dial Turn CW": null,
+                "Dial Turn CCW": null,
+                "Dial Touchscreen Short Press": null,
+                "Dial Touchscreen Long Press": null,
+                "Touchscreen Drag Left": null,
+                "Touchscreen Drag Right": null
+              }
+            }
+          ],
+          "image-control-action": 0,
+          "label-control-actions": [
+            0,
+            0,
+            0
+          ],
+          "background-control-action": 0,
+          "background": {
+            "color": null
+          }
+        }
+      }
     }
+  }
 }

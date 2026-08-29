@@ -17,7 +17,8 @@ in {
       Type = "simple";
       User = "chaton";
       Group = "users";
-      ExecStart = "${parakeetAsr}/bin/parakeet -port 10310 -gpu cpu -models /hdd/parakeet";
+      # -long-audio: chunk clips above the model single-pass limit (toggle can leave long takes).
+      ExecStart = "${parakeetAsr}/bin/parakeet -port 10310 -gpu cpu -models /hdd/parakeet -long-audio";
       Restart = "on-failure";
       RestartSec = 5;
       Environment = [

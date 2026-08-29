@@ -2,10 +2,13 @@
 set -euo pipefail
 
 STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}/dictation-ptt"
+# WAV lives under /tmp (not the small XDG_RUNTIME_DIR tmpfs) so long
+# toggle sessions cannot fill the session runtime and orphan pw-record.
+DATA_DIR="${DICTATION_DATA_DIR:-${TMPDIR:-/tmp}/dictation-ptt-${UID:-$(id -u)}}"
 STATE_FILE="$STATE_DIR/state"
 PID_FILE="$STATE_DIR/record.pid"
 ERR_FILE="$STATE_DIR/transcribe.err"
-WAV_FILE="$STATE_DIR/capture.wav"
+WAV_FILE="$DATA_DIR/capture.wav"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 TRANSCRIBE="${DICTATION_TRANSCRIBE:-$SCRIPT_DIR/wyoming_transcribe.py}"
 OPENAI_TRANSCRIBE="${DICTATION_OPENAI_TRANSCRIBE:-$SCRIPT_DIR/openai_transcribe.py}"
@@ -19,7 +22,7 @@ NOTIFY_TITLE="Dictation"
 NOTIFY_ID=991031
 
 ensure_state_dir() {
-  mkdir -p "$STATE_DIR"
+  mkdir -p "$STATE_DIR" "$DATA_DIR"
 }
 
 set_state() {
@@ -65,16 +68,32 @@ wait_for_process_exit() {
   wait "$pid" 2>/dev/null || true
 }
 
+stop_pid() {
+  local pid="$1"
+  [[ -n "$pid" ]] || return 0
+  if kill -0 "$pid" 2>/dev/null; then
+    kill -INT "$pid" 2>/dev/null || kill "$pid" 2>/dev/null || true
+    wait_for_process_exit "$pid"
+    kill -KILL "$pid" 2>/dev/null || true
+  fi
+}
+
+# Stop recorders tracked by PID file and any orphan pw-record on our WAV path.
 stop_recording_process() {
   if [[ -f "$PID_FILE" ]]; then
     local pid
-    pid="$(cat "$PID_FILE")"
-    if kill -0 "$pid" 2>/dev/null; then
-      kill -INT "$pid" 2>/dev/null || kill "$pid" 2>/dev/null || true
-      wait_for_process_exit "$pid"
-    fi
+    pid="$(tr -d '[:space:]' <"$PID_FILE" || true)"
+    stop_pid "$pid"
     rm -f "$PID_FILE"
   fi
+
+  local p cmd
+  for p in $(pgrep -x pw-record 2>/dev/null || true); do
+    cmd="$(tr '\0' ' ' <"/proc/$p/cmdline" 2>/dev/null || true)"
+    if [[ "$cmd" == *"$WAV_FILE"* ]]; then
+      stop_pid "$p"
+    fi
+  done
 }
 
 cmd_start() {
@@ -88,10 +107,21 @@ cmd_start() {
     exit 1
   fi
 
-  pw-record --rate=16000 --channels=1 --format=s16 --container=wav "$WAV_FILE" &
-  echo $! >"$PID_FILE"
+  # Fail fast if the WAV filesystem is full (common when WAV lived on tmpfs).
+  local avail_kb
+  avail_kb="$(df -Pk "$DATA_DIR" | awk 'NR==2 {print $4}')"
+  if [[ -z "${avail_kb:-}" || "$avail_kb" -lt 10240 ]]; then
+    set_state idle
+    notify_err "Espace disque insuffisant pour l’enregistrement."
+    exit 1
+  fi
 
-  if ! kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
+  pw-record --rate=16000 --channels=1 --format=s16 --container=wav "$WAV_FILE" &
+  local rec_pid=$!
+  disown "$rec_pid" 2>/dev/null || true
+  printf '%s\n' "$rec_pid" >"$PID_FILE"
+
+  if ! kill -0 "$rec_pid" 2>/dev/null; then
     rm -f "$PID_FILE"
     set_state idle
     notify_err "Échec démarrage micro / PipeWire."
@@ -152,10 +182,39 @@ cmd_stop() {
       whisper) run_whisper ;;
       wyoming) run_wyoming ;;
       auto)
-        if backend_up "$PARAKEET_URL"; then run_openai "$PARAKEET_URL"
-        elif backend_up "$WHISPER_URL"; then run_whisper
-        else run_wyoming
+        # Try each healthy backend in order; on hard failure continue (e.g. Parakeet
+        # rejects audio longer than the single-pass limit without -long-audio).
+        # Exit 2 = empty transcript: stop without trying another backend.
+        local errf out rc
+        errf="$(mktemp)"
+        try_backend() {
+          out="$("$@" 2>"$errf")"
+          rc=$?
+          if [[ "$rc" -eq 0 ]]; then
+            printf '%s' "$out"
+            rm -f "$errf"
+            return 0
+          fi
+          if [[ "$rc" -eq 2 ]]; then
+            cat "$errf" >&2
+            rm -f "$errf"
+            return 2
+          fi
+          cat "$errf" >&2
+          return 1
+        }
+        if backend_up "$PARAKEET_URL"; then
+          try_backend run_openai "$PARAKEET_URL" && return 0
+          [[ $? -eq 2 ]] && return 2
         fi
+        if backend_up "$WHISPER_URL"; then
+          try_backend run_whisper && return 0
+          [[ $? -eq 2 ]] && return 2
+        fi
+        try_backend run_wyoming
+        rc=$?
+        rm -f "$errf"
+        return "$rc"
         ;;
       *) notify_err "DICTATION_STT invalide: $STT_MODE"; return 1 ;;
     esac
@@ -182,7 +241,8 @@ cmd_stop() {
 
   printf '%s' "$text" | wl-copy
   sleep 0.05
-  wtype -M ctrl v -m ctrl
+  # Ctrl+Shift+V: works in terminals (Ghostty) and most GUI apps
+  wtype -M ctrl -M shift v -m shift -m ctrl
   set_state idle
 }
 
