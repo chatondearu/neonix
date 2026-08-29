@@ -38,6 +38,20 @@ else
   chmod +x "$XDG_RUNTIME_DIR/bin/flock"
 fi
 
+STATE_DIR="$XDG_RUNTIME_DIR/dictation-ptt"
+
+# clean while listening: stops recorder and returns idle
+"$ROOT/dictation-ptt.sh" start
+"$ROOT/dictation-ptt.sh" status | head -1 | grep -qx listening
+rec_pid="$(tr -d '[:space:]' <"$STATE_DIR/record.pid")"
+test -n "$rec_pid"
+kill -0 "$rec_pid" 2>/dev/null
+"$ROOT/dictation-ptt.sh" clean
+"$ROOT/dictation-ptt.sh" status | head -1 | grep -qx idle
+! kill -0 "$rec_pid" 2>/dev/null
+test ! -f "$STATE_DIR/record.pid"
+test ! -e "$DICTATION_DATA_DIR/capture.wav" || ! -s "$DICTATION_DATA_DIR/capture.wav"
+
 "$ROOT/dictation-ptt.sh" start
 "$ROOT/dictation-ptt.sh" status | grep -qx idle && exit 1 || true
 "$ROOT/dictation-ptt.sh" status | head -1 | grep -qx listening
@@ -47,7 +61,6 @@ test ! -f "$DICTATION_DATA_DIR/capture.wav" -o ! -s "$DICTATION_DATA_DIR/capture
   { "$ROOT/dictation-ptt.sh" clean; test ! -e "$DICTATION_DATA_DIR/capture.wav" || ! -s "$DICTATION_DATA_DIR/capture.wav"; }
 
 # force-stop during transcribing (simulated in-flight STT)
-STATE_DIR="$XDG_RUNTIME_DIR/dictation-ptt"
 "$ROOT/dictation-ptt.sh" start
 "$ROOT/dictation-ptt.sh" status | head -1 | grep -qx listening
 sleep 300 &

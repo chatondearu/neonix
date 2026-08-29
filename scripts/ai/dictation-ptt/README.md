@@ -83,7 +83,7 @@ Also versioned: `default-page.snapshot.json` (hold layout reference), `install-s
 
 ### DMS bar widget (click toggle)
 
-The **DictationPtt** plugin (`dictationPtt`) shows an always-on mic icon on the Dank Material Shell bar. Click toggles recording (start/stop). States: idle (`mic`), listening (`fiber_manual_record`, red), transcribing (`hourglass_top`, amber). Polls `dictation-ptt status` every 400 ms.
+The **DictationPtt** plugin (`dictationPtt`) shows an always-on mic icon on the Dank Material Shell bar. Click toggles recording (start/stop). States: idle (`mic`), listening (`fiber_manual_record`, red), transcribing (`hourglass_top`, amber). Polls `dictation-ptt status --json` every 400 ms.
 
 **DMS settings** (plugin settings panel):
 

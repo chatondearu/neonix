@@ -441,8 +441,7 @@ cmd_toggle() {
   esac
 }
 
-cmd_force_stop() {
-  ensure_state_dir
+force_stop_session() {
   stop_watchers
   stop_recording_process
   if [[ -f "$TRANSCRIBE_PID_FILE" ]]; then
@@ -453,12 +452,17 @@ cmd_force_stop() {
   for p in $(pgrep -f 'whisper_cpp_transcribe|openai_transcribe|wyoming_transcribe' 2>/dev/null || true); do
     stop_pid "$p"
   done
+  set_state idle
+}
+
+cmd_force_stop() {
+  ensure_state_dir
   if acquire_lock_wait 2; then
-    set_state idle
+    force_stop_session
     release_lock
   else
     exec 9>&- 2>/dev/null || true
-    set_state idle
+    force_stop_session
   fi
   notify_info "Arrêt forcé."
 }
@@ -469,8 +473,15 @@ cmd_cancel() {
 
 cmd_clean() {
   ensure_state_dir
+  acquire_lock_wait 2
+  local state
+  state="$(get_state)"
+  if [[ "$state" == "listening" || "$state" == "transcribing" ]]; then
+    force_stop_session
+  fi
   rm -f "$WAV_FILE" "$DATA_DIR"/*.wav 2>/dev/null || true
   rm -f "$PID_FILE" "$TRANSCRIBE_PID_FILE"
+  release_lock
   notify_info "Cache audio nettoyé."
 }
 
