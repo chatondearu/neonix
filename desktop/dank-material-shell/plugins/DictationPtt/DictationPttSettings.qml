@@ -70,16 +70,22 @@ PluginSettings {
              mode="$1"; key="$2"; se="$3"; sms="$4"; me="$5"; msec="$6"
              for d in \
                "$(dirname "$(readlink -f "$(command -v dictation-ptt)")")/../lib/dictation-ptt" \
-               "$HOME/etc/nixos/.superpowers/worktrees/dictation-ptt-reliability/scripts/ai/dictation-ptt" \
                "$HOME/etc/nixos/scripts/ai/dictation-ptt"; do
                if [[ -f "$d/write-cli-config.sh" ]]; then
                  exec bash "$d/write-cli-config.sh" "$mode" "$key" "$se" "$sms" "$me" "$msec"
                fi
              done
-             # Inline fallback if package/worktree scripts are not on disk yet.
+             # Inline fallback if package scripts are not on disk yet (still sync niri if possible).
              cfg="${DICTATION_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/dictation-ptt/config.json}"
              mkdir -p "$(dirname "$cfg")"
              printf "%s\\n" "{\"mode\":\"${mode}\",\"keyboard_key\":\"${key}\",\"silence_enabled\":${se},\"silence_ms\":${sms},\"max_duration_enabled\":${me},\"max_sec\":${msec}}" >"$cfg"
+             for d in \
+               "$(dirname "$(readlink -f "$(command -v dictation-ptt)")")/../lib/dictation-ptt" \
+               "$HOME/etc/nixos/scripts/ai/dictation-ptt"; do
+               if [[ -f "$d/sync-niri-bind.sh" ]]; then
+                 exec bash "$d/sync-niri-bind.sh"
+               fi
+             done
              true',
             "_", mode, keyboardKey, silenceEnabled, silenceMs, maxEnabled, maxSec
         ]);
@@ -140,7 +146,7 @@ PluginSettings {
     StringSetting {
         settingKey: "keyboard_key"
         label: "Keyboard key"
-        description: "niri bind key name (default ScrollLock). Bind file sync is Task 5."
+        description: "niri XKB key name (default ScrollLock → Scroll_Lock). Synced to ~/.config/niri/dms/dictation-ptt.kdl on save."
         placeholder: "ScrollLock"
         defaultValue: "ScrollLock"
     }

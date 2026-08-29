@@ -45,7 +45,43 @@ Versioned under `scripts/ai/dictation-ptt/streamcontroller/`: `stt-key.json`, `d
 
 The **DictationPtt** plugin (`dictationPtt`) shows an always-on mic icon on the Dank Material Shell bar. Click toggles recording (start/stop). States: idle (`mic`), listening (`fiber_manual_record`, red), transcribing (`hourglass_top`, amber). Polls `dictation-ptt status` every 400 ms.
 
-Enable in DMS plugin settings if needed.
+Enable in DMS plugin settings if needed. Opening **Dictation PTT** settings bootstraps `~/.config/dictation-ptt/config.json` and regenerates the niri bind file (below).
+
+### Keyboard (niri Scroll_Lock)
+
+`desktop/niri/config.kdl` optionally includes `dms/dictation-ptt.kdl` (separate from DMS-owned `dms/binds.kdl` so regenerations do not wipe dictation binds). Saving DMS settings (or running the sync script) writes:
+
+`~/.config/niri/dms/dictation-ptt.kdl`
+
+| `config.json` `mode` | Bind behavior |
+|----------------------|---------------|
+| `hold` (default) | **Press** → `dictation-ptt start` only |
+| `toggle` | **Press** → `dictation-ptt toggle` |
+
+**niri key-release binds are not supported** on niri 25.x/26.04 (PR [niri-wm/niri#3621](https://github.com/niri-wm/niri/pull/3621) still open; `Key+Release` fails `niri validate`). In **hold** mode the keyboard therefore cannot stop on key-up. Stop via:
+
+- silence auto-stop (`silence_enabled` / `silence_ms`, default 2500 ms), and/or
+- max duration (`max_duration_enabled` / `max_sec`, default 180 s), and/or
+- DMS widget click / `dictation-ptt stop` / Stream Deck Key Up
+
+True press+release hold remains available on the **Stream Deck** path above.
+
+Default key in settings is `ScrollLock`; the sync script maps it to the XKB name **`Scroll_Lock`** (required by niri). Other keys must use valid XKB names (see `wev`).
+
+Regenerate / reload:
+
+```bash
+# After editing ~/.config/dictation-ptt/config.json by hand:
+./scripts/ai/dictation-ptt/sync-niri-bind.sh
+# Prefer explicit reload (also attempted by the script):
+niri msg action load-config-file
+```
+
+Validate the generated fragment:
+
+```bash
+niri validate -c ~/.config/niri/dms/dictation-ptt.kdl
+```
 
 ## STT backends
 
