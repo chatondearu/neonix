@@ -1,8 +1,8 @@
 {
   "id": "dictationPtt",
   "name": "Dictation PTT",
-  "description": "Dictation status, hold/toggle, shortcuts, and recovery controls",
-  "version": "0.2.0",
+  "description": "Dictation status, hold/toggle (evdev keyboard + Stream Deck), recovery",
+  "version": "0.3.0",
   "author": "chaton",
   "icon": "mic",
   "type": "widget",

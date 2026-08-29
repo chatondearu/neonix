@@ -10,6 +10,7 @@ PluginComponent {
     layerNamespacePlugin: "dictation-ptt"
 
     property string dictationState: "idle"
+    property bool clickBusy: false
 
     Timer {
         interval: 400
@@ -20,6 +21,14 @@ PluginComponent {
                 statusProc.running = true
             }
         }
+    }
+
+    // Clear optimistic busy flag if status caught up or timed out
+    Timer {
+        id: clickBusyClear
+        interval: 1500
+        repeat: false
+        onTriggered: root.clickBusy = false
     }
 
     Process {
@@ -38,9 +47,10 @@ PluginComponent {
                     const obj = JSON.parse(raw)
                     root.dictationState = (obj && obj.state) ? obj.state : "idle"
                 } catch (e) {
-                    // Installed CLI may still return a plain state word.
                     root.dictationState = raw.split(/\s+/)[0] || "idle"
                 }
+                if (root.dictationState === "listening" || root.dictationState === "idle")
+                    root.clickBusy = false
             }
         }
     }
@@ -70,9 +80,17 @@ PluginComponent {
     }
 
     pillClickAction: () => {
-        if (root.dictationState === "transcribing")
+        if (root.dictationState === "transcribing" || root.clickBusy)
             return
+        root.clickBusy = true
+        clickBusyClear.restart()
+        // Optimistic UI feedback
+        if (root.dictationState === "idle")
+            root.dictationState = "listening"
+        else if (root.dictationState === "listening")
+            root.dictationState = "transcribing"
         Quickshell.execDetached(["dictation-ptt", "toggle"])
+        statusProc.running = true
     }
 
     horizontalBarPill: Component {

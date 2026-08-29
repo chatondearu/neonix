@@ -4,7 +4,8 @@
   ...
 }: let
   parakeetAsr = pkgs.parakeet-asr;
-  whisperCpp = pkgs.whisper-cpp.override { cudaSupport = true; };
+  whisperCpp = pkgs.whisper-cpp.override {cudaSupport = true;};
+  dictationPtt = pkgs.callPackage ../pkgs/dictation-ptt/default.nix {};
 in {
   environment.systemPackages = [parakeetAsr whisperCpp];
 
@@ -100,5 +101,19 @@ in {
         ${pkgs.curl}/bin/curl -L -o ggml-large-v3-turbo.bin "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin"
       fi
     '';
+  };
+
+  # Evdev keyboard PTT (real hold/release). User must be in group `input` (already).
+  systemd.user.services.dictation-ptt-keys = {
+    description = "dictation-ptt keyboard PTT (evdev)";
+    wantedBy = ["default.target"];
+    after = ["graphical-session.target"];
+    partOf = ["graphical-session.target"];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${dictationPtt}/bin/dictation-ptt-keys";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
   };
 }

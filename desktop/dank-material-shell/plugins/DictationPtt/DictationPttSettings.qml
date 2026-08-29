@@ -63,31 +63,21 @@ PluginSettings {
         const silenceMs = root.asIntString(root.loadValue("silence_ms", "2500"), 2500);
         const maxEnabled = root.asBoolString(root.loadValue("max_duration_enabled", true), true);
         const maxSec = root.asIntString(root.loadValue("max_sec", "180"), 180);
+        const keyboardDaemon = root.asBoolString(root.loadValue("keyboard_daemon", true), true);
 
         Quickshell.execDetached([
             "bash", "-c",
             'set -euo pipefail
-             mode="$1"; key="$2"; se="$3"; sms="$4"; me="$5"; msec="$6"
+             mode="$1"; key="$2"; se="$3"; sms="$4"; me="$5"; msec="$6"; kd="$7"
              for d in \
                "$(dirname "$(readlink -f "$(command -v dictation-ptt)")")/../lib/dictation-ptt" \
                "$HOME/etc/nixos/scripts/ai/dictation-ptt"; do
                if [[ -f "$d/write-cli-config.sh" ]]; then
-                 exec bash "$d/write-cli-config.sh" "$mode" "$key" "$se" "$sms" "$me" "$msec"
-               fi
-             done
-             # Inline fallback if package scripts are not on disk yet (still sync niri if possible).
-             cfg="${DICTATION_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/dictation-ptt/config.json}"
-             mkdir -p "$(dirname "$cfg")"
-             printf "%s\\n" "{\"mode\":\"${mode}\",\"keyboard_key\":\"${key}\",\"silence_enabled\":${se},\"silence_ms\":${sms},\"max_duration_enabled\":${me},\"max_sec\":${msec}}" >"$cfg"
-             for d in \
-               "$(dirname "$(readlink -f "$(command -v dictation-ptt)")")/../lib/dictation-ptt" \
-               "$HOME/etc/nixos/scripts/ai/dictation-ptt"; do
-               if [[ -f "$d/sync-niri-bind.sh" ]]; then
-                 exec bash "$d/sync-niri-bind.sh"
+                 exec bash "$d/write-cli-config.sh" "$mode" "$key" "$se" "$sms" "$me" "$msec" "$kd"
                fi
              done
              true',
-            "_", mode, keyboardKey, silenceEnabled, silenceMs, maxEnabled, maxSec
+            "_", mode, keyboardKey, silenceEnabled, silenceMs, maxEnabled, maxSec, keyboardDaemon
         ]);
     }
 
@@ -113,7 +103,7 @@ PluginSettings {
 
     StyledText {
         width: parent.width
-        text: "Hold/toggle mode, keyboard shortcut, silence and max-duration timeouts. Settings write ~/.config/dictation-ptt/config.json."
+        text: "Hold/toggle for Stream Deck + keyboard daemon (evdev). Settings write config, sync Deck fragment, and restart dictation-ptt-keys."
         font.pixelSize: Theme.fontSizeSmall
         color: Theme.surfaceVariantText
         wrapMode: Text.WordWrap
@@ -129,7 +119,7 @@ PluginSettings {
     SelectionSetting {
         settingKey: "mode"
         label: "Trigger mode"
-        description: "hold = Stream Deck press/release start/stop; keyboard press starts only (niri has no key-up bind) — stop via silence, max duration, or widget. toggle = each press flips listening."
+        description: "hold = press/release start/stop (Stream Deck + ScrollLock via dictation-ptt-keys). toggle = each press flips listening."
         options: [
             {
                 label: "Hold",
@@ -146,9 +136,16 @@ PluginSettings {
     StringSetting {
         settingKey: "keyboard_key"
         label: "Keyboard key"
-        description: "niri XKB key name (default ScrollLock → Scroll_Lock). Synced to ~/.config/niri/dms/dictation-ptt.kdl on save."
+        description: "Linux/XKB name (default ScrollLock). Handled by dictation-ptt-keys user service (evdev), not niri hold binds."
         placeholder: "ScrollLock"
         defaultValue: "ScrollLock"
+    }
+
+    ToggleSetting {
+        settingKey: "keyboard_daemon"
+        label: "Keyboard daemon (evdev PTT)"
+        description: value ? "dictation-ptt-keys listens for real press/release." : "Disabled — niri toggle fallback only."
+        defaultValue: true
     }
 
     Rectangle {
