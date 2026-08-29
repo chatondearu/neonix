@@ -4,48 +4,97 @@ Local dictation (hold or toggle): PipeWire record → STT backend → clipboard 
 
 WAV captures go under `/tmp/dictation-ptt-$UID/` (not the small `XDG_RUNTIME_DIR` tmpfs) so long sessions cannot fill the session runtime.
 
+## Configuration
+
+Settings live in `~/.config/dictation-ptt/config.json` (override path with `DICTATION_CONFIG`). DMS **Dictation PTT** settings write this file and regenerate the niri bind fragment on save.
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `mode` | `hold` | `hold` or `toggle` — affects keyboard bind and recommended Stream Deck fragment |
+| `keyboard_key` | `ScrollLock` | niri XKB key name (sync normalizes `ScrollLock` → `Scroll_Lock`) |
+| `silence_enabled` | `true` | Auto-stop after quiet period while listening |
+| `silence_ms` | `2500` | Quiet period (ms) before silence auto-stop |
+| `max_duration_enabled` | `true` | Hard cap on listening length |
+| `max_sec` | `180` | Max listening duration (seconds) |
+
+Example:
+
+```json
+{
+  "mode": "hold",
+  "keyboard_key": "ScrollLock",
+  "silence_enabled": true,
+  "silence_ms": 2500,
+  "max_duration_enabled": true,
+  "max_sec": 180
+}
+```
+
+Write from CLI (also syncs niri):
+
+```bash
+./scripts/ai/dictation-ptt/write-cli-config.sh hold ScrollLock true 2500 true 180
+```
+
+## Silence and max duration
+
+While **listening**, background watchers (when enabled in config) can stop recording without a manual trigger:
+
+| Watcher | Config | Behavior |
+|---------|--------|----------|
+| Silence | `silence_enabled`, `silence_ms` | Stops after `silence_ms` ms without speech (default 2.5 s) |
+| Max duration | `max_duration_enabled`, `max_sec` | Forced stop after `max_sec` seconds (default 180 s) |
+
+These are especially important in **hold** mode on the **keyboard**: niri cannot bind key release (see below), so silence and max duration are the primary keyboard stop paths besides DMS / CLI / Stream Deck.
+
+Disable silence for manual-only stop: set `"silence_enabled": false` in config (or turn off in DMS settings).
+
 ## Triggers
 
-### Stream Deck (hold-to-talk)
+### Stream Deck (mode-aware)
 
-StreamController page `default.json` key **1x0** (label **STT**) is configured for hold-to-talk:
+Versioned fragments under `scripts/ai/dictation-ptt/streamcontroller/`:
 
-| Physical event | Action | Command |
-|----------------|--------|---------|
-| Key Down (press) | RunCommand | `/run/current-system/sw/bin/dictation-ptt start` |
-| Key Up (release) | RunCommand | `/run/current-system/sw/bin/dictation-ptt stop` |
+| Mode | Fragment | Behavior |
+|------|----------|----------|
+| `hold` | `stt-key.json` | Key Down → `start`, Key Up → `stop` (true press+release hold) |
+| `toggle` | `stt-key-toggle.json` | Key Down → `toggle` (single RunCommand) |
 
-**Important:** `RunCommand` only *runs* the command on its “Key Down” assigner, but it also tracks a `registered_down` flag that must be cleared by a “Key Up” assigner — otherwise the action fires only once.
+**Hold assigner pattern:** `RunCommand` only *runs* on its “Key Down” assigner, but tracks a `registered_down` flag that must be cleared by a “Key Up” assigner — otherwise the action fires only once.
 
 | Action | Physical Key Down | Physical Key Up |
 |--------|-------------------|-----------------|
 | Start | → Key Down (run start) | → Key Up (reset flag) |
 | Stop | → Key Up (reset flag) | → Key Down (run stop) |
 
-If you recreate the button in the UI:
-
-1. Open StreamController → page **default** → key for STT.
-2. Add **OS Plugin → Run Command** → `dictation-ptt start`. Event Assigner: Key Down→Key Down, Key Up→Key Up.
-3. Add a **second** Run Command → `dictation-ptt stop`. Event Assigner: Key Down→Key Up, Key Up→Key Down.
-4. Labels: e.g. top text `STT`. Detached = on.
-5. Prefer the **Nix** StreamController binary (not Flatpak) so PATH sees `dictation-ptt`.
-
-After editing `~/.var/app/com.core447.StreamController/data/pages/default.json` by hand, restart StreamController.
-
-Or restore from the repo fragment:
+Install or restore the key at **1x0** (label **STT**) from config mode (or override):
 
 ```bash
 ./scripts/ai/dictation-ptt/streamcontroller/install-stt-key.sh
+# explicit:
+./scripts/ai/dictation-ptt/streamcontroller/install-stt-key.sh --mode hold
+./scripts/ai/dictation-ptt/streamcontroller/install-stt-key.sh --mode toggle
 # then restart StreamController
 ```
 
-Versioned under `scripts/ai/dictation-ptt/streamcontroller/`: `stt-key.json`, `default-page.snapshot.json`, `install-stt-key.sh`.
+After editing `~/.var/app/com.core447.StreamController/data/pages/default.json` by hand, restart StreamController. Prefer the **Nix** StreamController binary (not Flatpak) so PATH sees `dictation-ptt`.
+
+Also versioned: `default-page.snapshot.json` (hold layout reference), `install-stt-key.sh`.
 
 ### DMS bar widget (click toggle)
 
 The **DictationPtt** plugin (`dictationPtt`) shows an always-on mic icon on the Dank Material Shell bar. Click toggles recording (start/stop). States: idle (`mic`), listening (`fiber_manual_record`, red), transcribing (`hourglass_top`, amber). Polls `dictation-ptt status` every 400 ms.
 
-Enable in DMS plugin settings if needed. Opening **Dictation PTT** settings bootstraps `~/.config/dictation-ptt/config.json` and regenerates the niri bind file (below).
+**DMS settings** (plugin settings panel):
+
+- **Trigger mode** — `hold` or `toggle` (see semantics below; keyboard vs Stream Deck differ in hold mode)
+- **Keyboard key** — niri XKB name; synced to `~/.config/niri/dms/dictation-ptt.kdl`
+- **Silence auto-stop** / **Silence timeout (ms)**
+- **Max duration** / **Max duration (seconds)**
+- **Recovery** buttons: Force stop, Cancel, Clean, Reset, Restart backends
+- **Write config now** — force persist + niri sync
+
+Opening **Dictation PTT** settings bootstraps `~/.config/dictation-ptt/config.json` and regenerates the niri bind file.
 
 ### Keyboard (niri Scroll_Lock)
 
@@ -58,11 +107,11 @@ Enable in DMS plugin settings if needed. Opening **Dictation PTT** settings boot
 | `hold` (default) | **Press** → `dictation-ptt start` only |
 | `toggle` | **Press** → `dictation-ptt toggle` |
 
-**niri key-release binds are not supported** on niri 25.x/26.04 (PR [niri-wm/niri#3621](https://github.com/niri-wm/niri/pull/3621) still open; `Key+Release` fails `niri validate`). In **hold** mode the keyboard therefore cannot stop on key-up. Stop via:
+**niri key-release binds are not supported** on niri 25.x/26.04 (PR [niri-wm/niri#3621](https://github.com/niri-wm/niri/pull/3621) still open; `Key+Release` / `Scroll_Lock+Release` fails `niri validate`). In **hold** mode the keyboard therefore cannot stop on key-up. Stop via:
 
 - silence auto-stop (`silence_enabled` / `silence_ms`, default 2500 ms), and/or
 - max duration (`max_duration_enabled` / `max_sec`, default 180 s), and/or
-- DMS widget click / `dictation-ptt stop` / Stream Deck Key Up
+- DMS widget click / recovery buttons / CLI / Stream Deck Key Up
 
 True press+release hold remains available on the **Stream Deck** path above.
 
@@ -82,6 +131,41 @@ Validate the generated fragment:
 ```bash
 niri validate -c ~/.config/niri/dms/dictation-ptt.kdl
 ```
+
+## Recovery commands
+
+Use when dictation is stuck (`listening` / `transcribing`), WAV cache is large, or orphaned processes remain.
+
+| Command | Effect |
+|---------|--------|
+| `dictation-ptt force-stop` | Kill recording, watchers, in-flight transcribe; set state `idle` |
+| `dictation-ptt cancel` | Alias of `force-stop` |
+| `dictation-ptt clean` | Remove WAV files under data dir; clear pid files |
+| `dictation-ptt reset` | `force-stop` + `clean` + ensure `idle` |
+
+Same commands are exposed as buttons in DMS **Dictation PTT** settings. **Restart backends** restarts `parakeet-asr` and `whisper-cpp-asr` (system or user units, best-effort).
+
+Quick recovery when idle is wrong or RAM is climbing:
+
+```bash
+dictation-ptt status
+dictation-ptt status --json
+dictation-ptt reset
+```
+
+## Troubleshooting stuck state / RAM
+
+Symptoms: bar icon stuck on listening/transcribing, repeated notifications, growing RAM, or large files under `/tmp/dictation-ptt-$UID/`.
+
+1. Check state: `dictation-ptt status --json` (fields: `state`, `elapsed_ms`, `record_pid`, `wav_bytes`, `mode`).
+2. **Reset**: `dictation-ptt reset` (preferred one-shot fix).
+3. If processes remain: `dictation-ptt force-stop`, then inspect `pgrep -af 'pw-record|whisper_cpp_transcribe|openai_transcribe|wyoming_transcribe'`.
+4. **Clean cache**: `dictation-ptt clean` or remove stale WAV under `/tmp/dictation-ptt-$UID/` (default `DICTATION_DATA_DIR`).
+5. Reinstall Stream Deck key if hold/toggle behavior mismatches config: `install-stt-key.sh [--mode hold|toggle]`.
+6. After config or niri changes: `sync-niri-bind.sh` and `niri msg action load-config-file`.
+7. STT backend issues: restart units (`systemctl restart parakeet-asr whisper-cpp-asr`) or use DMS **Restart backends**.
+
+State and lock files: `$XDG_RUNTIME_DIR/dictation-ptt/` (runtime). Audio cache: `/tmp/dictation-ptt-$UID/` by design — avoids filling the small session tmpfs.
 
 ## STT backends
 
@@ -137,10 +221,15 @@ The Parakeet TDT 0.6B v3 ONNX models used by `parakeet-asr` are derived from NVI
 ## CLI
 
 ```bash
-dictation-ptt start    # begin recording
-dictation-ptt stop     # stop, transcribe, paste
-dictation-ptt toggle   # start or stop (DMS widget)
-dictation-ptt status   # idle | listening | transcribing
+dictation-ptt start         # begin recording
+dictation-ptt stop          # stop, transcribe, paste
+dictation-ptt toggle        # start or stop (DMS widget / toggle mode)
+dictation-ptt status        # idle | listening | transcribing
+dictation-ptt status --json # machine-readable status
+dictation-ptt force-stop    # kill session, return idle
+dictation-ptt cancel        # alias force-stop
+dictation-ptt clean         # remove WAV cache
+dictation-ptt reset         # force-stop + clean
 ```
 
 ## Manual test
@@ -157,6 +246,14 @@ Force a backend:
 DICTATION_STT=parakeet dictation-ptt start
 sleep 3
 time DICTATION_STT=parakeet dictation-ptt stop
+```
+
+Automated checks (from repo):
+
+```bash
+bash scripts/ai/dictation-ptt/test_recovery.sh
+bash scripts/ai/dictation-ptt/test_watchers.sh
+bash scripts/ai/dictation-ptt/test_dictation_state.sh
 ```
 
 ## Failures

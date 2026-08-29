@@ -1,0 +1,66 @@
+{
+  "comment": "StreamController key fragment for dictation-ptt toggle mode. Merge into pages/default.json under keys.\"1x0\" (or any free key).",
+  "coords": "1x0",
+  "key": {
+    "states": {
+      "0": {
+        "labels": {
+          "top": {
+            "text": "STT",
+            "color": [
+              255,
+              255,
+              255,
+              255
+            ],
+            "outline_width": 1,
+            "font-family": "Futura",
+            "style": "normal",
+            "font-size": 18.0,
+            "font-weight": 700
+          }
+        },
+        "actions": [
+          {
+            "id": "com_core447_OSPlugin::RunCommand",
+            "name": "Dictation Toggle",
+            "settings": {
+              "command": "/run/current-system/sw/bin/dictation-ptt toggle",
+              "detached": true,
+              "display_output": false,
+              "auto_run": 0
+            },
+            "event-assignments": {
+              "Key Down": "Key Down",
+              "Key Up": "Key Up",
+              "Key Short Up": null,
+              "Key Hold Start": null,
+              "Key Hold Stop": null,
+              "Dial Down": null,
+              "Dial Up": null,
+              "Dial Short Up": null,
+              "Dial Hold Start": null,
+              "Dial Hold Stop": null,
+              "Dial Turn CW": null,
+              "Dial Turn CCW": null,
+              "Dial Touchscreen Short Press": null,
+              "Dial Touchscreen Long Press": null,
+              "Touchscreen Drag Left": null,
+              "Touchscreen Drag Right": null
+            }
+          }
+        ],
+        "image-control-action": 0,
+        "label-control-actions": [
+          0,
+          0,
+          0
+        ],
+        "background-control-action": 0,
+        "background": {
+          "color": null
+        }
+      }
+    }
+  }
+}

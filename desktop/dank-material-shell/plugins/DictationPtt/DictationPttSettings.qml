@@ -129,7 +129,7 @@ PluginSettings {
     SelectionSetting {
         settingKey: "mode"
         label: "Trigger mode"
-        description: "hold = key down start / key up stop; toggle = each press flips listening"
+        description: "hold = Stream Deck press/release start/stop; keyboard press starts only (niri has no key-up bind) — stop via silence, max duration, or widget. toggle = each press flips listening."
         options: [
             {
                 label: "Hold",
