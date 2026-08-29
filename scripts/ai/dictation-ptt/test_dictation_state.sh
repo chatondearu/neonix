@@ -77,8 +77,10 @@ EOF
 chmod +x "$DICTATION_TRANSCRIBE"
 
 "$ROOT/dictation-ptt.sh" status | grep -qx idle
+"$ROOT/dictation-ptt.sh" status --json | grep -q '"state":"idle"'
 "$ROOT/dictation-ptt.sh" start
 "$ROOT/dictation-ptt.sh" status | grep -qx listening
+"$ROOT/dictation-ptt.sh" status --json | grep -q '"state":"listening"'
 grep -q "Écoute" "$XDG_RUNTIME_DIR/notify.log"
 "$ROOT/dictation-ptt.sh" stop
 "$ROOT/dictation-ptt.sh" status | grep -qx idle

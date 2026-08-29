@@ -10,6 +10,7 @@ LOCK_FILE=""
 WATCH_PID_FILE=""
 TRANSCRIBE_PID_FILE=""
 STATE_FILE="$STATE_DIR/state"
+LISTEN_STARTED_FILE="$STATE_DIR/listening_started"
 PID_FILE="$STATE_DIR/record.pid"
 ERR_FILE="$STATE_DIR/transcribe.err"
 WAV_FILE="$DATA_DIR/capture.wav"
@@ -107,6 +108,11 @@ stop_watchers() {
 set_state() {
   ensure_state_dir
   printf '%s\n' "$1" >"$STATE_FILE"
+  if [[ "$1" == "listening" ]]; then
+    date +%s%3N >"$LISTEN_STARTED_FILE"
+  elif [[ "$1" == "idle" ]]; then
+    rm -f "$LISTEN_STARTED_FILE"
+  fi
 }
 
 get_state() {
@@ -381,7 +387,48 @@ cmd_stop() {
   stop_transcribe_and_paste
 }
 
+now_ms() {
+  date +%s%3N
+}
+
 cmd_status() {
+  if [[ "${1:-}" == "--json" ]]; then
+    local state record_pid wav_bytes elapsed_ms rp
+    state="$(get_state)"
+    elapsed_ms=0
+    if [[ "$state" == "listening" && -f "$LISTEN_STARTED_FILE" ]]; then
+      local started now
+      started="$(tr -d '[:space:]' <"$LISTEN_STARTED_FILE")"
+      now="$(now_ms)"
+      elapsed_ms=$((now - started))
+    fi
+    rp=null
+    if [[ -f "$PID_FILE" ]]; then
+      rp="$(tr -d '[:space:]' <"$PID_FILE")"
+    fi
+    wav_bytes=0
+    if [[ -f "$WAV_FILE" ]]; then
+      wav_bytes="$(stat -c '%s' "$WAV_FILE" 2>/dev/null || echo 0)"
+    fi
+    if command -v jq >/dev/null 2>&1; then
+      jq -nc \
+        --arg state "$state" \
+        --argjson elapsed_ms "$elapsed_ms" \
+        --arg rp "$rp" \
+        --argjson wav_bytes "$wav_bytes" \
+        --arg mode "$CFG_MODE" \
+        '{state: $state, elapsed_ms: $elapsed_ms, record_pid: (if $rp == "null" then null else ($rp | tonumber) end), wav_bytes: $wav_bytes, mode: $mode}'
+    else
+      if [[ "$rp" == "null" ]]; then
+        printf '{"state":"%s","elapsed_ms":%s,"record_pid":null,"wav_bytes":%s,"mode":"%s"}\n' \
+          "$state" "$elapsed_ms" "$wav_bytes" "$CFG_MODE"
+      else
+        printf '{"state":"%s","elapsed_ms":%s,"record_pid":%s,"wav_bytes":%s,"mode":"%s"}\n' \
+          "$state" "$elapsed_ms" "$rp" "$wav_bytes" "$CFG_MODE"
+      fi
+    fi
+    return 0
+  fi
   get_state
   echo
 }
