@@ -62,8 +62,14 @@ def load_config() -> dict:
 
 
 def resolve_keycode(name: str) -> int:
+    name = (name or "").strip()
+    if not name or name in {".", "?"}:
+        raise KeyError(f"invalid key: {name!r}")
     key_name = KEY_ALIASES.get(name, name)
     if not key_name.startswith("KEY_"):
+        # Single-char punctuation is never a valid KEY_* name
+        if len(key_name) == 1 and not key_name.isalnum():
+            raise KeyError(f"invalid key: {name!r}")
         key_name = f"KEY_{key_name.upper()}"
     code = ecodes.ecodes.get(key_name)
     if code is None:
@@ -144,15 +150,19 @@ def main() -> int:
                     return 0
                 try:
                     keycode = resolve_keycode(str(cfg.get("keyboard_key", "ScrollLock")))
+                    mode = str(cfg.get("mode", "hold"))
+                    print(
+                        f"dictation-ptt-keys: reloaded config key={cfg.get('keyboard_key')} "
+                        f"mode={mode}",
+                        flush=True,
+                    )
                 except KeyError as exc:
-                    print(f"dictation-ptt-keys: {exc}", file=sys.stderr)
-                    return 1
-                mode = str(cfg.get("mode", "hold"))
-                print(
-                    f"dictation-ptt-keys: reloaded config key={cfg.get('keyboard_key')} "
-                    f"mode={mode}",
-                    flush=True,
-                )
+                    # Keep previous keycode/mode — a bad DMS edit must not kill the daemon.
+                    print(
+                        f"dictation-ptt-keys: ignoring bad config key ({exc}); "
+                        f"keeping previous binding",
+                        flush=True,
+                    )
 
         r, _, _ = select.select(list(fds.keys()), [], [], 1.0)
         for fd in r:

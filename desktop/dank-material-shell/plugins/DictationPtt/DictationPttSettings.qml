@@ -136,7 +136,7 @@ PluginSettings {
     StringSetting {
         settingKey: "keyboard_key"
         label: "Keyboard key"
-        description: "Linux/XKB name (default ScrollLock). Handled by dictation-ptt-keys user service (evdev), not niri hold binds."
+        description: "Use ScrollLock (recommended). Do not leave empty or use punctuation — invalid values crash the old daemon; now ignored."
         placeholder: "ScrollLock"
         defaultValue: "ScrollLock"
     }
@@ -144,7 +144,7 @@ PluginSettings {
     ToggleSetting {
         settingKey: "keyboard_daemon"
         label: "Keyboard daemon (evdev PTT)"
-        description: value ? "dictation-ptt-keys listens for real press/release." : "Disabled — niri toggle fallback only."
+        description: value ? "dictation-ptt-keys listens for real press/release — keep ON for hold." : "OFF disables keyboard PTT (niri fallback only)."
         defaultValue: true
     }
 
