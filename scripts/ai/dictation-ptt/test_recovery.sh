@@ -42,4 +42,20 @@ fi
 "$ROOT/dictation-ptt.sh" status | head -1 | grep -qx idle
 test ! -f "$DICTATION_DATA_DIR/capture.wav" -o ! -s "$DICTATION_DATA_DIR/capture.wav" || \
   { "$ROOT/dictation-ptt.sh" clean; test ! -e "$DICTATION_DATA_DIR/capture.wav" || ! -s "$DICTATION_DATA_DIR/capture.wav"; }
+
+# force-stop during transcribing (simulated in-flight STT)
+STATE_DIR="$XDG_RUNTIME_DIR/dictation-ptt"
+"$ROOT/dictation-ptt.sh" start
+"$ROOT/dictation-ptt.sh" status | head -1 | grep -qx listening
+sleep 300 &
+fake_stt=$!
+disown "$fake_stt" 2>/dev/null || true
+printf '%s\n' "$fake_stt" >"$STATE_DIR/transcribe.pid"
+printf 'transcribing\n' >"$STATE_DIR/state"
+"$ROOT/dictation-ptt.sh" force-stop
+"$ROOT/dictation-ptt.sh" status | head -1 | grep -qx idle
+kill "$fake_stt" 2>/dev/null || true
+wait "$fake_stt" 2>/dev/null || true
+test ! -f "$STATE_DIR/transcribe.pid"
+
 echo OK

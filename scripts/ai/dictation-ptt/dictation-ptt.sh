@@ -47,7 +47,7 @@ load_config() {
   fi
 }
 
-with_lock() {
+acquire_lock() {
   ensure_state_dir
   LOCK_FILE="$STATE_DIR/lock"
   exec 9>"$LOCK_FILE"
@@ -55,7 +55,25 @@ with_lock() {
     notify_err "Dictation déjà en cours (lock)."
     exit 1
   fi
+}
+
+acquire_lock_wait() {
+  local timeout="${1:-2}"
+  ensure_state_dir
+  LOCK_FILE="$STATE_DIR/lock"
+  exec 9>"$LOCK_FILE"
+  flock -w "$timeout" 9
+}
+
+release_lock() {
+  flock -u 9 2>/dev/null || true
+  exec 9>&-
+}
+
+with_lock() {
+  acquire_lock
   "$@"
+  release_lock
 }
 
 stop_watchers() {
@@ -135,6 +153,10 @@ stop_recording_process() {
 
 cmd_start() {
   ensure_state_dir
+  if [[ "$(get_state)" == "transcribing" ]]; then
+    notify_err "Transcription en cours."
+    exit 1
+  fi
   stop_recording_process
   rm -f "$WAV_FILE"
 
@@ -169,12 +191,16 @@ cmd_start() {
   notify_info "Écoute…"
 }
 
-cmd_stop() {
+stop_prepare_listening() {
   ensure_state_dir
+
+  if [[ "$(get_state)" == "transcribing" ]]; then
+    return 2
+  fi
 
   if [[ ! -f "$PID_FILE" ]]; then
     set_state idle
-    exit 0
+    return 1
   fi
 
   stop_recording_process
@@ -182,18 +208,21 @@ cmd_stop() {
   if [[ ! -f "$WAV_FILE" ]] || [[ ! -s "$WAV_FILE" ]]; then
     set_state idle
     notify_err "Enregistrement vide ou manquant."
-    exit 1
+    return 1
   fi
 
   if ! command -v wl-copy >/dev/null 2>&1 || ! command -v wtype >/dev/null 2>&1; then
     set_state idle
     notify_err "wl-copy ou wtype manquant."
-    exit 1
+    return 1
   fi
 
   set_state transcribing
   notify_info "Transcription…"
+  return 0
+}
 
+stop_transcribe_and_paste() {
   backend_up() {
     local url="$1"
     curl -fsS -m 0.3 "${url%/v1}/health" >/dev/null 2>&1 \
@@ -274,9 +303,13 @@ cmd_stop() {
   rc=$?
   set -e
 
+  if [[ "$(get_state)" != "transcribing" ]]; then
+    return 0
+  fi
+
   if [[ "$rc" -eq 2 ]]; then
     set_state idle
-    exit 0
+    return 0
   fi
 
   if [[ "$rc" -ne 0 ]]; then
@@ -284,7 +317,7 @@ cmd_stop() {
     err="$(cat "$ERR_FILE" 2>/dev/null || echo "erreur inconnue")"
     set_state idle
     notify_err "STT / modèle: $err"
-    exit 1
+    return 1
   fi
 
   printf '%s' "$text" | wl-copy
@@ -292,6 +325,22 @@ cmd_stop() {
   # Ctrl+Shift+V: works in terminals (Ghostty) and most GUI apps
   wtype -M ctrl -M shift v -m shift -m ctrl
   set_state idle
+}
+
+cmd_stop() {
+  acquire_lock
+  stop_prepare_listening
+  local prep_rc=$?
+  release_lock
+
+  if ((prep_rc == 2)); then
+    exit 0
+  fi
+  if ((prep_rc != 0)); then
+    exit "$prep_rc"
+  fi
+
+  stop_transcribe_and_paste
 }
 
 cmd_status() {
@@ -303,7 +352,7 @@ cmd_toggle() {
   case "$(get_state)" in
     listening) cmd_stop ;;
     transcribing) exit 0 ;;
-    *) cmd_start ;;
+    *) with_lock cmd_start ;;
   esac
 }
 
@@ -319,7 +368,13 @@ cmd_force_stop() {
   for p in $(pgrep -f 'whisper_cpp_transcribe|openai_transcribe|wyoming_transcribe' 2>/dev/null || true); do
     stop_pid "$p"
   done
-  set_state idle
+  if acquire_lock_wait 2; then
+    set_state idle
+    release_lock
+  else
+    exec 9>&- 2>/dev/null || true
+    set_state idle
+  fi
   notify_info "Arrêt forcé."
 }
 
@@ -351,13 +406,13 @@ main() {
   TRANSCRIBE_PID_FILE="$STATE_DIR/transcribe.pid"
   case "${1:-}" in
     start) with_lock cmd_start ;;
-    stop) with_lock cmd_stop ;;
-    toggle) with_lock cmd_toggle ;;
+    stop) cmd_stop ;;
+    toggle) cmd_toggle ;;
     status) cmd_status "${2:-}" ;;
-    force-stop) with_lock cmd_force_stop ;;
-    cancel) with_lock cmd_cancel ;;
-    clean) with_lock cmd_clean ;;
-    reset) with_lock cmd_reset ;;
+    force-stop) cmd_force_stop ;;
+    cancel) cmd_cancel ;;
+    clean) cmd_clean ;;
+    reset) cmd_reset ;;
     *) usage ;;
   esac
 }
