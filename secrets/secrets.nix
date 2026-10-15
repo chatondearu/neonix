@@ -1,12 +1,8 @@
 let
-  # Replace these placeholders with your real AGE public keys.
-  # Host key (from `age-keygen -y /path/to/key.txt` or SSH->AGE conversion)
-  hostKey = "age1replace-this-with-host-public-key";
-  userKey = "age1replace-this-with-user-public-key";
+  # Host identity (ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub)
+  hostKey = "age1ywj43me8kzavjq39ld3h76ccf7wqxe0kly9lpkdh6nk7qytwkf8s7pl09d";
 
-  recipients = [hostKey userKey];
-in
-{
-  # Example:
-  # "github-token.age".publicKeys = recipients;
+  recipients = [hostKey];
+in {
+  "llama-swap-api-key.age".publicKeys = recipients;
 }
