@@ -1,33 +1,22 @@
-{ ... }:
-
-{
+{...}: {
   networking.hostName = "neo-nix";
 
   networking.networkmanager.enable = true;
   networking.firewall.allowedTCPPorts = [
-    2242  # SSH
-    8009  # TCP SYN
-    9000  # UPnP control ports (dynamic, opened via conntrack normally)
-    8080  # HTTP
+    2242 # SSH
   ];
   networking.firewall.allowedUDPPorts = [
-    8009  # UDP SYN
-    8080  # HTTP
-    5353  # mDNS
-  ];
-
-  networking.firewall.allowedUDPPortRanges = [
-    { from = 32768; to = 61000; }  # SSDP discovery (sblast)
+    5353 # mDNS
   ];
 
   services.openssh = {
     enable = true;
-    ports = [ 2242 ];
+    ports = [2242];
     settings = {
       PasswordAuthentication = false;
       PermitRootLogin = "prohibit-password";
       KbdInteractiveAuthentication = false;
-      AllowUsers = [ "chaton" ];
+      AllowUsers = ["chaton"];
     };
     openFirewall = true;
   };
