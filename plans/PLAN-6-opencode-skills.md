@@ -1,6 +1,6 @@
 # PLAN-6 — Repair task-management and remove dead bak links
 
-- **Status**: draft
+- **Status**: done
 - **PRD**: [[../prd/PRD-2-kiss-audit-harden|PRD-2]]
 - **GitHub**: [#6](https://github.com/chatondearu/neonix/issues/6)
 - **Date**: 2026-10-15
@@ -33,9 +33,9 @@ Smallest NixOS/config/script change that meets acceptance. Discover paths at imp
 
 ## Tasks
 
-- [ ] Replace broken task-management symlink with real skill content (copy from ~/.cursor/skills or kit)
-- [ ] Remove all *.bak-* skill symlinks in that tree
-- [ ] Verify rg and SKILL.md resolve
+- [x] Replace broken task-management symlink with real skill content (copy from ~/.cursor/skills or kit)
+- [x] Remove all *.bak-* skill symlinks in that tree
+- [x] Verify rg and SKILL.md resolve
 
 ## Risks & mitigations
 
@@ -46,10 +46,10 @@ Smallest NixOS/config/script change that meets acceptance. Discover paths at imp
 
 ## Test plan
 
-- [ ] test -f dev/opencode/skills/task-management/SKILL.md
-- [ ] rg over skills tree exits 0
+- [x] test -f dev/opencode/skills/task-management/SKILL.md
+- [x] rg over skills tree exits 0
 
 ## Verification
 
-- [ ] Lint / test / build per AGENTS.md (alejandra for Nix; existing script tests if touched)
-- [ ] Update foam / ADR if a new decision was made
+- [x] Lint / test / build per AGENTS.md (alejandra for Nix; existing script tests if touched)
+- [x] Update foam (no new ADR) / ADR if a new decision was made
