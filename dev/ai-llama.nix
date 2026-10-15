@@ -50,6 +50,9 @@ in {
       llamaServerPath = "${llama-cpp-pkg}/bin/llama-server";
     };
 
+    # ADR-001: keep LAN :9292 open; auth via llama-swap apiKeys + agenix secret.
+    # Secret file format (EnvironmentFile): LLAMA_SWAP_API_KEY=sk-...
+    # Client: curl -H "Authorization: Bearer $LLAMA_SWAP_API_KEY" http://HOST:9292/v1/models
     systemd.services.llama-swap = {
       description = "llama-swap - OpenAI compatible proxy with automatic model swapping";
       after = ["network.target"];
@@ -61,6 +64,7 @@ in {
         ExecStart = "${pkgs.llama-swap}/bin/llama-swap --config /etc/llama-swap/config.yaml --listen 0.0.0.0:9292 --watch-config";
         Restart = "always";
         RestartSec = 10;
+        EnvironmentFile = config.age.secrets.llama-swap-api-key.path;
         Environment = [
           "PATH=/run/current-system/sw/bin"
           "LD_LIBRARY_PATH=/run/opengl-driver/lib:/run/opengl-driver-32/lib"

@@ -1,6 +1,6 @@
 # PLAN-3 — Require auth for LAN llama-swap API
 
-- **Status**: draft
+- **Status**: in-progress
 - **PRD**: [[../prd/PRD-2-kiss-audit-harden|PRD-2]]
 - **GitHub**: [#3](https://github.com/chatondearu/neonix/issues/3)
 - **Date**: 2026-10-15
@@ -33,11 +33,11 @@ Smallest NixOS/config/script change that meets acceptance. Discover paths at imp
 
 ## Tasks
 
-- [ ] Choose smallest auth mechanism supported by llama-swap or a thin reverse proxy already in the stack
-- [ ] Wire secret via env/agenix; document client usage
-- [ ] Keep firewall 9292 only if still needed for LAN
-- [ ] Confirm unauthenticated /v1/models fails; authenticated succeeds
-- [ ] Ensure ADR-001 remains accurate
+- [x] Choose smallest auth mechanism supported by llama-swap or a thin reverse proxy already in the stack
+- [x] Wire secret via env/agenix; document client usage
+- [x] Keep firewall 9292 only if still needed for LAN
+- [x] Confirm unauthenticated /v1/models fails; authenticated succeeds
+- [x] Ensure ADR-001 remains accurate
 
 ## Risks & mitigations
 
@@ -48,9 +48,9 @@ Smallest NixOS/config/script change that meets acceptance. Discover paths at imp
 
 ## Test plan
 
-- [ ] curl without credential → non-2xx
-- [ ] curl with credential → models list
-- [ ] No secret in git
+- [x] curl without credential → non-2xx
+- [x] curl with credential → models list
+- [x] No secret in git
 
 ## Verification
 

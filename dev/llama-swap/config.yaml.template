@@ -1,8 +1,12 @@
-       
-    # llama-swap configuration
-    # This config uses llama.cpp's server to serve models on demand
+# llama-swap configuration
+# This config uses llama.cpp's server to serve models on demand
 
-    models:  # Ordered from newest to oldest
+# Require API key (LAN-exposed). Value from LLAMA_SWAP_API_KEY via systemd EnvironmentFile.
+# Clients: Authorization: Bearer $LLAMA_SWAP_API_KEY  (or x-api-key / Basic)
+apiKeys:
+  - "${env.LLAMA_SWAP_API_KEY}"
+
+models:  # Ordered from newest to oldest
 
       "gemma-4:31b-q4":
         cmd: |
