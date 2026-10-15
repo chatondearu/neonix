@@ -36,8 +36,8 @@
     # both incoming and outgoing connections:
     "net.ipv4.tcp_fastopen" = 3;
 
-    # Enable IPv4 forwarding for VPN/container routing
-    "net.ipv4.ip_forward" = 1;
+    # Not a router: off by default. Modules that need it (e.g. Docker) override.
+    "net.ipv4.ip_forward" = pkgs.lib.mkDefault 0;
     # Bufferbloat mitigations + slight improvement in throughput & latency
     "net.ipv4.tcp_congestion_control" = "bbr";
     "net.core.default_qdisc" = "cake";

@@ -1,6 +1,6 @@
 # PLAN-11 — Disable ip_forward unless needed
 
-- **Status**: draft
+- **Status**: in-progress
 - **PRD**: [[../prd/PRD-2-kiss-audit-harden|PRD-2]]
 - **GitHub**: [#11](https://github.com/chatondearu/neonix/issues/11)
 - **Date**: 2026-10-15
@@ -33,9 +33,9 @@ Smallest NixOS/config/script change that meets acceptance. Discover paths at imp
 
 ## Tasks
 
-- [ ] Determine if Docker/VPN currently requires ip_forward
-- [ ] Default to 0 or gate behind explicit option with comment
-- [ ] Document consequence
+- [x] Determine if Docker/VPN currently requires ip_forward
+- [x] Default to 0 or gate behind explicit option with comment
+- [x] Document consequence
 
 ## Risks & mitigations
 
