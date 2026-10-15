@@ -4,6 +4,7 @@ set -euo pipefail
 STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}/dictation-ptt"
 STATE_FILE="$STATE_DIR/state"
 PID_FILE="$STATE_DIR/record.pid"
+ERR_FILE="$STATE_DIR/transcribe.err"
 WAV_FILE="$STATE_DIR/capture.wav"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 TRANSCRIBE="${DICTATION_TRANSCRIBE:-$SCRIPT_DIR/wyoming_transcribe.py}"
@@ -162,7 +163,7 @@ cmd_stop() {
 
   local text rc
   set +e
-  text="$(transcribe_routed 2>/tmp/dictation-ptt-transcribe.err)"
+  text="$(transcribe_routed 2>"$ERR_FILE")"
   rc=$?
   set -e
 
@@ -173,7 +174,7 @@ cmd_stop() {
 
   if [[ "$rc" -ne 0 ]]; then
     local err
-    err="$(cat /tmp/dictation-ptt-transcribe.err 2>/dev/null || echo "erreur inconnue")"
+    err="$(cat "$ERR_FILE" 2>/dev/null || echo "erreur inconnue")"
     set_state idle
     notify_err "STT / modèle: $err"
     exit 1
