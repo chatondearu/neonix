@@ -40,6 +40,7 @@
 
     # Niri/Wayland validation helpers
     neo-smoke = "bash \"$HOME/etc/nixos/gaming/smoke-tests-wayland.sh\"";
+    neo-smoke-llama = "bash \"$HOME/etc/nixos/scripts/smoke-llama-swap-auth.sh\"";
     neo-test-matrix = "echo 'See: $HOME/etc/nixos/doc/test-matrix-wayland.md'";
   };
 }

@@ -7,6 +7,7 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 flake_ref="${FLAKE_REF:-.#neo-nix}"
 smoke_script="$repo_root/gaming/smoke-tests-wayland.sh"
+llama_auth_smoke="$repo_root/scripts/smoke-llama-swap-auth.sh"
 
 echo "== Safe flake update routine =="
 echo "Repository: $repo_root"
@@ -29,6 +30,13 @@ if [[ -x "$smoke_script" ]]; then
 else
   echo "[WARN] Smoke test script missing or not executable: $smoke_script"
   echo "[WARN] Run manual checks before considering this update successful."
+fi
+
+if [[ -x "$llama_auth_smoke" ]]; then
+  echo "--> Running llama-swap auth smoke"
+  bash "$llama_auth_smoke"
+else
+  echo "[WARN] llama-swap auth smoke missing or not executable: $llama_auth_smoke"
 fi
 
 echo "== Update routine completed =="
