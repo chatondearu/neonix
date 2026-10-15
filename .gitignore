@@ -29,3 +29,5 @@ result-*
 .cerbot
 
 .env
+# cda-dev orchestrator worktrees
+.orch/
