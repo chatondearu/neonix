@@ -77,12 +77,12 @@
     sudo-rs = {
       enable = true;
       execWheelOnly = true;
-      wheelNeedsPassword = false;
+      wheelNeedsPassword = true;
     };
 
-    # don't ask for password for wheel group
+    # require password for wheel group
     sudo = {
-      wheelNeedsPassword = false;
+      wheelNeedsPassword = true;
     };
   };
 
