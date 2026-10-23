@@ -30,6 +30,16 @@ fi
 echo "Updating prebuilt metadata to b${LATEST_TAG}"
 echo "URL: $ASSET_URL"
 
+# Latest GitHub tag is sometimes a nightly with no Ubuntu tarball.
+# GPU inference uses nixpkgs-cuda, so a missing prebuilt must not abort the update.
+if ! curl -fsI -o /dev/null --retry 2 "$ASSET_URL"; then
+  echo "No prebuilt tarball for b${LATEST_TAG}; leaving prebuilt metadata unchanged."
+  if [[ "$BUILD" == "nixpkgs-cuda" ]]; then
+    exit 0
+  fi
+  exit 1
+fi
+
 { read -r hash; read -r _path; } < <(nix-prefetch-url --print-path "$ASSET_URL")
 SRI=$(nix-hash --type sha256 --to-sri "$hash")
 

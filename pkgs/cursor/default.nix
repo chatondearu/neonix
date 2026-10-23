@@ -23,7 +23,13 @@ in
   "pkgs/cursor: only x86_64-linux is supported (see sources.json / update.sh)"
   (buildVscode rec {
     commandLineArgs = finalCommandLineArgs;
-    inherit (sourcesJson) version vscodeVersion;
+    inherit (sourcesJson) version;
+    # Cursor reports vscode >= 1.122 but still ships @vscode/ripgrep.
+    # A higher vscodeVersion makes buildVscode look for ripgrep-universal, which is absent.
+    vscodeVersion =
+      if lib.versionAtLeast sourcesJson.vscodeVersion "1.122.0"
+      then "1.121.0"
+      else sourcesJson.vscodeVersion;
 
     pname = "cursor";
     useVSCodeRipgrep = false;

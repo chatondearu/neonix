@@ -1,5 +1,10 @@
 // Custom DMS-related niri configuration managed by nix-maid.
 // Keep DMS auto-generated files under ~/.config/niri/dms unmanaged.
+//
+// Do not set background-effect.blur=true on ^dms:.* — that applies niri blur to
+// the full layer rectangle (often near full-screen for popouts/modals) and washes
+// out the desktop. Regional frosted-glass blur is handled by DMS BlurService
+// (ext-background-effect-v1 / WindowBlur).
 
 layer-rule {
     match namespace=".*"
@@ -11,45 +16,10 @@ layer-rule {
 layer-rule {
     match namespace="^quickshell$"
     place-within-backdrop true
-    background-effect {
-        blur false
-    }
 }
 
 layer-rule {
     match namespace="^dms:.*"
-    background-effect {
-        blur true
-        xray false
-    }
-}
-
-layer-rule {
-    match namespace="^dms:.*:background$"
-    background-effect {
-        blur false
-        xray false
-    }
-}
-
-layer-rule {
-    match namespace="^dms:dock$"
-    background-effect {
-        blur false
-        xray false
-    }
-}
-
-layer-rule {
-    match namespace="^dms:tray-menu-window$"
-    background-effect {
-        blur false
-        xray false
-    }
-}
-
-layer-rule {
-    match namespace="^dms:niri.*"
     background-effect {
         blur false
         xray false

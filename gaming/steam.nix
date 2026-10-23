@@ -6,6 +6,18 @@
 }: let
   # Same WiVRn build as services.wivrn (CUDA) so Steam + ~/.config/openxr match the runtime.
   wivrnPkg = config.services.wivrn.package or (pkgs.wivrn.override {cudaSupport = true;});
+
+  # Steam FHS uses --cap-add ALL for SteamVR. Unpatched bubblewrap 0.11.2 then dies with
+  # "Unexpected capabilities but not setuid"; steam-runtime-check-requirements misreports
+  # that as missing user namespaces. steam-run prefers /run/wrappers/bin/bwrap, so the
+  # system wrapper must use the same patched binary as Steam's buildFHSEnv.
+  patchedBwrap = pkgs.bubblewrap.overrideAttrs (o: {
+    patches =
+      (o.patches or [])
+      ++ [
+        ./vr/steam-vr/bwrap.patch
+      ];
+  });
 in {
   # WayVR / xdg-open use portal + MIME DB; register steam schemes so GTK finds Steam.
   xdg.mime.enable = true;
@@ -32,24 +44,16 @@ in {
 
   # bubblewrap 0.11.2+ rejects setuid. nixpkgs still installs a setuid bwrap wrapper
   # when gamescopeSession and capSysNice are both enabled; gamescope already has its
-  # own cap_sys_nice wrapper, so force a non-setuid bwrap until upstream drops this.
+  # own cap_sys_nice wrapper, so force a non-setuid patched bwrap until upstream drops this.
   # https://github.com/NixOS/nixpkgs/issues/523200
   security.wrappers.bwrap = lib.mkForce {
     owner = "root";
     group = "root";
-    source = "${pkgs.bubblewrap}/bin/bwrap";
+    source = "${patchedBwrap}/bin/bwrap";
   };
 
   # Install Steam.
-  programs.steam = let
-    patchedBwrap = pkgs.bubblewrap.overrideAttrs (o: {
-      patches =
-        (o.patches or [])
-        ++ [
-          ./vr/steam-vr/bwrap.patch
-        ];
-    });
-  in {
+  programs.steam = {
     enable = true;
     gamescopeSession.enable = true;
 
@@ -60,6 +64,12 @@ in {
     protontricks.enable = true;
 
     package = pkgs.steam.override {
+      # Wayland cannot grab the desktop via X11. Remote Play Together falls
+      # back to desktop capture when the game window is not hooked; logs then
+      # report k_ECaptureFailedReasonPipewireRequired. Do not use
+      # -pipewire-dmabuf here: NVIDIA capture is unreliable with that path.
+      extraArgs = "-pipewire";
+
       extraPkgs = pkgs:
         with pkgs; [
           libkrb5

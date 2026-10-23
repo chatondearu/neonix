@@ -3,7 +3,8 @@
   inputs,
   ...
 }: let
-  # Single WiVRn derivation for service, OpenXR manifest, and Steam mounts.
+  # Single WiVRn derivation (CUDA) for service, OpenXR manifest, and Steam mounts.
+  # Tagged 26.9 is pinned in unstable.nix to match the Quest client.
   wivrnPkg = pkgs.wivrn.override {cudaSupport = true;};
 in {
   ## TO TEST :

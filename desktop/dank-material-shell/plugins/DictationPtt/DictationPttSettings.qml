@@ -11,12 +11,13 @@ PluginSettings {
     property bool persistReady: false
 
     Component.onCompleted: {
-        const mode = root.loadValue("mode", "hold");
+        const mode = root.loadValue("mode", "toggle");
         if (!mode || String(mode).trim().length === 0)
-            root.saveValue("mode", "hold");
-        const key = root.loadValue("keyboard_key", "ScrollLock");
-        if (!key || String(key).trim().length === 0)
-            root.saveValue("keyboard_key", "ScrollLock");
+            root.saveValue("mode", "toggle");
+        const key = root.loadValue("keyboard_key", "Pause");
+        // Migrate away from Moonlander special-layer ScrollLock default.
+        if (!key || String(key).trim().length === 0 || key === "ScrollLock" || key === "Scroll_Lock")
+            root.saveValue("keyboard_key", "Pause");
         Qt.callLater(() => {
             root.persistReady = true;
             root.persistCliConfig();
@@ -31,7 +32,7 @@ PluginSettings {
 
     Timer {
         id: persistTimer
-        interval: 200
+        interval: 250
         repeat: false
         onTriggered: root.persistCliConfig()
     }
@@ -57,8 +58,8 @@ PluginSettings {
     }
 
     function persistCliConfig() {
-        const mode = String(root.loadValue("mode", "hold") || "hold");
-        const keyboardKey = String(root.loadValue("keyboard_key", "ScrollLock") || "ScrollLock");
+        const mode = String(root.loadValue("mode", "toggle") || "toggle");
+        const keyboardKey = String(root.loadValue("keyboard_key", "Pause") || "Pause");
         const silenceEnabled = root.asBoolString(root.loadValue("silence_enabled", true), true);
         const silenceMs = root.asIntString(root.loadValue("silence_ms", "2500"), 2500);
         const maxEnabled = root.asBoolString(root.loadValue("max_duration_enabled", true), true);
@@ -119,32 +120,32 @@ PluginSettings {
     SelectionSetting {
         settingKey: "mode"
         label: "Trigger mode"
-        description: "hold = press/release start/stop (Stream Deck + ScrollLock via dictation-ptt-keys). toggle = each press flips listening."
+        description: "toggle = each press flips listening (default). hold = press/release start/stop (Stream Deck + keyboard via dictation-ptt-keys). Changing mode rewrites the Deck key and relaunches StreamController."
         options: [
-            {
-                label: "Hold",
-                value: "hold"
-            },
             {
                 label: "Toggle",
                 value: "toggle"
+            },
+            {
+                label: "Hold",
+                value: "hold"
             }
         ]
-        defaultValue: "hold"
+        defaultValue: "toggle"
     }
 
     StringSetting {
         settingKey: "keyboard_key"
         label: "Keyboard key"
-        description: "Use ScrollLock (recommended). Do not leave empty or use punctuation — invalid values crash the old daemon; now ignored."
-        placeholder: "ScrollLock"
-        defaultValue: "ScrollLock"
+        description: "Linux key name for evdev PTT (default Pause). Avoid ScrollLock on Moonlander special layers. Examples: Pause, F13, Insert."
+        placeholder: "Pause"
+        defaultValue: "Pause"
     }
 
     ToggleSetting {
         settingKey: "keyboard_daemon"
         label: "Keyboard daemon (evdev PTT)"
-        description: value ? "dictation-ptt-keys listens for real press/release — keep ON for hold." : "OFF disables keyboard PTT (niri fallback only)."
+        description: value ? "dictation-ptt-keys listens for real press/release — keep ON for keyboard PTT." : "OFF disables keyboard PTT (niri fallback only)."
         defaultValue: true
     }
 

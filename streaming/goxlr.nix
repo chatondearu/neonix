@@ -11,11 +11,14 @@
 
   # Wire Line4 (broadcast mix) to the PRO X headset once PipeWire nodes exist.
   # Static loopback node.target is unreliable with WirePlumber 1.6+ at boot.
+  # WantedBy graphical-session (not default.target): WantedBy=default +
+  # After=graphical-session cycles with maid-activation (Before=graphical-session-pre).
   systemd.user.services.goxlr-headset-route = {
     description = "Route GoXLR Line4 broadcast mix to Logitech PRO X headset";
-    wantedBy = ["default.target"];
+    wantedBy = ["graphical-session.target"];
     wants = ["pipewire.service" "wireplumber.service"];
-    after = ["pipewire.service" "wireplumber.service" "graphical-session.target"];
+    after = ["pipewire.service" "wireplumber.service"];
+    unitConfig.ConditionUser = "!dms-greeter";
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;

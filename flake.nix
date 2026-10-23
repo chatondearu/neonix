@@ -10,8 +10,8 @@
     alejandra.url = "github:kamadorueda/alejandra/4.0.0";
     alejandra.inputs.nixpkgs.follows = "nixpkgs";
 
-    # nix-maid
-    nix-maid.url = "github:viperML/nix-maid";
+    # nix-maid (migrated from GitHub → Codeberg)
+    nix-maid.url = "git+https://codeberg.org/viperML/nix-maid";
     agenix.url = "github:ryantm/agenix";
 
     # quickshell
@@ -37,6 +37,9 @@
 
     nirinit.url = "github:amaanq/nirinit";
     nirinit.inputs.nixpkgs.follows = "nixpkgs";
+
+    ai-dev-kit.url = "github:chatondearu/ai-dev-kit";
+    ai-dev-kit.inputs.nixpkgs.follows = "nixpkgs-unstable";
   };
 
   outputs = {

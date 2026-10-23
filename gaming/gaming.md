@@ -5,6 +5,7 @@
 - Session stack: `greetd` + `dms-greeter` + `niri` + `dms-shell`.
 - X11 compatibility is provided through XWayland (`services.xserver.enable = true` + `programs.xwayland.enable = true` in the NixOS modules).
 - The system base is pinned to `nixos-26.05`; selected desktop/gaming components are intentionally sourced from unstable.
+- **Sunshine** (host) and **Moonlight** (`moonlight-qt`, client) live in `gaming/gamestream.nix`.
 - Sunshine is handled as a **user service** in this setup:
 
 ```bash
@@ -14,6 +15,30 @@ journalctl --user -u sunshine -f
 ```
 
 If `systemctl restart sunshine` fails with "Unit sunshine.service not found", use the `--user` variant above.
+
+**Moonlight (client)** — launch `moonlight` or pick *Moonlight* in fuzzel (Mod+D). To pair with this PC’s Sunshine:
+
+1. Open https://localhost:47990/ and note the PIN when adding a client.
+2. In Moonlight, add the PC (hostname or LAN IP) and enter the PIN.
+
+Other devices (phone, Steam Deck, etc.) use the same PIN flow against Sunshine on this host.
+
+### Keyboard shortcuts (Mac client → this host)
+
+Moonlight maps **Option ⌥ → Alt** (including **AltGr** = Right Option) and **Command ⌘ → Super** on the Linux host. Sunshine keeps `key_rightalt_to_key_win` off so AltGr stays AltGr on AZERTY.
+
+**On the Mac (Moonlight app, not on neo-nix):**
+
+1. Settings → **Capture system keyboard shortcuts** → **Always** (not “fullscreen only”). With this off, Option/Alt combos often never reach the host.
+2. Click inside the stream so it has keyboard focus before testing niri binds (e.g. Command+Space → Super menu if Command is mapped to Super).
+3. **Moonlight** shortcuts use **Control+Option+Shift** on macOS (Option = Alt), for example:
+   - **Ctrl+Option+Shift+Q** — quit stream (session stays on host)
+   - **Ctrl+Option+Shift+Z** — release mouse/keyboard capture to the Mac
+   - **Ctrl+Option+Shift+S** — stats overlay
+
+These are **chords** (press all keys together). A firmware **hold** binding (layer/mod-tap that only acts as Alt while held) can fail if the key sends a layer switch instead of a real `Alt` modifier, or if Moonlight does not see the modifier during the chord. Prefer a plain **Alt/Option key** (tap or hold as `KC_LALT`/`KC_RALT`), or map the shortcut as a single macro that emits the full chord in one **press** (Stream Deck / QMK macro), not a layer hold.
+
+**On neo-nix (Moonlight Qt client):** set `capturesyskeys=2` in `~/.config/Moonlight Game Streaming Project/Moonlight.conf` (UI: capture system keys → always), then restart Moonlight. Pairing/certs stay in that file — do not replace it from Nix.
 
 Post-rebuild quick checks can be run with:
 

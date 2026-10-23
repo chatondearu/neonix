@@ -1,7 +1,4 @@
 {
-  "dockerManager": {
-    "enabled": true
-  },
   "linuxWallpaperEngine": {
     "enabled": false,
     "playlistIntervalMinutes": 59,

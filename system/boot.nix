@@ -2,7 +2,16 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  # Slow spin-up HDD + NVMe enumeration after initrd; 5s was too short at boot.
+  gameDiskDeviceTimeout = "90s";
+  gameDiskMountUnits = [
+    "games.mount"
+    "hdd.mount"
+    "hdd-share.mount"
+    "games-SteamLibrary-steamapps-compatdata.mount"
+  ];
+in {
   # Bootloader.
   boot = {
     initrd = {
@@ -64,7 +73,7 @@
       "umask=000" # Permissions 755 for directories, 644 for files
       "prealloc"
       "discard" # Allows the filesystem to discard unused blocks
-      "x-systemd.device-timeout=5s"
+      "x-systemd.device-timeout=${gameDiskDeviceTimeout}"
     ];
   };
 
@@ -91,7 +100,7 @@
     options = [
       "defaults"
       "nofail"
-      "x-systemd.device-timeout=5s"
+      "x-systemd.device-timeout=${gameDiskDeviceTimeout}"
     ];
   };
 
@@ -104,8 +113,26 @@
       "gid=100"
       "umask=000"
       "nofail"
-      "x-systemd.device-timeout=5s"
+      "x-systemd.device-timeout=${gameDiskDeviceTimeout}"
       "x-systemd.idle-timeout=10min"
     ];
+  };
+
+  # nofail + short device wait at boot leaves mounts dead if the disk appears later.
+  systemd.services.game-disks-mount-retry = {
+    description = "Retry game disk mounts when block devices were not ready at early boot";
+    wantedBy = ["multi-user.target"];
+    after = ["local-fs.target"];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script =
+      lib.concatMapStringsSep "\n" (unit: ''
+        if ! ${pkgs.systemd}/bin/systemctl is-active --quiet ${unit}; then
+          ${pkgs.systemd}/bin/systemctl start ${unit} || true
+        fi
+      '')
+      gameDiskMountUnits;
   };
 }

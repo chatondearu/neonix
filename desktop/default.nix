@@ -24,5 +24,6 @@
     ./niri.nix
     ./shell.dank.nix
     ./greeter.dank.nix
+    ./managed-dotfiles.nix
   ];
 }

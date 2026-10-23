@@ -10,8 +10,9 @@
       "adbusers"
       "video"
       "input"
+      "uinput"
       "greeter"
-      "docker"
+      "podman"
       "audio"
       "render"
       # Polkit allows GameMode pkexec helpers only for this group (see gamemode.rules).

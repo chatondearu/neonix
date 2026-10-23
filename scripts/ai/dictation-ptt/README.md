@@ -10,8 +10,8 @@ Settings live in `~/.config/dictation-ptt/config.json` (override path with `DICT
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `mode` | `hold` | `hold` or `toggle` — affects keyboard bind and recommended Stream Deck fragment |
-| `keyboard_key` | `ScrollLock` | niri XKB key name (sync normalizes `ScrollLock` → `Scroll_Lock`) |
+| `mode` | `toggle` | `hold` or `toggle` — affects keyboard bind and Stream Deck fragment (install relaunches StreamController) |
+| `keyboard_key` | `Pause` | Linux key for PTT (`Pause` default; avoid Moonlander special-layer ScrollLock). Daemon grabs+filters it. |
 | `silence_enabled` | `true` | Auto-stop after quiet period while listening |
 | `silence_ms` | `2500` | Quiet period (ms) before silence auto-stop |
 | `max_duration_enabled` | `true` | Hard cap on listening length |
@@ -21,8 +21,8 @@ Example:
 
 ```json
 {
-  "mode": "hold",
-  "keyboard_key": "ScrollLock",
+  "mode": "toggle",
+  "keyboard_key": "Pause",
   "silence_enabled": true,
   "silence_ms": 2500,
   "max_duration_enabled": true,
@@ -30,10 +30,10 @@ Example:
 }
 ```
 
-Write from CLI (also syncs niri):
+Write from CLI (also syncs niri + Stream Deck and relaunches StreamController):
 
 ```bash
-./scripts/ai/dictation-ptt/write-cli-config.sh hold ScrollLock true 2500 true 180
+./scripts/ai/dictation-ptt/write-cli-config.sh toggle Pause true 2500 true 180
 ```
 
 ## Silence and max duration

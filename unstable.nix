@@ -34,6 +34,60 @@
 
     # aarch64-only patch must not apply on x86_64 (breaks xrizer → wivrn when garnix cache misses).
     (final: prev: {
+      # Quest client (store / APK) is v26.9. nixos-26.05 and our locked
+      # nixos-unstable still package 26.6.2; nixpkgs-xr overlays git HEAD
+      # onto that recipe. Pin the tagged release so the protocol matches.
+      wivrn = prev.wivrn.overrideAttrs (old: let
+        src = prev.fetchFromGitHub {
+          owner = "wivrn";
+          repo = "wivrn";
+          rev = "v26.9";
+          hash = "sha256-/kXgbku/4EeYY5YTwtY71csgxOP8bRACLqOvKXolg5g=";
+        };
+        monado = prev.applyPatches {
+          src = prev.fetchFromGitLab {
+            domain = "gitlab.freedesktop.org";
+            owner = "monado";
+            repo = "monado";
+            rev = "f037264d23e2472a444a157370647fcd601ed81b";
+            hash = "sha256-exHbecudAy57szL7kut7/fBYCoekEs3riZzhMtFWS/c=";
+          };
+          postPatch = ''
+            ${src}/patches/apply.sh ${src}/patches/monado/*
+          '';
+        };
+      in {
+        version = "26.9";
+        inherit src monado;
+        postUnpack = ''
+          ourMonadoRev="${monado.src.rev}"
+          theirMonadoRev=$(cat ${src.name}/monado-rev)
+          if [ ! "$theirMonadoRev" == "$ourMonadoRev" ]; then
+            echo "Our Monado source revision doesn't match CMakeLists.txt." >&2
+            echo " theirs: $theirMonadoRev" >&2
+            echo " ours: $ourMonadoRev" >&2
+            return 1
+          fi
+        '';
+        cmakeFlags =
+          (
+            lib.filter (
+              flag: let
+                s = toString flag;
+              in
+                !(lib.hasInfix "GIT_DESC" s
+                  || lib.hasInfix "GIT_COMMIT" s
+                  || lib.hasInfix "GIT_TAG" s
+                  || lib.hasInfix "FETCHCONTENT_SOURCE_DIR_MONADO" s)
+            )
+            (old.cmakeFlags or [])
+          )
+          ++ [
+            (lib.cmakeFeature "GIT_TAG" "v26.9")
+            (lib.cmakeFeature "FETCHCONTENT_SOURCE_DIR_MONADO" "${monado}")
+          ];
+      });
+
       xrizer = prev.xrizer.overrideAttrs (oldAttrs: {
         patches =
           lib.filter (

@@ -88,7 +88,7 @@ Le Quest 1 est plus lent que les Quest 2/3, et les outils (wivrn-dashboard, adb 
 2. `adb shell pm install` - Installation locale (plus rapide, pas de timeout)
 
 ### Chemins importants
-- APK WiVRn : `~/.cache/wivrn/wivrn-dashboard/wivrn-v25.12.apk`
+- APK WiVRn : `~/.cache/wivrn/wivrn-dashboard/wivrn-v26.9.apk`
 - Logs WiVRn : `~/.local/state/wivrn/wivrn-dashboard/server_logs_*.txt`
 - Configuration ADB : `~/.android/`
 

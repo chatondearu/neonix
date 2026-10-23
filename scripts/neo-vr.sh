@@ -11,6 +11,31 @@ WIVRN_DASHBOARD_LOG_FILE="${STATE_DIR}/wivrn-dashboard.log"
 
 mkdir -p "${STATE_DIR}"
 
+# Login sessions keep XR_RUNTIME_JSON from the generation they started with.
+# After nixos-rebuild, WayVR would otherwise load an old Monado client against
+# the current wivrn-server (IPC version mismatch). Prefer /etc/set-environment.
+refresh_openxr_runtime() {
+  local env_file="/etc/set-environment"
+  local json=""
+  if [[ -f "${env_file}" ]]; then
+    json="$(sed -n 's/^export XR_RUNTIME_JSON="\(.*\)"$/\1/p' "${env_file}" | tail -n1)"
+  fi
+  if [[ -n "${json}" && -f "${json}" ]]; then
+    export XR_RUNTIME_JSON="${json}"
+  fi
+
+  local xdg_openxr="${XDG_CONFIG_HOME:-$HOME/.config}/openxr/1"
+  local maid_runtime="${XDG_STATE_HOME:-$HOME/.local/state}/nix-maid/static-xdg-config/openxr/1/active_runtime.json"
+  local target="${XR_RUNTIME_JSON:-}"
+  if [[ -L "${maid_runtime}" || -f "${maid_runtime}" ]]; then
+    target="${maid_runtime}"
+  fi
+  if [[ -n "${target}" && -e "${target}" ]]; then
+    mkdir -p "${xdg_openxr}"
+    ln -sfn "${target}" "${xdg_openxr}/active_runtime.json"
+  fi
+}
+
 print_help() {
   cat <<'EOF'
 neo-vr - Manage WiVRn and WayVR quickly
@@ -114,6 +139,8 @@ start_wayvr() {
     return 0
   fi
 
+  refresh_openxr_runtime
+  echo "XR_RUNTIME_JSON=${XR_RUNTIME_JSON:-unset}"
   start_process "wayvr" "wayvr" "${WAYVR_PID_FILE}" "${WAYVR_LOG_FILE}"
 }
 
@@ -139,6 +166,19 @@ show_status() {
     echo "Running (pid $(<"${WAYVR_PID_FILE}"))"
   else
     echo "Not running"
+  fi
+  echo
+  echo "== OpenXR =="
+  echo "session XR_RUNTIME_JSON=${XR_RUNTIME_JSON:-unset}"
+  if [[ -f /etc/set-environment ]]; then
+    echo -n "system "
+    grep -E '^export XR_RUNTIME_JSON=' /etc/set-environment || echo "XR_RUNTIME_JSON=unset"
+  fi
+  local active="${XDG_CONFIG_HOME:-$HOME/.config}/openxr/1/active_runtime.json"
+  if [[ -e "${active}" ]]; then
+    echo "active_runtime.json -> $(readlink -f "${active}" 2>/dev/null || echo "${active}")"
+  else
+    echo "active_runtime.json: missing"
   fi
 }
 

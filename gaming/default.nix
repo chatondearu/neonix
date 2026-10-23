@@ -11,7 +11,6 @@
     winetricks # Script to install DLLs needed to work around problems in Wine
     goverlay # Graphical UI to configure MangoHud, vkBasalt and other Vulkan/OpenGL overlays
     gamescope-wsi # HDR won't work without this
-    moonlight-qt # Play your PC games on almost any device
 
     # Input devices
     #oversteer       # Steering Wheel Manager for Linux
@@ -58,48 +57,6 @@
     capSysNice = true;
   };
 
-  # https://localhost:47990/
-  services.sunshine = {
-    enable = true;
-    autoStart = true;
-    capSysAdmin = true; # only needed for Wayland -- omit this when using with Xorg
-    openFirewall = true;
-
-    package = pkgs.sunshine.override {
-      cudaSupport = true;
-    };
-
-    settings = {
-      # Disable AV1 encoding, not supported by my GPU <= RTX 4000
-      av1_mode = 1;
-    };
-  };
-
-  # Sunshine may start before niri exposes a GTK-friendly display, causing
-  # gtk_widget_get_scale_factor assertion warnings at boot.
-  systemd.user.services.sunshine = {
-    unitConfig.After = lib.mkAfter ["graphical-session.target" "pipewire.service"];
-    unitConfig.Wants = ["graphical-session.target"];
-    serviceConfig.Environment = ["GDK_BACKEND=wayland"];
-  };
-
-  # Firewall rules for Sunshine
-  networking.firewall = {
-    allowedTCPPorts = [
-      47984
-      47989
-      47990
-      48010
-    ]; # Sunshine web interface
-  };
-
-  networking.firewall.allowedUDPPortRanges = [
-    {
-      from = 47998;
-      to = 48000;
-    } # Sunshine UDP
-  ];
-
   # Hardware support for devices
   # Dongle Microsoft (045e:02fe) via xone; do not enable xpadneo unless Bluetooth is on.
   hardware.xone.enable = true;
@@ -122,6 +79,7 @@
   '';
 
   imports = [
+    ./gamestream.nix
     ./steam.nix
     ./vr/vr.nix
   ];

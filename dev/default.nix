@@ -55,8 +55,9 @@ in {
   };
 
   imports = [
-    ./docker.nix
+    ./podman.nix
     ./ai.nix
+    ./aitools.nix
     ./helix.nix
     ./direnv.nix
   ];

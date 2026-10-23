@@ -47,7 +47,16 @@ echo "{\"id\":\"log_${timestamp}_$$\",\"timestamp\":${timestamp},\"location\":\"
 
 # #region agent log
 # Step 2: Push APK to Quest
-APK_PATH="/home/chaton/.cache/wivrn/wivrn-dashboard/wivrn-v25.12.apk"
+APK_DIR="/home/chaton/.cache/wivrn/wivrn-dashboard"
+APK_PATH="${APK_DIR}/wivrn-v26.9.apk"
+if [ ! -f "$APK_PATH" ]; then
+    APK_PATH="$(ls -t "${APK_DIR}"/wivrn-*.apk "${APK_DIR}"/WiVRn-release.apk 2>/dev/null | head -n 1 || true)"
+fi
+if [ -z "$APK_PATH" ] || [ ! -f "$APK_PATH" ]; then
+    echo "❌ No WiVRn APK found in ${APK_DIR} (expected wivrn-v26.9.apk)"
+    exit 1
+fi
+echo "Using APK: $APK_PATH"
 QUEST_PATH="/data/local/tmp/WiVRn.apk"
 
 echo ""

@@ -12,7 +12,7 @@
   imports = [
     # Import the dms-shell module from unstable
     "${inputs.nixpkgs-unstable}/nixos/modules/programs/wayland/dms-shell.nix"
-    inputs.dms-plugin-registry.modules.default
+    inputs.dms-plugin-registry.nixosModules.default
   ];
 
   environment.systemPackages = with pkgs; [
@@ -42,24 +42,24 @@
     };
 
     # Core features
-    enableSystemMonitoring = true; # System monitoring widgets (dgop)
+    # System monitoring and clipboard paste are built into DMS now.
     enableVPN = true; # VPN management widget
     enableDynamicTheming = true; # Wallpaper-based theming (matugen)
     enableAudioWavelength = true; # Audio visualizer (cava)
     enableCalendarEvents = true; # Calendar integration (khal)
-    enableClipboardPaste = true; # Clipboard paste (wtype)
 
-    plugins = {
-      dockerManager.enable = true;
-    };
   };
 
   # Strip trailing whitespace-only lines from .desktop files (SteamVR generates
   # broken entries that cause quickshell desktop-entry parser to flood warnings
   # and can trigger a crash in QObjectWrapper::wrap_slowPath)
+  # Do not auto-start the full desktop shell under the greeter user session.
+  systemd.user.services.dms.unitConfig.ConditionUser = "!dms-greeter";
+
   systemd.user.services.fix-desktop-entries = {
     description = "Fix malformed .desktop files";
     wantedBy = ["graphical-session.target"];
+    unitConfig.ConditionUser = "!dms-greeter";
     serviceConfig = {
       Type = "oneshot";
       ExecStart = pkgs.writeShellScript "fix-desktop-entries" ''

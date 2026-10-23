@@ -30,14 +30,17 @@
 
   # Portal GTK/GNOME backends need a live Wayland display; starting them with the
   # generic user session races niri startup and spams "cannot open display".
+  # Skip under dms-greeter (no desktop portals needed for the login UI).
   systemd.user.services.xdg-desktop-portal-gtk = {
     unitConfig.After = lib.mkAfter ["graphical-session.target"];
     unitConfig.BindsTo = ["graphical-session.target"];
     unitConfig.PartOf = ["graphical-session.target"];
+    unitConfig.ConditionUser = "!dms-greeter";
   };
   systemd.user.services.xdg-desktop-portal-gnome = {
     unitConfig.After = lib.mkAfter ["graphical-session.target"];
     unitConfig.BindsTo = ["graphical-session.target"];
     unitConfig.PartOf = ["graphical-session.target"];
+    unitConfig.ConditionUser = "!dms-greeter";
   };
 }

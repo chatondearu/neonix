@@ -75,6 +75,8 @@
 
   # Nirinit configuration - https://github.com/amaanq/nirinit
   services.nirinit.enable = true;
+  # nirinit needs NIRI_SOCKET from a real niri session; skip under dms-greeter.
+  systemd.user.services.nirinit.unitConfig.ConditionUser = "!dms-greeter";
   users.users.chaton.maid = {
     # Niri declarative config imported from current machine setup.
     file.xdg_config."niri/config.kdl".source = "${self}/desktop/niri/config.kdl";

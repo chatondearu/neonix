@@ -31,16 +31,16 @@ ensure_state_dir() {
 }
 
 load_config() {
-  CFG_MODE=hold
-  CFG_KEYBOARD_KEY=ScrollLock
+  CFG_MODE=toggle
+  CFG_KEYBOARD_KEY=Pause
   CFG_SILENCE_ENABLED=true
   CFG_SILENCE_MS=2500
   CFG_MAX_ENABLED=true
   CFG_MAX_SEC=180
   [[ -f "$CONFIG_FILE" ]] || return 0
   if command -v jq >/dev/null 2>&1; then
-    CFG_MODE="$(jq -r '.mode // "hold"' "$CONFIG_FILE")"
-    CFG_KEYBOARD_KEY="$(jq -r '.keyboard_key // "ScrollLock"' "$CONFIG_FILE")"
+    CFG_MODE="$(jq -r '.mode // "toggle"' "$CONFIG_FILE")"
+    CFG_KEYBOARD_KEY="$(jq -r '.keyboard_key // "Pause"' "$CONFIG_FILE")"
     CFG_SILENCE_ENABLED="$(jq -r 'if has("silence_enabled") then (.silence_enabled | tostring) else "true" end' "$CONFIG_FILE")"
     CFG_SILENCE_MS="$(jq -r '.silence_ms // 2500' "$CONFIG_FILE")"
     CFG_MAX_ENABLED="$(jq -r 'if has("max_duration_enabled") then (.max_duration_enabled | tostring) else "true" end' "$CONFIG_FILE")"

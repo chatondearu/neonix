@@ -11,14 +11,14 @@ CFG="${DICTATION_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/dictation-ptt/config.
 OUT="${NIRI_DMS_BINDS:-${XDG_CONFIG_HOME:-$HOME/.config}/niri/dms/dictation-ptt.kdl}"
 BIN="${DICTATION_BIN:-/run/current-system/sw/bin/dictation-ptt}"
 
-MODE=hold
-KEY=Scroll_Lock
+MODE=toggle
+KEY=Pause
 DAEMON=true
 
 if [[ -f "$CFG" ]]; then
   if command -v jq >/dev/null 2>&1; then
-    MODE=$(jq -r '.mode // "hold"' "$CFG")
-    KEY=$(jq -r '.keyboard_key // "Scroll_Lock"' "$CFG")
+    MODE=$(jq -r '.mode // "toggle"' "$CFG")
+    KEY=$(jq -r '.keyboard_key // "Pause"' "$CFG")
     DAEMON=$(jq -r 'if .keyboard_daemon == false then "false" else "true" end' "$CFG")
   else
     raw_mode=$(grep -oE '"mode"[[:space:]]*:[[:space:]]*"[^"]+"' "$CFG" | head -1 | sed -E 's/.*"([^"]+)"[[:space:]]*$/\1/') || true
@@ -34,6 +34,7 @@ fi
 case "${KEY}" in
   ScrollLock | scrolllock | Scroll_lock | SCROLLLOCK) KEY=Scroll_Lock ;;
   CapsLock | capslock | Caps_lock) KEY=Caps_Lock ;;
+  Pause | pause | Break | break) KEY=Pause ;;
 esac
 
 mkdir -p "$(dirname "$OUT")"

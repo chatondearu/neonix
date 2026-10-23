@@ -103,12 +103,18 @@ in {
     '';
   };
 
+  # Needed so dictation-ptt-keys can grab keyboards and re-emit via /dev/uinput
+  # (swallows the PTT key so it does not insert a glyph in the focused app).
+  hardware.uinput.enable = true;
+
   # Evdev keyboard PTT (real hold/release). User must be in group `input` (already).
+  # WantedBy graphical-session only: default.target + After=graphical-session
+  # creates an ordering cycle with maid-activation.
   systemd.user.services.dictation-ptt-keys = {
     description = "dictation-ptt keyboard PTT (evdev)";
-    wantedBy = ["default.target"];
-    after = ["graphical-session.target"];
+    wantedBy = ["graphical-session.target"];
     partOf = ["graphical-session.target"];
+    unitConfig.ConditionUser = "!dms-greeter";
     serviceConfig = {
       Type = "simple";
       ExecStart = "${dictationPtt}/bin/dictation-ptt-keys";
