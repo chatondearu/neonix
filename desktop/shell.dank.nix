@@ -41,13 +41,8 @@
       restartIfChanged = true; # Auto-restart dms.service when dms-shell changes
     };
 
-    # Core features
-    # System monitoring and clipboard paste are built into DMS now.
-    enableVPN = true; # VPN management widget
-    enableDynamicTheming = true; # Wallpaper-based theming (matugen)
-    enableAudioWavelength = true; # Audio visualizer (cava)
-    enableCalendarEvents = true; # Calendar integration (khal)
-
+    # VPN, matugen/cava, and calendar backends are handled by DMS at runtime
+    # (see unstable dms-shell module); khal/matugen/cava stay in systemPackages.
   };
 
   # Strip trailing whitespace-only lines from .desktop files (SteamVR generates
