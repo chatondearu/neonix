@@ -66,5 +66,7 @@
     usbutils
     ffmpeg
     ffmpegthumbnailer
+
+    (writeShellScriptBin "suspend-preflight" (builtins.readFile ../scripts/system/suspend-preflight.sh))
   ];
 }

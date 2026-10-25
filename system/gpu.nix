@@ -43,7 +43,8 @@
     nvidiaSettings = true; # Enable Nvidia settings
     modesetting.enable = true; # Enable modesetting required for Wayland
 
-    powerManagement.enable = false;
+    # Required with nvidia-suspend/resume for reliable S3/s2idle wake on Wayland.
+    powerManagement.enable = true;
     powerManagement.finegrained = false;
 
     # Add these for VR:

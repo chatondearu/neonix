@@ -11,7 +11,10 @@
     enablePackages = true;
     deploy.enable = true;
     ccmux.projectsRoot = "/hdd/dev";
-    tmux.clipboard = "wayland";
+    tmux = {
+      clipboard = "wayland";
+      persist.enable = true;
+    };
     mosh.enable = true;
     ccmuxd.enable = true;
     moshiHook = {

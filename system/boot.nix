@@ -48,6 +48,8 @@ in {
       "nvidia-drm.fbdev=1"
       "nvidia.NVreg_EnableGpuFirmware=1"
       "nvidia.NVreg_RmRestrictDeviceFileAccess=0"
+      # Prefer ACPI S3 "deep" over s2idle when firmware allows (see /sys/power/mem_sleep).
+      "mem_sleep_default=deep"
     ];
   };
 
