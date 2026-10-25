@@ -1,0 +1,6 @@
+# Example stack — replace with real services or remove after first deploy test.
+services:
+  hello:
+    image: docker.io/library/busybox:1.36
+    command: ["sh", "-c", "echo 'hosts/nas deploy OK' && sleep 3600"]
+    restart: unless-stopped
