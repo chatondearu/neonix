@@ -10,13 +10,13 @@
     installMethod = "auto";
     enablePackages = true;
     deploy.enable = true;
-    ccmux.projectsRoot = "/hdd/dev";
+    cdamux.projectsRoot = "/hdd/dev";
     tmux = {
       clipboard = "wayland";
       persist.enable = true;
     };
     mosh.enable = true;
-    ccmuxd.enable = true;
+    cdamuxd.enable = true;
     moshiHook = {
       enable = true;
       hookTargets = ["cursor"];

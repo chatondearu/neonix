@@ -12,5 +12,10 @@
       group = "users";
       mode = "0400";
     };
+
+    # tailscale-auth-key = {
+    #   file = ../secrets/tailscale-auth-key.age;
+    #   mode = "0400";
+    # };
   };
 }
