@@ -49,6 +49,6 @@ gtk-single-instance = true
 # Dank color generation (see ~/.config/ghostty/themes/dankcolors)
 theme = dankcolors
 
-# cda.aitools — tmux/ccmux clipboard (OSC 52)
+# cda.aitools — tmux/cdamux clipboard (OSC 52)
 clipboard-read = allow
 clipboard-write = allow
