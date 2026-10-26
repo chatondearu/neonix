@@ -13,8 +13,22 @@
         system = prev.stdenv.hostPlatform.system;
         config = config.nixpkgs.config;
       };
+      # cursor-cli: bundled node SIGSEGV after autoPatchelf with patchelf 0.19.2
+      # https://github.com/NixOS/nixpkgs/issues/579143
+      patchelf_0_15_2 =
+        unstable-pkgs.patchelf.overrideAttrs (finalAttrs: previousAttrs: {
+          version = "0.15.2";
+          src = unstable-pkgs.fetchurl {
+            url = "https://github.com/NixOS/patchelf/releases/download/${finalAttrs.version}/patchelf-${finalAttrs.version}.tar.bz2";
+            hash = "sha256-F3RfVkFZyOIo/EEtplogSLhGxLa0Igt3y/IkFuAvLXw=";
+          };
+        });
+      cursor-cli = unstable-pkgs.cursor-cli.overrideAttrs (old: {
+        nativeBuildInputs = [patchelf_0_15_2] ++ (old.nativeBuildInputs or []);
+      });
+      unstable = unstable-pkgs // {inherit cursor-cli;};
     in {
-      unstable = unstable-pkgs; # Provides pkgs.unstable for explicit opt-in usage
+      unstable = unstable; # Provides pkgs.unstable for explicit opt-in usage
 
       # Dank Material Shell stack (paired with niri/quickshell integration)
       dms-shell = unstable-pkgs.dms-shell;
