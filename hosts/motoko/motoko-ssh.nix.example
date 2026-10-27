@@ -1,0 +1,35 @@
+# Copy to dev/motoko-ssh.nix and import from configuration.nix or dev/default.nix.
+# Requires agenix secret motoko-cursor-ssh-key (see hosts/motoko/README.md).
+{ config, lib, ... }:
+let
+  cfg = config.neo.motoko;
+in {
+  options.neo.motoko = {
+    enable = lib.mkEnableOption "SSH client for Motoko production bootstrap";
+    hostname = lib.mkOption {
+      type = lib.types.str;
+      description = "DNS or IP reachable from neo-nix";
+    };
+    port = lib.mkOption {
+      type = lib.types.port;
+      default = 2242;
+    };
+    hostAlias = lib.mkOption {
+      type = lib.types.str;
+      default = "motoko-prod";
+      description = "SSH config Host alias (MOTOKO_SSH_HOST)";
+    };
+  };
+
+  config = lib.mkIf cfg.enable {
+    programs.ssh.extraConfig = lib.mkIf (config.age ? secrets && config.age.secrets ? motoko-cursor-ssh-key) ''
+      Host ${cfg.hostAlias}
+        HostName ${cfg.hostname}
+        Port ${toString cfg.port}
+        User root
+        IdentityFile ${config.age.secrets.motoko-cursor-ssh-key.path}
+        IdentitiesOnly yes
+        StrictHostKeyChecking accept-new
+    '';
+  };
+}

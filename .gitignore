@@ -1,4 +1,6 @@
 # Secrets et données sensibles
+hosts/motoko/.env
+hosts/nas/.env
 /secrets.nix
 *.key
 *.pem

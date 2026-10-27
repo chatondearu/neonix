@@ -62,7 +62,8 @@ This file provides guidelines for agentic coding tools (like opencode) working i
 │   └── ...
 ├── gaming/                    # Gaming-related configurations
 ├── hosts/                     # Non-NixOS machines (declarative deploy from neo-nix)
-│   └── nas/                   # Synology DSM — Docker stacks, nix run .#deploy
+│   ├── nas/                   # Synology DSM — Docker stacks, nix run .#deploy
+│   └── motoko/                # Motoko prod Debian — SSH + motoko-ops bootstrap (see README)
 └── virtual-envs/              # Virtual environment setups
     ├── templates/             # Some templates to use in dev projects as environment setup
     │   ├── fullstack/         # Full-stack dev environment
