@@ -10,13 +10,17 @@
   config,
   ...
 }: let
-  # Public HTTPS URL of your Headscale instance (no trailing slash).
-  headscaleLoginServer = "https://headscale.example.com";
+  # Headscale control plane (must match `tailscale debug prefs` ControlURL).
+  headscaleLoginServer = "https://headscale.neomatix.net";
 in {
   services.tailscale = {
     enable = true;
     openFirewall = true;
     useRoutingFeatures = "none";
+
+    # Keep LAN DNS (Pi-hole on the Synology NAS, local *.home via reverse proxy).
+    # Without this, `tailscale up` can push Headscale/MagicDNS and break local names.
+    extraSetFlags = ["--accept-dns=false"];
 
     # After agenix secret (see comment in system/secrets.nix):
     # authKeyFile = config.age.secrets.tailscale-auth-key.path;

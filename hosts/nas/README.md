@@ -112,3 +112,5 @@ Sur le NAS, les conteneurs sont visibles dans **Container Manager** ; la source 
 
 - Machines **NixOS** : `nixos/hosts/*` (ex. pi-sound).
 - **NAS Synology** : `hosts/nas` (ce dossier).
+
+Ce module ne configure **pas** le DNS, Pi-hole ni le reverse proxy sur le NAS — uniquement le déploiement Docker via SSH. Le DNS local reste géré par le routeur / Pi-hole sur le NAS ; sur neo-nix, Tailscale est configuré avec `--accept-dns=false` pour ne pas remplacer ce résolveur (voir `system/tailscale.nix`).
