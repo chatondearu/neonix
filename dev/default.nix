@@ -60,5 +60,6 @@ in {
     ./aitools.nix
     ./helix.nix
     ./direnv.nix
+    ./mise.nix
   ];
 }

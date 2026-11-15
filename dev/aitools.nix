@@ -17,7 +17,11 @@
     installMethod = "auto";
     enablePackages = true;
     deploy.enable = true;
-    cdamux.projectsRoot = "/hdd/dev";
+    cdamux = {
+      projectsRoot = "/hdd/dev";
+      # Alt-N → dedicated cdamux-nav (ADR-014 / kit #349); needs deploy.enable
+      navBind.enable = true;
+    };
     tmux = {
       clipboard = "wayland";
       persist.enable = true;
