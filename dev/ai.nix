@@ -43,6 +43,8 @@ in {
   # Same mapping as run-live.sh: EnvironmentFile loads LLAMA_SWAP_API_KEY.
   # Default systemd PATH is too small for host cdamux (neomind status → cdamux on).
   systemd.services.neomind.path = [config.system.path];
+  # PrivateTmp would hide /tmp/tmux-1000 from cdamux orch ls.
+  systemd.services.neomind.serviceConfig.PrivateTmp = lib.mkForce false;
   systemd.services.neomind.serviceConfig.ExecStart = lib.mkForce "${pkgs.writeShellScript "neomind-run" ''
     export NEOMIND_MODEL_KEY="''${LLAMA_SWAP_API_KEY:?}"
     exec ${config.services.neomind.package}/bin/neomind run
