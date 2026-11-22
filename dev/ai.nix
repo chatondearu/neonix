@@ -45,6 +45,8 @@ in {
   systemd.services.neomind.path = [config.system.path];
   # PrivateTmp would hide /tmp/tmux-1000 from cdamux orch ls.
   systemd.services.neomind.serviceConfig.PrivateTmp = lib.mkForce false;
+  # Module has no services.neomind.channel; status reads NEOMIND_CHANNEL (default prod).
+  systemd.services.neomind.environment.NEOMIND_CHANNEL = "canary";
   systemd.services.neomind.serviceConfig.ExecStart = lib.mkForce "${pkgs.writeShellScript "neomind-run" ''
     export NEOMIND_MODEL_KEY="''${LLAMA_SWAP_API_KEY:?}"
     exec ${config.services.neomind.package}/bin/neomind run
