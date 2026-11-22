@@ -40,6 +40,10 @@
 
     ai-dev-kit.url = "github:chatondearu/ai-dev-kit";
     ai-dev-kit.inputs.nixpkgs.follows = "nixpkgs-unstable";
+
+    # Workstation daemon (nixosModules.neomind). Follow main; no v* pin.
+    # git+ssh: repo is private; github: 404s without an access token.
+    neomind.url = "git+ssh://git@github.com/chatondearu/neomind.git";
   };
 
   outputs = {
