@@ -170,7 +170,7 @@ This configuration uses **NixOS with flakes** as the primary workflow, **without
   - Mistral Devstral Small 2 2512 (local)
   - Qwen.3 35b A3B (local)
   - GLM 4.7 Flash (local)
-- **neomind live path:** `services.neomind` (system unit, `User=chaton`, package `neomind-desktop`). Do not run `~/.local/share/neomind/run-live.sh` (cargo) beside it. After the first `sudo nixos-rebuild switch --flake .#neo-nix` that enables the unit, stop `run-live.sh` so only systemd remains. Updates: `nix flake update neomind && sudo nixos-rebuild switch --flake .#neo-nix` (follow **main**, no `v*` pin).
+- **neomind live path:** `services.neomind` (system unit, `User=chaton`, package `neomind-desktop`). Unit PATH must see host `cdamux`. Unit must not PrivateTmp (tmux socket in `/tmp`). Do not run `~/.local/share/neomind/run-live.sh` (cargo) beside it. After the first `sudo nixos-rebuild switch --flake .#neo-nix` that enables the unit, stop `run-live.sh` so only systemd remains. Updates: `nix flake update neomind && sudo nixos-rebuild switch --flake .#neo-nix` (follow **main**, no `v*` pin).
 
 ### Setting Up a new template for dev Projects or a one-time application
 1. Create a new directory under `virtual-envs/` or `virtual-envs/templates/`
