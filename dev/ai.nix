@@ -1,4 +1,10 @@
-{pkgs, ...}: let
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  ...
+}: let
   huggingfaceCache = "/hdd/huggingface";
   # Build / runtime cost notes (see pkgs/packaging.md):
   # - llama-cpp CUDA: see dev/ai-llama.nix (optional, slow compile)
@@ -11,6 +17,7 @@ in {
     ../pkgs/overrides.nix
     ./ai-llama.nix
     ./ai-stt.nix
+    inputs.neomind.nixosModules.neomind
   ];
 
   environment.systemPackages = with pkgs; [
@@ -18,6 +25,26 @@ in {
     (callPackage ../pkgs/OpenAgentsControl/default.nix {})
     (callPackage ../pkgs/dictation-ptt/default.nix {})
   ];
+
+  # Official live daemon: systemd neomind (User=chaton). After switch, stop
+  # ~/.local/share/neomind/run-live.sh so only one daemon remains.
+  # identity paths omitted → $HOME/.local/share/neomind/{memory,agent.key,ask.sock}
+  # installKind defaults to nix_desktop (module).
+  services.neomind = {
+    enable = true;
+    user = "chaton";
+    agent = "neo-nix";
+    model = "glm-4.7-flash:q4";
+    modelUrl = "http://127.0.0.1:9292/v1";
+    # agenix file is LLAMA_SWAP_API_KEY=; remap below. No second secret.
+    environmentFile = config.age.secrets.llama-swap-api-key.path;
+  };
+
+  # Same mapping as run-live.sh: EnvironmentFile loads LLAMA_SWAP_API_KEY.
+  systemd.services.neomind.serviceConfig.ExecStart = lib.mkForce "${pkgs.writeShellScript "neomind-run" ''
+    export NEOMIND_MODEL_KEY="''${LLAMA_SWAP_API_KEY:?}"
+    exec ${config.services.neomind.package}/bin/neomind run
+  ''}";
 
   users.users.chaton.maid = {
     file.xdg_config."opencode/opencode.json".source = "{{home}}/etc/nixos/dev/opencode/opencode.json";

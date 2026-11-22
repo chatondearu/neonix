@@ -357,6 +357,24 @@
         "type": "github"
       }
     },
+    "neomind": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_5"
+      },
+      "locked": {
+        "lastModified": 1795307747,
+        "narHash": "sha256-FO8VWUycOLgDbeQOp7OwdyTfXMr+nVyM6TeKwf8C58E=",
+        "ref": "refs/heads/main",
+        "rev": "94d52444f45e133aead5e9652440d31a78c4077c",
+        "revCount": 326,
+        "type": "git",
+        "url": "ssh://git@github.com/chatondearu/neomind.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/chatondearu/neomind.git"
+      }
+    },
     "nirinit": {
       "inputs": {
         "fenix": "fenix_2",
@@ -459,7 +477,7 @@
       "inputs": {
         "flake-compat": "flake-compat_4",
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs_6",
+        "nixpkgs": "nixpkgs_7",
         "nvfetcher": "nvfetcher",
         "systems": "systems",
         "treefmt-nix": "treefmt-nix_2"
@@ -528,6 +546,22 @@
     },
     "nixpkgs_5": {
       "locked": {
+        "lastModified": 1793540411,
+        "narHash": "sha256-fiPJ88izTVucjeo2EQ3jk4aWmLg03I1D4vxnX2QjEgE=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "0bb2eedc20e4739f29e8045034f2828ad7054f8f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_6": {
+      "locked": {
         "lastModified": 1792615934,
         "narHash": "sha256-MlvRfa1O5Cqc2/a+gG+l9TSuowEoCKCmrJ1d9oAVm0I=",
         "owner": "NixOS",
@@ -542,7 +576,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_6": {
+    "nixpkgs_7": {
       "locked": {
         "lastModified": 1792094642,
         "narHash": "sha256-zp8ToDMnqZcu4o4IH9pdwXFXGp7yLm/M0dEnNWnyd7I=",
@@ -649,9 +683,10 @@
         "alejandra": "alejandra",
         "dms": "dms",
         "dms-plugin-registry": "dms-plugin-registry",
+        "neomind": "neomind",
         "nirinit": "nirinit",
         "nix-maid": "nix-maid_2",
-        "nixpkgs": "nixpkgs_5",
+        "nixpkgs": "nixpkgs_6",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nixpkgs-xr": "nixpkgs-xr",
         "quickshell": "quickshell",
