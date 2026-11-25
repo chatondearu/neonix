@@ -2,6 +2,7 @@
 
 For an agent on the live host after the next NixOS boot. English. Do the steps in order. Each step ends on a checkable done line. Chat with the human in French.
 
+- **Status**: done (SanDisk fallback wiped 2026-11-25; disk left plugged as empty spare)
 - **ADRs**: [[../foam/decisions/ADR-003-nvme-system-migration|ADR-003]] (method) + [[../foam/decisions/ADR-004-luks-lvm-hibernate|ADR-004]] (layout)
 - **Layout snapshot**: [[../foam/architecture/nvme-system-migration|foam architecture note]]
 
@@ -340,7 +341,7 @@ If resume hangs: hard power-off, boot the 1T NVMe again (normal boot, hibernate 
 
 Update `foam/architecture/nvme-system-migration.md`: status **done**, replace the “current layout” table with vg0 + the new serials. Leave ADR-003 / ADR-004 accepted.
 
-Do not wipe the SanDisk in this playbook. That is a later human decision.
+SanDisk wipe (2026-11-25, human GO): identify by serial `1948B0800288` only; destroy LUKS header; `blkdiscard`; `sgdisk --zap-all`; delete NVRAM entries on PARTUUID `da025c61`. Do not touch FOX SPIRIT / HDD / WD_BLACK.
 
 **Done:** foam layout table matches `lsblk`; playbook status can be marked done at the top of this file.
 
@@ -350,5 +351,5 @@ Do not wipe the SanDisk in this playbook. That is a later human decision.
 
 - Format and `sgdisk` only `$NEW`.
 - Keep `/games` and `/hdd` mounted from the existing disks.
-- Keep the SanDisk until session 2 **Done**.
+- Keep the SanDisk until session 2 **Done** (wiped afterwards, 2026-11-25).
 - Copy `/home`, `/nix`, `/var`, `/etc` with rsync (host keys, Tailscale, nix-maid). `nixos-install` does not copy them.

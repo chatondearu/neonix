@@ -30,6 +30,8 @@ in {
       limine = {
         enable = true;
         efiSupport = true;
+        # Firmware "boot from disk" uses \EFI\BOOT\BOOTX64.EFI; keep that Limine, not leftover systemd-boot.
+        efiInstallAsRemovable = true;
         style.wallpapers = [pkgs.nixos-artwork.wallpapers.simple-dark-gray-bootloader.gnomeFilePath];
         maxGenerations = 10;
         secureBoot.enable = true;

@@ -200,7 +200,7 @@ This configuration uses **NixOS with flakes** as the primary workflow, **without
 
 ## Project-specific notes
 
-- **Root disk:** neo-nix boots from WD_BLACK SN850X 1T (LUKS `cryptroot` → LVM `vg0`). SanDisk 480G is unmounted fallback. Layout: `playbooks/nvme-root-migration.md`, [[foam/decisions/ADR-003-nvme-system-migration|ADR-003]], [[foam/decisions/ADR-004-luks-lvm-hibernate|ADR-004]].
+- **Root disk:** neo-nix boots from WD_BLACK SN850X 1T (LUKS `cryptroot` → LVM `vg0`). SanDisk 480G (`1948B0800288`) is an empty spare (wiped 2026-11-25, no ESP). Layout: `playbooks/nvme-root-migration.md`, [[foam/decisions/ADR-003-nvme-system-migration|ADR-003]], [[foam/decisions/ADR-004-luks-lvm-hibernate|ADR-004]].
 
 ## References
 - [NixOS Manual](https://nixos.org/manual/)

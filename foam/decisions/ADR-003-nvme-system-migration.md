@@ -18,6 +18,7 @@ neo-nix currently boots from a SATA SanDisk 480G SSD (LUKS + ext4 `/`, FAT `/boo
 - Copy the live root with **rsync** (exclude `/games`, `/hdd`, and pseudo-fs), then `nixos-install --flake .#neo-nix` so Limine lands on the new ESP.
 - Update `hardware-configuration.nix` (LUKS `/`, `/boot`) and `swapDevices` in `system/system.nix` **before** first boot from the NVMe. Identify disks by model/serial, never by `nvme0`/`nvme1` index.
 - Keep the SanDisk as fallback until several successful boots; wipe it later.
+- **Done 2026-11-25:** SanDisk `1948B0800288` wiped (LUKS header + `blkdiscard` + GPT zap) and left plugged as empty spare. NVRAM entries pointing at its ESP removed. See [[../architecture/nvme-system-migration|layout snapshot]].
 
 Steps: `playbooks/nvme-root-migration.md`. Snapshot: [[../architecture/nvme-system-migration|NVMe system migration]].
 
