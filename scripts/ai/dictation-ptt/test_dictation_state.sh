@@ -6,10 +6,28 @@ mkdir -p "$XDG_RUNTIME_DIR"
 export PATH="$XDG_RUNTIME_DIR/bin:$PATH"
 mkdir -p "$XDG_RUNTIME_DIR/bin"
 export XDG_CONFIG_HOME="$XDG_RUNTIME_DIR/config"
+export DICTATION_STT=auto
+export DICTATION_STREAM_MODEL="$XDG_RUNTIME_DIR/fake-model.bin"
+export DICTATION_STREAM_BIN=whisper-stream
+: >"$DICTATION_STREAM_MODEL"
 mkdir -p "$XDG_CONFIG_HOME/dictation-ptt"
 cat >"$XDG_CONFIG_HOME/dictation-ptt/config.json" <<'EOF'
 {"silence_enabled": false}
 EOF
+
+cat >"$XDG_RUNTIME_DIR/bin/whisper-stream" <<'EOF'
+#!/usr/bin/env bash
+out=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -f) out="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+printf 'bonjour\n' >"$out"
+sleep 60
+EOF
+chmod +x "$XDG_RUNTIME_DIR/bin/whisper-stream"
 
 cat >"$XDG_RUNTIME_DIR/bin/notify-send" <<'EOF'
 #!/usr/bin/env bash
@@ -87,7 +105,8 @@ test ! -f "$XDG_RUNTIME_DIR/notify.log"
 "$ROOT/dictation-ptt.sh" status | grep -qx idle
 test ! -f "$XDG_RUNTIME_DIR/notify.log"
 
-# Error path: empty capture still notifies critical
+# Error path: empty capture still notifies critical (batch mode checks WAV)
+export DICTATION_STT=wyoming
 cat >"$XDG_RUNTIME_DIR/bin/pw-record" <<'EOF'
 #!/usr/bin/env bash
 out="${@: -1}"

@@ -9,10 +9,13 @@ CONFIG_FILE="${DICTATION_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/dictation-ptt
 LOCK_FILE=""
 WATCH_PID_FILE=""
 TRANSCRIBE_PID_FILE=""
+STREAM_PID_FILE=""
 STATE_FILE="$STATE_DIR/state"
 LISTEN_STARTED_FILE="$STATE_DIR/listening_started"
 PID_FILE="$STATE_DIR/record.pid"
 ERR_FILE="$STATE_DIR/transcribe.err"
+STREAM_OUT_FILE="$STATE_DIR/stream.txt"
+STREAM_ERR_FILE="$STATE_DIR/stream.err"
 WAV_FILE="$DATA_DIR/capture.wav"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 TRANSCRIBE="${DICTATION_TRANSCRIBE:-$SCRIPT_DIR/wyoming_transcribe.py}"
@@ -23,8 +26,22 @@ PARAKEET_URL="${DICTATION_PARAKEET_URL:-http://127.0.0.1:10310/v1}"
 WHISPER_URL="${DICTATION_WHISPER_URL:-http://127.0.0.1:10311}"
 STT_MODE="${DICTATION_STT:-auto}"
 STT_TIMEOUT="${DICTATION_STT_TIMEOUT:-60}"
+STREAM_BIN="${DICTATION_STREAM_BIN:-whisper-stream}"
+STREAM_MODEL="${DICTATION_STREAM_MODEL:-/hdd/whisper/ggml-small.bin}"
+STREAM_STEP_MS="${DICTATION_STREAM_STEP_MS:-1000}"
+STREAM_LENGTH_MS="${DICTATION_STREAM_LENGTH_MS:-5000}"
+STREAM_KEEP_MS="${DICTATION_STREAM_KEEP_MS:-200}"
 NOTIFY_TITLE="Dictation"
 NOTIFY_ID=991031
+
+# auto|stream: decode while held via whisper-stream (ADR-006).
+# parakeet|whisper|wyoming: legacy batch POST/Wyoming after release.
+uses_streaming_stt() {
+  case "$STT_MODE" in
+    auto | stream) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 
 ensure_state_dir() {
   mkdir -p "$STATE_DIR" "$DATA_DIR"
@@ -173,14 +190,77 @@ stop_recording_process() {
   done
 }
 
+stop_stream_process() {
+  if [[ -f "$STREAM_PID_FILE" ]]; then
+    local pid
+    pid="$(tr -d '[:space:]' <"$STREAM_PID_FILE" || true)"
+    stop_pid "$pid"
+    rm -f "$STREAM_PID_FILE"
+  fi
+}
+
+# Start whisper-stream so PCM is decoded while the key is held (not after release).
+start_stream_session() {
+  if ! command -v "$STREAM_BIN" >/dev/null 2>&1; then
+    notify_err "whisper-stream introuvable (whisper-cpp)."
+    return 1
+  fi
+  if [[ ! -f "$STREAM_MODEL" ]]; then
+    notify_err "Modèle streaming introuvable: $STREAM_MODEL"
+    return 1
+  fi
+
+  rm -f "$STREAM_OUT_FILE" "$STREAM_ERR_FILE"
+  : >"$STREAM_OUT_FILE"
+
+  local -a cmd=(
+    "$STREAM_BIN"
+    -m "$STREAM_MODEL"
+    -l fr
+    -f "$STREAM_OUT_FILE"
+    --step "$STREAM_STEP_MS"
+    --length "$STREAM_LENGTH_MS"
+    --keep "$STREAM_KEEP_MS"
+  )
+  if [[ -n "${DICTATION_STREAM_CAPTURE:-}" ]]; then
+    cmd+=(-c "$DICTATION_STREAM_CAPTURE")
+  fi
+  if [[ "${DICTATION_STREAM_NO_GPU:-}" == "1" ]]; then
+    cmd+=(-ng)
+  fi
+
+  "${cmd[@]}" 9>&- >>"$STREAM_ERR_FILE" 2>&1 &
+  local stream_pid=$!
+  disown "$stream_pid" 2>/dev/null || true
+  printf '%s\n' "$stream_pid" >"$STREAM_PID_FILE"
+
+  if ! kill -0 "$stream_pid" 2>/dev/null; then
+    rm -f "$STREAM_PID_FILE"
+    notify_err "Échec démarrage whisper-stream."
+    return 1
+  fi
+  return 0
+}
+
+finalize_stream_text() {
+  [[ -f "$STREAM_OUT_FILE" ]] || return 0
+  # whisper-stream appends step transcripts; join non-empty lines.
+  tr -d '\r' <"$STREAM_OUT_FILE" \
+    | sed '/^[[:space:]]*$/d;s/^[[:space:]]*//;s/[[:space:]]*$//' \
+    | paste -sd' ' - \
+    | tr -s '[:space:]' ' ' \
+    | sed 's/^ //;s/ $//'
+}
+
 cmd_start() {
   ensure_state_dir
   if [[ "$(get_state)" == "transcribing" ]]; then
     notify_err "Transcription en cours."
     exit 1
   fi
+  stop_stream_process
   stop_recording_process
-  rm -f "$WAV_FILE"
+  rm -f "$WAV_FILE" "$STREAM_OUT_FILE" "$STREAM_ERR_FILE"
 
   if ! command -v pw-record >/dev/null 2>&1; then
     set_state idle
@@ -209,6 +289,14 @@ cmd_start() {
     exit 1
   fi
 
+  if uses_streaming_stt; then
+    if ! start_stream_session; then
+      stop_recording_process
+      set_state idle
+      exit 1
+    fi
+  fi
+
   set_state listening
   start_watchers
 }
@@ -221,19 +309,23 @@ stop_prepare_listening() {
   fi
 
   if [[ ! -f "$PID_FILE" ]]; then
+    stop_stream_process
     set_state idle
     return 1
   fi
 
   stop_recording_process
 
-  if [[ ! -f "$WAV_FILE" ]] || [[ ! -s "$WAV_FILE" ]]; then
-    set_state idle
-    notify_err "Enregistrement vide ou manquant."
-    return 1
+  if ! uses_streaming_stt; then
+    if [[ ! -f "$WAV_FILE" ]] || [[ ! -s "$WAV_FILE" ]]; then
+      set_state idle
+      notify_err "Enregistrement vide ou manquant."
+      return 1
+    fi
   fi
 
   if ! command -v wl-copy >/dev/null 2>&1 || ! command -v wtype >/dev/null 2>&1; then
+    stop_stream_process
     set_state idle
     notify_err "wl-copy ou wtype manquant."
     return 1
@@ -243,7 +335,39 @@ stop_prepare_listening() {
   return 0
 }
 
+paste_transcript() {
+  local text="$1"
+  printf '%s' "$text" | wl-copy
+  sleep 0.05
+  # Ctrl+Shift+V: works in terminals (Ghostty) and most GUI apps
+  wtype -M ctrl -M shift v -m shift -m ctrl
+  set_state idle
+}
+
+# Flush whisper-stream (SIGINT), read final text, paste. No batch HTTP POST.
+stop_stream_flush_and_paste() {
+  stop_stream_process
+
+  if [[ "$(get_state)" != "transcribing" ]]; then
+    return 0
+  fi
+
+  local text
+  text="$(finalize_stream_text)"
+  if [[ -z "$text" ]]; then
+    set_state idle
+    return 0
+  fi
+
+  paste_transcript "$text"
+}
+
 stop_transcribe_and_paste() {
+  if uses_streaming_stt; then
+    stop_stream_flush_and_paste
+    return
+  fi
+
   backend_up() {
     local url="$1"
     curl -fsS -m 0.3 "${url%/v1}/health" >/dev/null 2>&1 \
@@ -279,41 +403,6 @@ stop_transcribe_and_paste() {
       parakeet) run_openai "$PARAKEET_URL" ;;
       whisper) run_whisper ;;
       wyoming) run_wyoming ;;
-      auto)
-        # Try each healthy backend in order; on hard failure continue (e.g. Parakeet
-        # rejects audio longer than the single-pass limit without -long-audio).
-        # Exit 2 = empty transcript: stop without trying another backend.
-        local errf out rc
-        errf="$(mktemp)"
-        try_backend() {
-          out="$("$@" 2>"$errf")"
-          rc=$?
-          if [[ "$rc" -eq 0 ]]; then
-            printf '%s' "$out"
-            rm -f "$errf"
-            return 0
-          fi
-          if [[ "$rc" -eq 2 ]]; then
-            cat "$errf" >&2
-            rm -f "$errf"
-            return 2
-          fi
-          cat "$errf" >&2
-          return 1
-        }
-        if backend_up "$PARAKEET_URL"; then
-          try_backend run_openai "$PARAKEET_URL" && return 0
-          [[ $? -eq 2 ]] && return 2
-        fi
-        if backend_up "$WHISPER_URL"; then
-          try_backend run_whisper && return 0
-          [[ $? -eq 2 ]] && return 2
-        fi
-        try_backend run_wyoming
-        rc=$?
-        rm -f "$errf"
-        return "$rc"
-        ;;
       *) notify_err "DICTATION_STT invalide: $STT_MODE"; return 1 ;;
     esac
   }
@@ -341,11 +430,7 @@ stop_transcribe_and_paste() {
     return 1
   fi
 
-  printf '%s' "$text" | wl-copy
-  sleep 0.05
-  # Ctrl+Shift+V: works in terminals (Ghostty) and most GUI apps
-  wtype -M ctrl -M shift v -m shift -m ctrl
-  set_state idle
+  paste_transcript "$text"
 }
 
 cmd_stop() {
@@ -433,13 +518,14 @@ cmd_toggle() {
 
 force_stop_session() {
   stop_watchers
+  stop_stream_process
   stop_recording_process
   if [[ -f "$TRANSCRIBE_PID_FILE" ]]; then
     stop_pid "$(tr -d '[:space:]' <"$TRANSCRIBE_PID_FILE")"
     rm -f "$TRANSCRIBE_PID_FILE"
   fi
   local p
-  for p in $(pgrep -f 'whisper_cpp_transcribe|openai_transcribe|wyoming_transcribe' 2>/dev/null || true); do
+  for p in $(pgrep -f 'whisper_cpp_transcribe|openai_transcribe|wyoming_transcribe|whisper-stream' 2>/dev/null || true); do
     stop_pid "$p"
   done
   set_state idle
@@ -489,6 +575,7 @@ main() {
   DICTATION_BIN="${DICTATION_BIN:-$SCRIPT_DIR/dictation-ptt.sh}"
   WATCH_PID_FILE="$STATE_DIR/watch.pid"
   TRANSCRIBE_PID_FILE="$STATE_DIR/transcribe.pid"
+  STREAM_PID_FILE="$STATE_DIR/stream.pid"
   case "${1:-}" in
     start) with_lock cmd_start ;;
     stop) cmd_stop ;;

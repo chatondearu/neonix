@@ -1,6 +1,6 @@
 # PLAN-31 — Local streaming STT while PTT is held
 
-- **Status**: draft
+- **Status**: in-progress
 - **PRD**: [[../prd/PRD-29-dictation-ptt-quiet-streaming|PRD-29]]
 - **GitHub**: [#31](https://github.com/chatondearu/neonix/issues/31)
 - **Date**: 2026-11-25
@@ -48,13 +48,13 @@ Record the engine choice as an ADR if it is a durable stack decision.
 
 ## Tasks
 
-- [ ] Confirm none of the current batch HTTP/Wyoming paths emit a transcript before end-of-utterance (acceptance: one-line note in the PR / ADR)
-- [ ] Choose and package a local streaming engine, or stop with BLOCKED (engines evaluated + reason)
-- [ ] `start` opens capture and the streaming session so PCM is consumed before `stop`
-- [ ] `stop` flushes, pastes at focus with the existing clipboard + paste chord, returns idle
-- [ ] Auto / fallback: streaming engine first while listening; batch backends are not the release path
-- [ ] Tests or a self-check: start then stop without a full-file POST of the whole clip on the happy path
-- [ ] README: streaming-while-held behavior, no Gradium, no overlay
+- [x] Confirm none of the current batch HTTP/Wyoming paths emit a transcript before end-of-utterance (acceptance: one-line note in the PR / ADR)
+- [x] Choose and package a local streaming engine, or stop with BLOCKED (engines evaluated + reason) — **whisper-stream** + `ggml-small` (ADR-006)
+- [x] `start` opens capture and the streaming session so PCM is consumed before `stop`
+- [x] `stop` flushes, pastes at focus with the existing clipboard + paste chord, returns idle
+- [x] Auto / fallback: streaming engine first while listening; batch backends are not the release path
+- [x] Tests or a self-check: start then stop without a full-file POST of the whole clip on the happy path
+- [x] README: streaming-while-held behavior, no Gradium, no overlay
 
 ## Risks & mitigations
 
