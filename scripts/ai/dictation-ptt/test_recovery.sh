@@ -51,6 +51,7 @@ kill -0 "$rec_pid" 2>/dev/null
 ! kill -0 "$rec_pid" 2>/dev/null
 test ! -f "$STATE_DIR/record.pid"
 test ! -e "$DICTATION_DATA_DIR/capture.wav" || ! -s "$DICTATION_DATA_DIR/capture.wav"
+test ! -f "$XDG_RUNTIME_DIR/notify.log"
 
 "$ROOT/dictation-ptt.sh" start
 "$ROOT/dictation-ptt.sh" status | grep -qx idle && exit 1 || true
@@ -59,6 +60,7 @@ test ! -e "$DICTATION_DATA_DIR/capture.wav" || ! -s "$DICTATION_DATA_DIR/capture
 "$ROOT/dictation-ptt.sh" status | head -1 | grep -qx idle
 test ! -f "$DICTATION_DATA_DIR/capture.wav" -o ! -s "$DICTATION_DATA_DIR/capture.wav" || \
   { "$ROOT/dictation-ptt.sh" clean; test ! -e "$DICTATION_DATA_DIR/capture.wav" || ! -s "$DICTATION_DATA_DIR/capture.wav"; }
+test ! -f "$XDG_RUNTIME_DIR/notify.log"
 
 # force-stop during transcribing (simulated in-flight STT)
 "$ROOT/dictation-ptt.sh" start
@@ -73,5 +75,6 @@ printf 'transcribing\n' >"$STATE_DIR/state"
 kill "$fake_stt" 2>/dev/null || true
 wait "$fake_stt" 2>/dev/null || true
 test ! -f "$STATE_DIR/transcribe.pid"
+test ! -f "$XDG_RUNTIME_DIR/notify.log"
 
 echo OK

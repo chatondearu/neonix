@@ -204,13 +204,13 @@ Measured on this machine (2026-08-03): Parakeet ~1.0 s, whisper.cpp ~0.2 s for a
 
 ## Notifications
 
-Desktop notifications (title **Dictation**, replace-id to avoid stacking):
+Happy-path start / stop / toggle / recovery emit **no** desktop toast — the DMS DictationPtt widget is the status surface.
+
+Critical notifications only (title **Dictation**, replace-id to avoid stacking):
 
 | Event | Body | Urgency |
 |-------|------|---------|
-| Start | Écoute… | low |
-| Transcribing | Transcription… | low |
-| Error | mic / STT / paste failure | critical |
+| Error | mic / lock / empty capture / missing paste tools / STT failure | critical |
 
 Empty transcripts do not notify and do not paste.
 
@@ -258,4 +258,4 @@ bash scripts/ai/dictation-ptt/test_dictation_state.sh
 
 ## Failures
 
-Desktop notifications titled **Dictation** appear for mic/PipeWire issues, missing paste tools (`wl-copy`, `wtype`), and STT/model errors.
+Critical desktop notifications titled **Dictation** appear for mic/PipeWire issues, lock conflicts, empty capture, missing paste tools (`wl-copy`, `wtype`), and STT/model errors. Success paths stay silent.

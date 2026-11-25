@@ -123,14 +123,6 @@ get_state() {
   fi
 }
 
-notify_info() {
-  local body="$1"
-  echo "$NOTIFY_TITLE: $body" >&2
-  if command -v notify-send >/dev/null 2>&1; then
-    notify-send -r "$NOTIFY_ID" -u low -a Dictation "$NOTIFY_TITLE" "$body" || true
-  fi
-}
-
 notify_err() {
   local body="$1"
   echo "$NOTIFY_TITLE: $body" >&2
@@ -218,7 +210,6 @@ cmd_start() {
   fi
 
   set_state listening
-  notify_info "Écoute…"
   start_watchers
 }
 
@@ -249,7 +240,6 @@ stop_prepare_listening() {
   fi
 
   set_state transcribing
-  notify_info "Transcription…"
   return 0
 }
 
@@ -464,7 +454,6 @@ cmd_force_stop() {
     exec 9>&- 2>/dev/null || true
     force_stop_session
   fi
-  notify_info "Arrêt forcé."
 }
 
 cmd_cancel() {
@@ -482,7 +471,6 @@ cmd_clean() {
   rm -f "$WAV_FILE" "$DATA_DIR"/*.wav 2>/dev/null || true
   rm -f "$PID_FILE" "$TRANSCRIBE_PID_FILE"
   release_lock
-  notify_info "Cache audio nettoyé."
 }
 
 cmd_reset() {
