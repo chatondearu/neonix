@@ -244,12 +244,11 @@ start_stream_session() {
 
 finalize_stream_text() {
   [[ -f "$STREAM_OUT_FILE" ]] || return 0
-  # whisper-stream appends step transcripts; join non-empty lines.
+  # whisper-stream (step>0) rewrites the full window each step then appends a
+  # newline; joining lines duplicates drafts. Keep the last non-empty line.
   tr -d '\r' <"$STREAM_OUT_FILE" \
-    | sed '/^[[:space:]]*$/d;s/^[[:space:]]*//;s/[[:space:]]*$//' \
-    | paste -sd' ' - \
-    | tr -s '[:space:]' ' ' \
-    | sed 's/^ //;s/ $//'
+    | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
+    | awk 'NF { line = $0 } END { print line }'
 }
 
 cmd_start() {
@@ -344,8 +343,19 @@ paste_transcript() {
   set_state idle
 }
 
-# Flush whisper-stream (SIGINT), read final text, paste. No batch HTTP POST.
+# Stop whisper-stream, take last decoded step text, paste. No batch HTTP POST.
+# Note: whisper-stream has no SIGINT flush of residual PCM; stop pastes the
+# last completed step already written to -f (shortcut: last ~step window may
+# be truncated, upgrade if upstream adds a clean shutdown decode).
 stop_stream_flush_and_paste() {
+  local stream_alive=0 stream_pid=""
+  if [[ -f "$STREAM_PID_FILE" ]]; then
+    stream_pid="$(tr -d '[:space:]' <"$STREAM_PID_FILE" || true)"
+    if [[ -n "$stream_pid" ]] && kill -0 "$stream_pid" 2>/dev/null; then
+      stream_alive=1
+    fi
+  fi
+
   stop_stream_process
 
   if [[ "$(get_state)" != "transcribing" ]]; then
@@ -354,6 +364,15 @@ stop_stream_flush_and_paste() {
 
   local text
   text="$(finalize_stream_text)"
+
+  if ((stream_alive == 0)); then
+    local err
+    err="$(tail -n 8 "$STREAM_ERR_FILE" 2>/dev/null | tr '\n' ' ' | sed 's/[[:space:]]*$//')"
+    set_state idle
+    notify_err "STT / stream: ${err:-whisper-stream arrêté}"
+    return 1
+  fi
+
   if [[ -z "$text" ]]; then
     set_state idle
     return 0
@@ -367,12 +386,6 @@ stop_transcribe_and_paste() {
     stop_stream_flush_and_paste
     return
   fi
-
-  backend_up() {
-    local url="$1"
-    curl -fsS -m 0.3 "${url%/v1}/health" >/dev/null 2>&1 \
-      || curl -fsS -m 0.3 "$url/models" >/dev/null 2>&1
-  }
 
   run_tracked() {
     local pid rc

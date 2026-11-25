@@ -5,7 +5,7 @@ Local push-to-talk dictation on neo-nix.
 ## Behavior
 
 - **Start** (`dictation-ptt start`): PipeWire WAV capture for watchers + **whisper-stream** session so PCM is decoded while the key is held.
-- **Stop** (`dictation-ptt stop`): flush the stream process, paste final text at focus (`wl-copy` + `Ctrl+Shift+V` via `wtype`). No live overlay; no cloud STT.
+- **Stop** (`dictation-ptt stop`): stop the stream process, paste the last decoded `-f` line at focus (`wl-copy` + `Ctrl+Shift+V` via `wtype`). No residual-PCM flush on SIGINT. Stream death before stop → critical notify. No live overlay; no cloud STT.
 - **Happy path**: no desktop notifications (DMS DictationPtt widget is the status surface). Errors still notify at critical urgency.
 
 ## Configuration

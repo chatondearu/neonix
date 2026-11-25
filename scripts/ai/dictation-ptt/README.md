@@ -1,6 +1,6 @@
 # dictation-ptt
 
-Local dictation (hold or toggle): capture starts on push, a **local streaming** ASR (`whisper-stream`) consumes PCM **while** the key is held, release flushes and pastes at focus (`Ctrl+Shift+V` via `wtype`). No cloud STT, no live overlay or live clipboard of partials.
+Local dictation (hold or toggle): capture starts on push, a **local streaming** ASR (`whisper-stream`) consumes PCM **while** the key is held; release stops the stream and pastes the last decoded step at focus (`Ctrl+Shift+V` via `wtype`). No cloud STT, no live overlay or live clipboard of partials.
 
 WAV captures (for silence / max-duration watchers) go under `/tmp/dictation-ptt-$UID/` (not the small `XDG_RUNTIME_DIR` tmpfs) so long sessions cannot fill the session runtime.
 
@@ -171,7 +171,7 @@ State and lock files: `$XDG_RUNTIME_DIR/dictation-ptt/` (runtime). Audio cache: 
 
 | Backend | Port / binary | Service | Role |
 |---------|---------------|---------|------|
-| **whisper-stream** (ggml-small) | local `whisper-stream` | model via `whisper-cpp-models` | **Default PTT path** — decodes while held; flush on release ([[foam/decisions/ADR-006-ptt-streaming-whisper-stream\|ADR-006]]) |
+| **whisper-stream** (ggml-small) | local `whisper-stream` | model via `whisper-cpp-models` | **Default PTT path** — decodes while held; on release paste last `-f` step ([[foam/decisions/ADR-006-ptt-streaming-whisper-stream\|ADR-006]]) |
 | **Parakeet** TDT 0.6B v3 (ONNX, CPU) | `10310` | `parakeet-asr` | Legacy batch — opt-in via `DICTATION_STT=parakeet` |
 | **whisper.cpp** large-v3-turbo (CUDA) | `10311` | `whisper-cpp-asr` | Legacy batch HTTP `/inference` |
 | **Wyoming** faster-whisper | `10300` | `wyoming-faster-whisper-english` | Legacy batch (decode after `AudioStop`) |
@@ -186,7 +186,7 @@ All HTTP listeners are localhost-only (`127.0.0.1` or restricted via `IPAddressA
 
 | Value | Behavior |
 |-------|----------|
-| `auto` | **Streaming**: start `whisper-stream` with capture; stop flushes and pastes (no batch POST) |
+| `auto` | **Streaming**: start `whisper-stream` with capture; stop pastes last decoded step (no batch POST) |
 | `stream` | Same as `auto` (explicit) |
 | `parakeet` | Force Parakeet OpenAI HTTP (`http://127.0.0.1:10310/v1`) after release |
 | `whisper` | Force whisper.cpp OpenAI HTTP (`http://127.0.0.1:10311`) after release |
@@ -198,11 +198,11 @@ Override batch URLs if needed: `DICTATION_PARAKEET_URL`, `DICTATION_WHISPER_URL`
 
 ## Latency expectations
 
-Target: release → paste is a **flush** of audio already being decoded (not a full-utterance file upload).
+Target: release → paste uses text already decoded in prior steps (not a full-utterance file upload). `whisper-stream` does not decode residual PCM on SIGINT — the last in-flight step may be short.
 
 | Backend | While held | On release |
 |---------|------------|------------|
-| whisper-stream (small) | Continuous step decode | Flush + paste |
+| whisper-stream (small) | Continuous step decode | Stop process; paste last `-f` line |
 | Parakeet / whisper.cpp / Wyoming (batch) | Record WAV only | Full-file POST / AudioStop |
 
 ## Notifications
