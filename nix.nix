@@ -44,12 +44,23 @@
       trusted-users = ["root" "chaton"];
     };
 
-    # Automatic garbage collection
+    # Automatic garbage collection — quiet hours, no catch-up after reboot
+    # (Persistent=true + weekly was saturating the root SanDisk SSD at boot).
     gc = {
       automatic = true;
-      dates = "weekly";
+      dates = "Sun *-*-* 03:00:00";
       options = "--delete-older-than 30d";
+      persistent = false;
+      randomizedDelaySec = "1h";
     };
+  };
+
+  # Keep GC from starving interactive I/O on the root SSD
+  systemd.services.nix-gc.serviceConfig = {
+    Nice = 19;
+    IOSchedulingClass = "idle";
+    IOSchedulingPriority = 7;
+    IOWeight = 10;
   };
 
   # Allow unfree packages
