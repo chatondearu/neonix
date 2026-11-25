@@ -14,7 +14,7 @@ Dictation PTT recorded a WAV then POSTed the whole file after key-up (Parakeet O
 Use **whisper.cpp `whisper-stream`** (already on neo-nix via `pkgs.whisper-cpp` + CUDA) with a dedicated **`ggml-small`** multilingual model under `/hdd/whisper/ggml-small.bin` (downloaded by `whisper-cpp-models.service`).
 
 - `dictation-ptt start` opens PipeWire capture **and** starts `whisper-stream` (SDL capture + step decode).
-- `dictation-ptt stop` terminates the stream process and pastes the **last non-empty line** from its `-f` output (each step rewrites the full window; do not join lines). `whisper-stream` has no SIGINT handler that decodes residual PCM — release uses the last completed step, not a true end-of-stream flush.
+- `dictation-ptt stop` snapshots `-f` at key-up, SIGKILL after ~0.3s if SIGINT is ignored, and pastes a **stitched** transcript: successive `-f` lines are revisions of the current sliding window (keep the latest); a line that does not overlap is a new window after whisper-stream drops the buffer (`length/step - 1` steps, `--keep` ms retained). Skip Whisper silence junk (`...`, `[Musique]`, Amara credits). `whisper-stream` has no SIGINT handler that decodes residual PCM — release uses completed steps, not a true end-of-stream flush. `--keep-context` is on so the next window conditions on the previous tokens.
 - If the stream dies before stop (model/audio init failure), stop notifies critical (empty silent paste is only for a live stream with no speech).
 - `DICTATION_STT=auto|stream` (default `auto`) uses this path only — batch backends are not the release path.
 - Explicit `parakeet` / `whisper` / `wyoming` remain available for debugging legacy batch.
@@ -32,7 +32,7 @@ Use **whisper.cpp `whisper-stream`** (already on neo-nix via `pkgs.whisper-cpp` 
 ## Consequences
 
 - **Positive**: PCM is decoded while listening; release latency is last-step paste, not a full-clip HTTP upload.
-- **Negative**: Streaming quality (small model) can trail batch Parakeet / large-v3-turbo; dual mic open (pw-record + SDL); last in-flight step may be truncated on stop.
+- **Negative**: Streaming quality (small model) can trail batch Parakeet / large-v3-turbo; dual mic open (pw-record + SDL); last in-flight step may be truncated on stop; CUDA whisper-stream often ignores SIGINT so stop SIGKILLs after ~0.3s instead of waiting for a flush. Sliding-window stitch can miss the first ~step if it never landed in `-f`, or duplicate a phrase if Whisper restarts a window with a similar prefix.
 - **Constraint**: Stay localhost; do not reintroduce happy-path batch POST for `auto`/`stream` without a superseding ADR.
 
 ## References

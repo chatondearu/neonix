@@ -15,6 +15,7 @@ LISTEN_STARTED_FILE="$STATE_DIR/listening_started"
 PID_FILE="$STATE_DIR/record.pid"
 ERR_FILE="$STATE_DIR/transcribe.err"
 STREAM_OUT_FILE="$STATE_DIR/stream.txt"
+STREAM_SNAPSHOT_FILE="$STATE_DIR/stream.snapshot"
 STREAM_ERR_FILE="$STATE_DIR/stream.err"
 WAV_FILE="$DATA_DIR/capture.wav"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
@@ -28,7 +29,7 @@ STT_MODE="${DICTATION_STT:-auto}"
 STT_TIMEOUT="${DICTATION_STT_TIMEOUT:-60}"
 STREAM_BIN="${DICTATION_STREAM_BIN:-whisper-stream}"
 STREAM_MODEL="${DICTATION_STREAM_MODEL:-/hdd/whisper/ggml-small.bin}"
-STREAM_STEP_MS="${DICTATION_STREAM_STEP_MS:-1000}"
+STREAM_STEP_MS="${DICTATION_STREAM_STEP_MS:-500}"
 STREAM_LENGTH_MS="${DICTATION_STREAM_LENGTH_MS:-5000}"
 STREAM_KEEP_MS="${DICTATION_STREAM_KEEP_MS:-200}"
 NOTIFY_TITLE="Dictation"
@@ -151,12 +152,14 @@ notify_err() {
 wait_for_process_exit() {
   local pid="$1"
   local i=0
+  # shortcut: 5s wait made PTT release feel hung; CUDA whisper-stream often
+  # ignores SIGINT. Kill after ~0.3s. Upgrade if a real flush-on-stop lands.
   while kill -0 "$pid" 2>/dev/null; do
-    if ((i >= 50)); then
-      kill -TERM "$pid" 2>/dev/null || true
+    if ((i >= 6)); then
+      kill -KILL "$pid" 2>/dev/null || true
       break
     fi
-    sleep 0.1
+    sleep 0.05
     ((i++)) || true
   done
   wait "$pid" 2>/dev/null || true
@@ -221,6 +224,7 @@ start_stream_session() {
     --step "$STREAM_STEP_MS"
     --length "$STREAM_LENGTH_MS"
     --keep "$STREAM_KEEP_MS"
+    --keep-context
   )
   if [[ -n "${DICTATION_STREAM_CAPTURE:-}" ]]; then
     cmd+=(-c "$DICTATION_STREAM_CAPTURE")
@@ -243,12 +247,59 @@ start_stream_session() {
 }
 
 finalize_stream_text() {
-  [[ -f "$STREAM_OUT_FILE" ]] || return 0
-  # whisper-stream (step>0) rewrites the full window each step then appends a
-  # newline; joining lines duplicates drafts. Keep the last non-empty line.
-  tr -d '\r' <"$STREAM_OUT_FILE" \
+  local src="$STREAM_OUT_FILE"
+  [[ -f "$STREAM_SNAPSHOT_FILE" ]] && src="$STREAM_SNAPSHOT_FILE"
+  [[ -f "$src" ]] || return 0
+  # whisper-stream (step>0) rewrites the current window each step, then every
+  # (length/step - 1) steps drops the buffer to --keep ms. Last line is only
+  # the latest fragment. Collapse revisions of one window; append a new window.
+  # Skip trailing-quiet junk: "...", "[Musique]", Amara credits.
+  tr -d '\r' <"$src" \
     | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
-    | awk 'NF { line = $0 } END { print line }'
+    | awk '
+        function is_junk(s) {
+          if (s == "" || s == "..." || s == "…") return 1
+          if (s ~ /^\.{2,}$/) return 1
+          if (s ~ /^\[[^]]+\]$/) return 1
+          if (s ~ /[Ss]ous-titres/) return 1
+          if (tolower(s) ~ /amara\.org/) return 1
+          return 0
+        }
+        function norm(s, t) {
+          t = tolower(s)
+          gsub(/[^a-z0-9 ]/, "", t)
+          gsub(/  +/, " ", t)
+          sub(/^ +/, "", t)
+          return t
+        }
+        function first2(s, a, n) {
+          n = split(s, a, / +/)
+          if (n >= 2) return a[1] " " a[2]
+          return s
+        }
+        function is_rev(a, b, na, nb) {
+          na = norm(a); nb = norm(b)
+          if (na == "" || nb == "") return 0
+          if (index(nb, na) || index(na, nb)) return 1
+          if (first2(na) == first2(nb)) return 1
+          return 0
+        }
+        function commit() {
+          if (cur == "") return
+          if (acc != "") acc = acc " "
+          acc = acc cur
+          cur = ""
+        }
+        NF == 0 { next }
+        is_junk($0) { next }
+        cur == "" { cur = $0; next }
+        is_rev(cur, $0) { cur = $0; next }
+        { commit(); cur = $0 }
+        END {
+          commit()
+          print acc
+        }
+      '
 }
 
 cmd_start() {
@@ -259,7 +310,7 @@ cmd_start() {
   fi
   stop_stream_process
   stop_recording_process
-  rm -f "$WAV_FILE" "$STREAM_OUT_FILE" "$STREAM_ERR_FILE"
+  rm -f "$WAV_FILE" "$STREAM_OUT_FILE" "$STREAM_SNAPSHOT_FILE" "$STREAM_ERR_FILE"
 
   if ! command -v pw-record >/dev/null 2>&1; then
     set_state idle
@@ -356,14 +407,15 @@ stop_stream_flush_and_paste() {
     fi
   fi
 
+  # Snapshot before kill: shutdown wait used to append silence hallucinations.
+  local text
+  text="$(finalize_stream_text)"
+
   stop_stream_process
 
   if [[ "$(get_state)" != "transcribing" ]]; then
     return 0
   fi
-
-  local text
-  text="$(finalize_stream_text)"
 
   if ((stream_alive == 0)); then
     local err
@@ -450,6 +502,11 @@ cmd_stop() {
   if [[ "$(get_state)" != "listening" ]]; then
     stop_watchers
     exit 0
+  fi
+  # Freeze decoded text at key-up before we stall killing pw-record /
+  # whisper-stream (those used to keep writing silence hallucinations).
+  if uses_streaming_stt && [[ -f "$STREAM_OUT_FILE" ]]; then
+    cp -f "$STREAM_OUT_FILE" "$STREAM_SNAPSHOT_FILE" || true
   fi
   stop_watchers
 

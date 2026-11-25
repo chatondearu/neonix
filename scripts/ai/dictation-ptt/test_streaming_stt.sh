@@ -111,10 +111,47 @@ test "$(wc -l <"$XDG_RUNTIME_DIR/stream-pcm-consumed")" -ge 2
 "$ROOT/dictation-ptt.sh" stop
 "$ROOT/dictation-ptt.sh" status | head -1 | grep -qx idle
 test ! -f "$STATE_DIR/stream.pid"
-# Last rewritten window only — not joined drafts.
+# Same-window drafts collapse to the latest rewrite (not joined).
 grep -qx 'bonjour tout le monde' "$CLIP"
 test ! -f "$XDG_RUNTIME_DIR/batch.log"
 test ! -f "$XDG_RUNTIME_DIR/notify.log"
+
+# Trailing Whisper junk must not be pasted; SIGINT-deaf stream must die fast.
+rm -f "$CLIP"
+cat >"$XDG_RUNTIME_DIR/bin/whisper-stream" <<'EOF'
+#!/usr/bin/env bash
+out=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -f) out="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+{
+  printf '%s\n' "J'essaye de faire des trucs."
+  printf '%s\n' '...'
+  printf '%s\n' '[Musique]'
+  printf '%s\n' '...'
+  printf '%s\n' "Sous-titres réalisés par la communauté d'Amara.org"
+  printf '%s\n' "Le modèle a l'air de couper au"
+  printf '%s\n' "Le modèle a l'air de couper au bout d'un certain temps."
+  printf '%s\n' 'ce que je dis.'
+  printf '%s\n' '...'
+} >"$out"
+trap '' INT TERM
+sleep 30
+EOF
+chmod +x "$XDG_RUNTIME_DIR/bin/whisper-stream"
+
+"$ROOT/dictation-ptt.sh" start
+"$ROOT/dictation-ptt.sh" status | head -1 | grep -qx listening
+stop_started="$SECONDS"
+"$ROOT/dictation-ptt.sh" stop
+stop_elapsed=$((SECONDS - stop_started))
+test "$stop_elapsed" -le 2
+"$ROOT/dictation-ptt.sh" status | head -1 | grep -qx idle
+grep -qx "J'essaye de faire des trucs. Le modèle a l'air de couper au bout d'un certain temps. ce que je dis." "$CLIP"
+test ! -f "$XDG_RUNTIME_DIR/batch.log"
 
 # Stream crash after start → critical notify on stop (no silent idle).
 rm -f "$CLIP" "$XDG_RUNTIME_DIR/notify.log" "$XDG_RUNTIME_DIR/batch.log"

@@ -198,11 +198,11 @@ Override batch URLs if needed: `DICTATION_PARAKEET_URL`, `DICTATION_WHISPER_URL`
 
 ## Latency expectations
 
-Target: release → paste uses text already decoded in prior steps (not a full-utterance file upload). `whisper-stream` does not decode residual PCM on SIGINT — the last in-flight step may be short.
+Target: release → paste uses text already decoded in prior steps (not a full-utterance file upload). `whisper-stream` resets its audio buffer every `--length/--step` cycle (~4.5 s with the defaults); stop stitches those windows (revisions collapse, new windows append). It does not decode residual PCM on SIGINT — the last in-flight step may be short. Stop snapshots `-f` at key-up and SIGKILLs after ~0.3s if the process ignores SIGINT. Trailing Whisper junk (`...`, `[Musique]`, Amara credits) is skipped.
 
 | Backend | While held | On release |
 |---------|------------|------------|
-| whisper-stream (small) | Continuous step decode | Stop process; paste last `-f` line |
+| whisper-stream (small) | Continuous step decode | Snapshot + stitch windows; kill stream |
 | Parakeet / whisper.cpp / Wyoming (batch) | Record WAV only | Full-file POST / AudioStop |
 
 ## Notifications
