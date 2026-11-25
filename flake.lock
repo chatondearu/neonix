@@ -54,11 +54,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795553104,
-        "narHash": "sha256-nbDkjRpLEcRltyM918Com7ifxyWWDT9IMn7mQ9GHrgA=",
+        "lastModified": 1795627469,
+        "narHash": "sha256-lTysvMoQROnDGQuRx2mLx9PhE6uiBwJ0SFvxHK7ova0=",
         "owner": "chatondearu",
         "repo": "ai-dev-kit",
-        "rev": "a26f96ce61ad93e3ed52360c3a5a6f6e814551f1",
+        "rev": "dee5771dd4e55c2064d99a425f82742315754349",
         "type": "github"
       },
       "original": {

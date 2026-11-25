@@ -22,6 +22,8 @@
     deploy.enable = true;
     cdamux = {
       projectsRoot = "/hdd/dev";
+      # Explicit state root so panes inherit it (#391). Same path as the XDG fallback.
+      home = "/home/chaton/.local/state/cdamux";
       # Alt-N → dedicated cdamux-nav (ADR-014 / kit #349); needs deploy.enable
       navBind.enable = true;
     };
@@ -83,6 +85,7 @@
       ExecStart = "/run/current-system/sw/bin/cdamux restore --all";
       Environment = [
         "PATH=/run/current-system/sw/bin:%h/.local/bin"
+        "CDAMUX_HOME=/home/chaton/.local/state/cdamux"
       ];
     };
   };
