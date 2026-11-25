@@ -1,8 +1,8 @@
 # dictation-ptt
 
-Local dictation (hold or toggle): PipeWire record → STT backend → clipboard paste at focus (`Ctrl+Shift+V` via `wtype`).
+Local dictation (hold or toggle): capture starts on push, a **local streaming** ASR (`whisper-stream`) consumes PCM **while** the key is held, release flushes and pastes at focus (`Ctrl+Shift+V` via `wtype`). No cloud STT, no live overlay or live clipboard of partials.
 
-WAV captures go under `/tmp/dictation-ptt-$UID/` (not the small `XDG_RUNTIME_DIR` tmpfs) so long sessions cannot fill the session runtime.
+WAV captures (for silence / max-duration watchers) go under `/tmp/dictation-ptt-$UID/` (not the small `XDG_RUNTIME_DIR` tmpfs) so long sessions cannot fill the session runtime.
 
 ## Configuration
 
@@ -169,13 +169,16 @@ State and lock files: `$XDG_RUNTIME_DIR/dictation-ptt/` (runtime). Audio cache: 
 
 ## STT backends
 
-| Backend | Port | Service | Role |
-|---------|------|---------|------|
-| **Parakeet** TDT 0.6B v3 (ONNX, CPU) | `10310` | `parakeet-asr` | Default — fastest for short FR clips (`-long-audio` for longer takes) |
-| **whisper.cpp** large-v3-turbo (CUDA) | `10311` | `whisper-cpp-asr` | Fallback / quality |
-| **Wyoming** faster-whisper | `10300` | `wyoming-faster-whisper-english` | Legacy fallback |
+| Backend | Port / binary | Service | Role |
+|---------|---------------|---------|------|
+| **whisper-stream** (ggml-small) | local `whisper-stream` | model via `whisper-cpp-models` | **Default PTT path** — decodes while held; flush on release ([[foam/decisions/ADR-006-ptt-streaming-whisper-stream\|ADR-006]]) |
+| **Parakeet** TDT 0.6B v3 (ONNX, CPU) | `10310` | `parakeet-asr` | Legacy batch — opt-in via `DICTATION_STT=parakeet` |
+| **whisper.cpp** large-v3-turbo (CUDA) | `10311` | `whisper-cpp-asr` | Legacy batch HTTP `/inference` |
+| **Wyoming** faster-whisper | `10300` | `wyoming-faster-whisper-english` | Legacy batch (decode after `AudioStop`) |
 
-All listeners are localhost-only (`127.0.0.1` or restricted via `IPAddressAllow`); no firewall ports opened.
+Batch HTTP/Wyoming paths do **not** emit a transcript before end-of-utterance (Parakeet `/audio/transcriptions`, whisper.cpp `/inference`, Wyoming after `AudioStop`). PTT `auto`/`stream` never POSTs the full clip on release.
+
+All HTTP listeners are localhost-only (`127.0.0.1` or restricted via `IPAddressAllow`); no firewall ports opened. No Gradium / cloud STT.
 
 ### Backend selection
 
@@ -183,24 +186,24 @@ All listeners are localhost-only (`127.0.0.1` or restricted via `IPAddressAllow`
 
 | Value | Behavior |
 |-------|----------|
-| `auto` | Parakeet → whisper.cpp → Wyoming (first healthy backend) |
-| `parakeet` | Force Parakeet OpenAI HTTP (`http://127.0.0.1:10310/v1`) |
-| `whisper` | Force whisper.cpp OpenAI HTTP (`http://127.0.0.1:10311`) |
-| `wyoming` | Force Wyoming TCP (`tcp://127.0.0.1:10300`) |
+| `auto` | **Streaming**: start `whisper-stream` with capture; stop flushes and pastes (no batch POST) |
+| `stream` | Same as `auto` (explicit) |
+| `parakeet` | Force Parakeet OpenAI HTTP (`http://127.0.0.1:10310/v1`) after release |
+| `whisper` | Force whisper.cpp OpenAI HTTP (`http://127.0.0.1:10311`) after release |
+| `wyoming` | Force Wyoming TCP (`tcp://127.0.0.1:10300`) after release |
 
-Override URLs if needed: `DICTATION_PARAKEET_URL`, `DICTATION_WHISPER_URL`, `DICTATION_WYOMING_URI`.
+Streaming env overrides: `DICTATION_STREAM_MODEL` (default `/hdd/whisper/ggml-small.bin`), `DICTATION_STREAM_BIN`, `DICTATION_STREAM_CAPTURE` (SDL device id), `DICTATION_STREAM_NO_GPU=1`.
+
+Override batch URLs if needed: `DICTATION_PARAKEET_URL`, `DICTATION_WHISPER_URL`, `DICTATION_WYOMING_URI`.
 
 ## Latency expectations
 
-Target: **≤ 3 s** end-to-end (release → paste) for a ~3 s utterance on Parakeet.
+Target: release → paste is a **flush** of audio already being decoded (not a full-utterance file upload).
 
-| Backend | ~3 s clip (typical) | Notes |
-|---------|-------------------|-------|
-| Parakeet (CPU ONNX) | ~1 s | Default; scales with clip length |
-| whisper.cpp (CUDA) | ~0.2–2 s | Depends on GPU load and model |
-| Wyoming (CPU float32) | ~15–30 s | Legacy fallback only |
-
-Measured on this machine (2026-08-03): Parakeet ~1.0 s, whisper.cpp ~0.2 s for a 2 s clip.
+| Backend | While held | On release |
+|---------|------------|------------|
+| whisper-stream (small) | Continuous step decode | Flush + paste |
+| Parakeet / whisper.cpp / Wyoming (batch) | Record WAV only | Full-file POST / AudioStop |
 
 ## Notifications
 
@@ -254,6 +257,7 @@ Automated checks (from repo):
 bash scripts/ai/dictation-ptt/test_recovery.sh
 bash scripts/ai/dictation-ptt/test_watchers.sh
 bash scripts/ai/dictation-ptt/test_dictation_state.sh
+bash scripts/ai/dictation-ptt/test_streaming_stt.sh
 ```
 
 ## Failures

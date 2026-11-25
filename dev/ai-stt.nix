@@ -100,6 +100,11 @@ in {
       if [ ! -f "ggml-large-v3-turbo.bin" ]; then
         ${pkgs.curl}/bin/curl -L -o ggml-large-v3-turbo.bin "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin"
       fi
+
+      # Small multilingual model for PTT streaming (whisper-stream); see ADR-006.
+      if [ ! -f "ggml-small.bin" ]; then
+        ${pkgs.curl}/bin/curl -L -o ggml-small.bin "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin"
+      fi
     '';
   };
 

@@ -28,6 +28,7 @@ Map of Content (MOC). Start here before product or architecture decisions.
 Index: [[decisions/index|All ADRs]]
 
 - [[decisions/ADR-001-llama-swap-lan-auth|ADR-001]] — llama-swap LAN + auth (accepted)
+- [[decisions/ADR-006-ptt-streaming-whisper-stream|ADR-006]] — PTT streaming STT via whisper-stream (accepted)
 
 ## PRDs & plans
 
