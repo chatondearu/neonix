@@ -1,6 +1,6 @@
 ---
 title: "fix(dictation-ptt): drop happy-path notifications; keep errors only"
-status: in-review
+status: done
 priority: P0
 updated: 2026-11-25
 github_issue: 30
