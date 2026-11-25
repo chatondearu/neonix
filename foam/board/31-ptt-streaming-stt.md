@@ -13,7 +13,7 @@ Feed PCM to a local streaming ASR while PTT is held; on release flush and paste.
 
 ## Acceptance
 
-- [ ] Streaming engine consumes PCM before key-up
-- [ ] Release does not wait for a full-file HTTP POST of the whole clip
-- [ ] No cloud STT, no live overlay
-- [ ] BLOCKED rather than a fake chunked full-file loop if no engine fits
+- [x] Streaming engine consumes PCM before key-up
+- [x] Release does not wait for a full-file HTTP POST of the whole clip
+- [x] No cloud STT, no live overlay
+- [x] Engine chosen: whisper-stream + ggml-small (ADR-006)
