@@ -163,7 +163,8 @@ This configuration uses **NixOS with flakes** as the primary workflow, **without
 - Integrated with gh CLI for GitHub operations
 
 ### AI Tool
-- Configured in `dev/ai.nix`
+- Configured in `dev/ai.nix` and `dev/aitools.nix`
+- **ai-dev-kit** is the flake input `ai-dev-kit` only ([[foam/decisions/ADR-005-aitools-from-flake|ADR-005]]). Skills via kit `nix/maid.nix` with `repoPath = inputs.ai-dev-kit` (do not import kit `nixosModules.default`: second nix-maid). Do not point `repoPath` at a local clone and do not run `install.sh` against this home for kit skills. Host-only extras overlay nix-maid from this repo.
 - opencode.json defines model providers and settings
 - Models available:
   - Gemma 3n-e4b (local)
@@ -171,6 +172,7 @@ This configuration uses **NixOS with flakes** as the primary workflow, **without
   - Qwen.3 35b A3B (local)
   - GLM 4.7 Flash (local)
 - **neomind live path:** `services.neomind` (system unit, `User=chaton`, package `neomind-desktop`, hive **channel canary** via `NEOMIND_CHANNEL`). Unit PATH must see host `cdamux`. Unit must not PrivateTmp (tmux socket in `/tmp`). Do not run `~/.local/share/neomind/run-live.sh` (cargo) beside it. After the first `sudo nixos-rebuild switch --flake .#neo-nix` that enables the unit, stop `run-live.sh` so only systemd remains. Updates: after a `--canary` publish (or anytime — flake follows git **main**, no `v*` pin): `nix flake update neomind && sudo nixos-rebuild switch --flake .#neo-nix`.
+- **Kit updates:** `nix flake update ai-dev-kit && sudo nixos-rebuild switch --flake .#neo-nix`.
 
 ### Setting Up a new template for dev Projects or a one-time application
 1. Create a new directory under `virtual-envs/` or `virtual-envs/templates/`
@@ -195,6 +197,10 @@ This configuration uses **NixOS with flakes** as the primary workflow, **without
 - `nix flake metadata`: Check flake inputs and dependencies
 - `nix store gc --print-dead`: Identify unused store paths (cleanup)
 - `journalctl -xe`: View system logs for errors
+
+## Project-specific notes
+
+- **Root disk:** neo-nix boots from WD_BLACK SN850X 1T (LUKS `cryptroot` → LVM `vg0`). SanDisk 480G is unmounted fallback. Layout: `playbooks/nvme-root-migration.md`, [[foam/decisions/ADR-003-nvme-system-migration|ADR-003]], [[foam/decisions/ADR-004-luks-lvm-hibernate|ADR-004]].
 
 ## References
 - [NixOS Manual](https://nixos.org/manual/)

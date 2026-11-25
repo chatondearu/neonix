@@ -1,8 +1,10 @@
 let
-  # Host identity (ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub)
-  hostKey = "age1ywj43me8kzavjq39ld3h76ccf7wqxe0kly9lpkdh6nk7qytwkf8s7pl09d";
+  # Host SSH key, not its ssh-to-age form: age.identityPaths uses the SSH key,
+  # which only matches ssh-ed25519 recipients.
+  hostKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII/GkbDE0YJJJXTe2hG4SP+LdC7gfK4ON3JEYn6arEXL";
 
   recipients = [hostKey];
 in {
   "llama-swap-api-key.age".publicKeys = recipients;
+  "coolify-token.age".publicKeys = recipients;
 }

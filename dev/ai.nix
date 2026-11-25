@@ -54,7 +54,6 @@ in {
 
   users.users.chaton.maid = {
     file.xdg_config."opencode/opencode.json".source = "{{home}}/etc/nixos/dev/opencode/opencode.json";
-    file.xdg_config."opencode/skills".source = "{{home}}/etc/nixos/dev/opencode/skills";
   };
 
   environment.sessionVariables = {

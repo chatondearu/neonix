@@ -21,13 +21,17 @@ Map of Content (MOC). Start here before product or architecture decisions.
 
 ## Architecture
 
-- _(Add topic notes under `foam/architecture/` and link ADRs here.)_
+- [[architecture/nvme-system-migration|NVMe system migration]] — layout snapshot; steps in `playbooks/nvme-root-migration.md` ([[decisions/ADR-003-nvme-system-migration|ADR-003]], [[decisions/ADR-004-luks-lvm-hibernate|ADR-004]])
 
 ## Decisions (ADRs)
 
 Index: [[decisions/index|All ADRs]]
 
 - [[decisions/ADR-001-llama-swap-lan-auth|ADR-001]] — llama-swap LAN + auth (accepted)
+- [[decisions/ADR-002-synology-declarative-docker|ADR-002]] — Synology NAS declarative Docker stacks (accepted)
+- [[decisions/ADR-003-nvme-system-migration|ADR-003]] — migrate neo-nix root to a new NVMe (accepted)
+- [[decisions/ADR-004-luks-lvm-hibernate|ADR-004]] — LUKS+LVM + encrypted swap for hibernate (accepted)
+- [[decisions/ADR-005-aitools-from-flake|ADR-005]] — ai-dev-kit from flake input (`nix/maid.nix`), not a local clone (accepted)
 - [[decisions/ADR-006-ptt-streaming-whisper-stream|ADR-006]] — PTT streaming STT via whisper-stream (accepted)
 
 ## PRDs & plans
@@ -42,4 +46,4 @@ Index: [[decisions/index|All ADRs]]
 
 ## Tags
 
-`#product` `#architecture` `#deployment` `#data` `#auth`
+`#product` `#architecture` `#deployment` `#data` `#auth` `#storage`

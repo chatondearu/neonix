@@ -1,10 +1,13 @@
-# neo-nix: thin host overlay on ai-dev-kit cda.aitools (ADR-003).
-# cdamux.projectsRoot is single-valued upstream; append extra [[projects.roots]] here.
+# neo-nix: thin host overlay on ai-dev-kit (ADR-005). Skills come from the
+# flake input via nix/maid.nix (not nixosModules.default: that re-imports
+# nix-maid). cdamux.projectsRoot is single-valued upstream; append extra
+# [[projects.roots]] here.
 # Login restore of dormant agents is host-only: PRD-195 lists auto-restore as a non-goal.
 {
   inputs,
   pkgs,
   lib,
+  config,
   ...
 }: {
   imports = [inputs.ai-dev-kit.nixosModules.cdaAitools];
@@ -12,9 +15,9 @@
   cda.aitools = {
     enable = true;
     user = "chaton";
-    repoPath = "{{home}}/dev/chatondearu/ai-dev-kit";
+    repoPath = "${inputs.ai-dev-kit}";
     configRoot = "/home/chaton/.config/cda-aitools";
-    installMethod = "auto";
+    installMethod = "nix";
     enablePackages = true;
     deploy.enable = true;
     cdamux = {
@@ -30,8 +33,11 @@
     cdamuxd.enable = true;
     graphify = {
       enable = true;
-      installMethod = "auto"; # pinned Nix wheel, else uv at activation
+      installMethod = "nix";
     };
+    # Official Coolify CLI on PATH (kit #344). URL + token live in
+    # age.secrets.coolify-token (never in the Nix store).
+    coolify.enable = true;
     moshiHook = {
       enable = true;
       hookTargets = ["cursor"];
@@ -39,19 +45,31 @@
     systemdUser.conditionUser = "!dms-greeter";
   };
 
-  users.users.chaton.maid.file.xdg_config."cdamux/config.toml".source = lib.mkForce (
-    pkgs.writeText "cdamux-config.toml" (
-      builtins.replaceStrings ["@PROJECTS_ROOT@"] ["/hdd/dev"] (
-        builtins.readFile "${inputs.ai-dev-kit}/aitools/templates/cdamux/config.toml"
-      )
-      + ''
+  users.users.chaton.maid = lib.mkMerge [
+    (import "${inputs.ai-dev-kit}/nix/maid.nix" {
+      repoPath = "${inputs.ai-dev-kit}";
+      skillDirs = [
+        ".cursor/skills"
+        ".claude/skills"
+        ".config/opencode/skills"
+      ];
+    })
+    {
+      file.xdg_config."cdamux/config.toml".source = lib.mkForce (
+        pkgs.writeText "cdamux-config.toml" (
+          builtins.replaceStrings ["@PROJECTS_ROOT@"] ["/hdd/dev"] (
+            builtins.readFile "${inputs.ai-dev-kit}/aitools/templates/cdamux/config.toml"
+          )
+          + ''
 
-        [[projects.roots]]
-        path = "/home/chaton/etc/nixos"
-        label = "nixos"
-      ''
-    )
-  );
+            [[projects.roots]]
+            path = "/home/chaton/etc/nixos"
+            label = "nixos"
+          ''
+        )
+      );
+    }
+  ];
 
   # After login: recreate dormant registry sessions on their agent conversation.
   systemd.user.services.cdamux-restore-dormant = {
@@ -66,6 +84,20 @@
       Environment = [
         "PATH=/run/current-system/sw/bin:%h/.local/bin"
       ];
+    };
+  };
+
+  systemd.user.services.coolify-env-sync = {
+    description = "Bootstrap Coolify CLI context from agenix secret";
+    after = ["default.target"];
+    wantedBy = ["default.target"];
+    unitConfig.ConditionUser = "!dms-greeter";
+    unitConfig.ConditionPathExists = config.age.secrets.coolify-token.path;
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "/run/current-system/sw/bin/coolify-env-sync";
+      Environment = ["PATH=/run/current-system/sw/bin"];
+      EnvironmentFile = ["-${config.age.secrets.coolify-token.path}"];
     };
   };
 }

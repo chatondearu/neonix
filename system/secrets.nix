@@ -13,6 +13,17 @@
       mode = "0400";
     };
 
+    # EnvironmentFile for coolify-env-sync. Fill with:
+    #   agenix -e secrets/coolify-token.age
+    #   COOLIFY_BASE_URL=https://…
+    #   COOLIFY_TOKEN=…
+    coolify-token = {
+      file = ../secrets/coolify-token.age;
+      owner = "chaton";
+      group = "users";
+      mode = "0400";
+    };
+
     # tailscale-auth-key = {
     #   file = ../secrets/tailscale-auth-key.age;
     #   mode = "0400";

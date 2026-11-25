@@ -8,7 +8,8 @@
 # | nirinit/config.toml  | desktop/niri.nix |
 # | DankMaterialShell/*  | desktop/shell.dank.nix (not settings.json) |
 # | helix/*              | dev/helix.nix |
-# | opencode/*           | dev/ai.nix |
+# | opencode/opencode.json | dev/ai.nix |
+# | agent skills         | dev/aitools.nix → kit nix/maid.nix (flake input, ADR-005) |
 # | .tmux.conf, cda-aitools, cdamux | dev/aitools.nix → ai-dev-kit aitools/templates |
 # | cdamuxd, moshi-hook (systemd)  | ai-dev-kit cda.aitools module |
 # | openvr, openxr, wivrn | gaming/steam.nix, gaming/vr/… |

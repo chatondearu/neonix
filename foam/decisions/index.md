@@ -8,6 +8,9 @@ Status values: `proposed` | `accepted` | `deprecated` | `superseded`.
 | -- | ----- | ------ | ---- |
 | [[ADR-001-llama-swap-lan-auth\|ADR-001]] | llama-swap LAN access with authentication | accepted | #security #ai |
 | [[ADR-002-synology-declarative-docker\|ADR-002]] | Synology NAS declarative Docker stacks | accepted | #deployment #architecture |
+| [[ADR-003-nvme-system-migration\|ADR-003]] | Migrate neo-nix root from SATA SSD to a new NVMe | accepted | #architecture #deployment #storage |
+| [[ADR-004-luks-lvm-hibernate\|ADR-004]] | LUKS + LVM root layout with encrypted swap for hibernate | accepted | #architecture #storage #deployment |
+| [[ADR-005-aitools-from-flake\|ADR-005]] | Install ai-dev-kit from the flake input | accepted | #architecture #ai #deployment |
 | [[ADR-006-ptt-streaming-whisper-stream\|ADR-006]] | PTT streaming STT via whisper-stream | accepted | #stt #ai #dictation |
 
 ## Template

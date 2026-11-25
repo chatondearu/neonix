@@ -54,11 +54,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794843610,
-        "narHash": "sha256-yiqgdufGE1AlbBtVG9afAQ485gFMrOpJGwcyb3Fyxng=",
+        "lastModified": 1795553104,
+        "narHash": "sha256-nbDkjRpLEcRltyM918Com7ifxyWWDT9IMn7mQ9GHrgA=",
         "owner": "chatondearu",
         "repo": "ai-dev-kit",
-        "rev": "f22dc452574ae8a48c7c14c38700325ec0155e66",
+        "rev": "a26f96ce61ad93e3ed52360c3a5a6f6e814551f1",
         "type": "github"
       },
       "original": {
@@ -362,11 +362,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1795307747,
-        "narHash": "sha256-FO8VWUycOLgDbeQOp7OwdyTfXMr+nVyM6TeKwf8C58E=",
+        "lastModified": 1795465468,
+        "narHash": "sha256-XlczOg91gPRj/odIdXPO67X/KctMYFpN4c6Ll87TVuY=",
         "ref": "refs/heads/main",
-        "rev": "94d52444f45e133aead5e9652440d31a78c4077c",
-        "revCount": 326,
+        "rev": "b18b99df5e67887896fa809eb8e61a1e45344fcb",
+        "revCount": 346,
         "type": "git",
         "url": "ssh://git@github.com/chatondearu/neomind.git"
       },
