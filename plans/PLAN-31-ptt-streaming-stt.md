@@ -1,6 +1,6 @@
 # PLAN-31 — Local streaming STT while PTT is held
 
-- **Status**: in-progress
+- **Status**: done
 - **PRD**: [[../prd/PRD-29-dictation-ptt-quiet-streaming|PRD-29]]
 - **GitHub**: [#31](https://github.com/chatondearu/neonix/issues/31)
 - **Date**: 2026-11-25
