@@ -47,7 +47,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 : >"${XDG_RUNTIME_DIR}/stream-pcm-consumed"
-printf 'bonjour stream\n' >"$out"
+# Mimic whisper-stream step>0: each line is a full-window rewrite.
+{
+  printf 'bonjour\n'
+  printf 'bonjour tout le\n'
+  printf 'bonjour tout le monde\n'
+} >"$out"
 # Prove PCM consumer is alive while listening (before stop).
 while true; do
   echo tick >>"${XDG_RUNTIME_DIR}/stream-pcm-consumed"
@@ -106,8 +111,38 @@ test "$(wc -l <"$XDG_RUNTIME_DIR/stream-pcm-consumed")" -ge 2
 "$ROOT/dictation-ptt.sh" stop
 "$ROOT/dictation-ptt.sh" status | head -1 | grep -qx idle
 test ! -f "$STATE_DIR/stream.pid"
-grep -qx 'bonjour stream' "$CLIP"
+# Last rewritten window only — not joined drafts.
+grep -qx 'bonjour tout le monde' "$CLIP"
 test ! -f "$XDG_RUNTIME_DIR/batch.log"
 test ! -f "$XDG_RUNTIME_DIR/notify.log"
+
+# Stream crash after start → critical notify on stop (no silent idle).
+rm -f "$CLIP" "$XDG_RUNTIME_DIR/notify.log" "$XDG_RUNTIME_DIR/batch.log"
+cat >"$XDG_RUNTIME_DIR/bin/whisper-stream" <<'EOF'
+#!/usr/bin/env bash
+out=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -f) out="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+echo "init failed: no capture" >>"${XDG_RUNTIME_DIR}/dictation-ptt/stream.err"
+sleep 0.3
+exit 1
+EOF
+chmod +x "$XDG_RUNTIME_DIR/bin/whisper-stream"
+
+"$ROOT/dictation-ptt.sh" start
+"$ROOT/dictation-ptt.sh" status | head -1 | grep -qx listening
+sleep 0.5
+set +e
+"$ROOT/dictation-ptt.sh" stop
+stop_rc=$?
+set -e
+test "$stop_rc" -ne 0
+"$ROOT/dictation-ptt.sh" status | head -1 | grep -qx idle
+grep -q "stream\|STT" "$XDG_RUNTIME_DIR/notify.log"
+test ! -f "$XDG_RUNTIME_DIR/batch.log"
 
 echo OK
