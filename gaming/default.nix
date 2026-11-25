@@ -59,9 +59,15 @@
 
   # Hardware support for devices
   # Dongle Microsoft (045e:02fe) via xone; do not enable xpadneo unless Bluetooth is on.
+  # xone.nix loads the package + firmware, but gamepad/headset bind via gip:* aliases;
+  # preload so a connected pad still gets /dev/input after boot races / I/O stalls.
   hardware.xone.enable = true;
   hardware.enableAllFirmware = true;
   hardware.xpadneo.enable = false;
+  boot.kernelModules = [
+    "xone_gip_gamepad"
+    "xone_gip_headset"
+  ];
   # hardware.opentabletdriver.enable = true; # Disabled: no tablet detected, wastes resources scanning
   services.ratbagd.enable = true; # Ratbagd is a daemon for managing input devices like Logitech G502
 
