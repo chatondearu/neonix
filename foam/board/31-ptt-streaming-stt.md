@@ -1,6 +1,6 @@
 ---
 title: "feat(dictation-ptt): stream local STT while recording; flush on release"
-status: ready
+status: in-progress
 priority: P0
 updated: 2026-11-25
 github_issue: 31
