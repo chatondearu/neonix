@@ -81,8 +81,26 @@ chmod +x "$DICTATION_TRANSCRIBE"
 "$ROOT/dictation-ptt.sh" start
 "$ROOT/dictation-ptt.sh" status | grep -qx listening
 "$ROOT/dictation-ptt.sh" status --json | grep -q '"state":"listening"'
-grep -q "Écoute" "$XDG_RUNTIME_DIR/notify.log"
+# Happy path: no desktop notification
+test ! -f "$XDG_RUNTIME_DIR/notify.log"
 "$ROOT/dictation-ptt.sh" stop
 "$ROOT/dictation-ptt.sh" status | grep -qx idle
-grep -q "Transcription" "$XDG_RUNTIME_DIR/notify.log"
+test ! -f "$XDG_RUNTIME_DIR/notify.log"
+
+# Error path: empty capture still notifies critical
+cat >"$XDG_RUNTIME_DIR/bin/pw-record" <<'EOF'
+#!/usr/bin/env bash
+out="${@: -1}"
+: >"$out"
+sleep 30
+EOF
+chmod +x "$XDG_RUNTIME_DIR/bin/pw-record"
+: >"$XDG_RUNTIME_DIR/notify.log"
+"$ROOT/dictation-ptt.sh" start
+set +e
+"$ROOT/dictation-ptt.sh" stop
+stop_rc=$?
+set -e
+test "$stop_rc" -ne 0
+grep -q "vide\|manquant" "$XDG_RUNTIME_DIR/notify.log"
 echo OK

@@ -34,6 +34,7 @@ Index: [[decisions/index|All ADRs]]
 | PRD | Status |
 | --- | ------ |
 | [[../prd/PRD-2-kiss-audit-harden\|PRD-2]] | approved |
+| [[../prd/PRD-29-dictation-ptt-quiet-streaming\|PRD-29]] | approved |
 
 - PRD template: `prd/template.md`
 - Plan template: `plans/template.md`
