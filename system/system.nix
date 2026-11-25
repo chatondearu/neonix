@@ -3,13 +3,12 @@
   config,
   pkgs,
   ...
-}:
-
-{
+}: {
   # Security hardening for HSI compliance
   security = {
     forcePageTableIsolation = true;
-    protectKernelImage = true;
+    # false: NixOS adds kernel param nohibernate when this is true (blocks S4).
+    protectKernelImage = false;
     apparmor = {
       enable = true;
       killUnconfinedConfinables = false; # true;
@@ -31,11 +30,12 @@
     priority = 5;
   };
 
+  boot.resumeDevice = "/dev/mapper/vg0-swap";
+
   swapDevices = [
     {
-      device = "/dev/disk/by-partuuid/da2c2ea6-323f-426e-9644-328248df2efa";
-      # randomEncryption disabled: nohibernate is set so swap is ephemeral,
-      # and dm_crypt causes deadlocks under memory pressure (bio alloc failure)
+      device = "/dev/mapper/vg0-swap";
+      priority = 1;
     }
   ];
 

@@ -2,9 +2,7 @@
   config,
   pkgs,
   ...
-}:
-
-{
+}: {
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
@@ -32,7 +30,7 @@
   };
 
   # NVIDIA X11/XWayland video driver
-  services.xserver.videoDrivers = [ "nvidia" ];
+  services.xserver.videoDrivers = ["nvidia"];
 
   # Enable NVIDIA drivers
   hardware.nvidia = {
@@ -75,5 +73,5 @@
   # Services systemd for suspend/resume/hibernate
   systemd.services.nvidia-suspend.enable = true;
   systemd.services.nvidia-resume.enable = true;
-  systemd.services.nvidia-hibernate.enable = false;
+  systemd.services.nvidia-hibernate.enable = true;
 }
