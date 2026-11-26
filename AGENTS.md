@@ -171,7 +171,7 @@ This configuration uses **NixOS with flakes** as the primary workflow, **without
   - Mistral Devstral Small 2 2512 (local)
   - Qwen.3 35b A3B (local)
   - GLM 4.7 Flash (local)
-- **neomind live path:** `services.neomind` (system unit, `User=chaton`, package `neomind-desktop`, hive **channel canary** via `NEOMIND_CHANNEL`). Unit PATH must see host `cdamux`. Unit must not PrivateTmp (tmux socket in `/tmp`). Do not run `~/.local/share/neomind/run-live.sh` (cargo) beside it. After the first `sudo nixos-rebuild switch --flake .#neo-nix` that enables the unit, stop `run-live.sh` so only systemd remains. Updates: after a `--canary` publish (or anytime — flake follows git **main**, no `v*` pin): `nix flake update neomind && sudo nixos-rebuild switch --flake .#neo-nix`.
+- **neomind live path:** `services.neomind` (system unit, `User=chaton`, package `neomind-desktop`, hive **channel canary** via `NEOMIND_CHANNEL`). Unit PATH must see host `cdamux`. Unit must not PrivateTmp (tmux socket in `/tmp`). Do not run `~/.local/share/neomind/run-live.sh` (cargo) beside it. After the first `sudo nixos-rebuild switch --flake .#neo-nix` that enables the unit, stop `run-live.sh` so only systemd remains. Updates: after a `--canary` publish (or anytime — flake follows git **main**, no `v*` pin): `nix flake update neomind && sudo nixos-rebuild switch --flake .#neo-nix`. A later GitHub `v*` release must not auto-flip this host to prod.
 - **Kit updates:** `nix flake update ai-dev-kit && sudo nixos-rebuild switch --flake .#neo-nix`.
 
 ### Setting Up a new template for dev Projects or a one-time application
