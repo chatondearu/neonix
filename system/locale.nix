@@ -1,7 +1,8 @@
-{ pkgs, ... }:
-
-{
-  time.hardwareClockInLocalTime = true;
+{pkgs, ...}: {
+  # UTC in the hardware clock (NixOS default). Local TZ disables RTC updates
+  # and makes the boot clock lie until NTP — daemons that snapshot unix time at
+  # start then refuse phone envelopes as stale.
+  time.hardwareClockInLocalTime = false;
   time.timeZone = "Europe/Paris";
   services.timesyncd.enable = true;
 
