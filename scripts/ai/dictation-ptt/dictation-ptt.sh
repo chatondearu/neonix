@@ -250,13 +250,20 @@ finalize_stream_text() {
   local src="$STREAM_OUT_FILE"
   [[ -f "$STREAM_SNAPSHOT_FILE" ]] && src="$STREAM_SNAPSHOT_FILE"
   [[ -f "$src" ]] || return 0
-  # whisper-stream (step>0) rewrites the current window each step, then every
-  # (length/step - 1) steps drops the buffer to --keep ms. Last line is only
-  # the latest fragment. Collapse revisions of one window; append a new window.
-  # Skip trailing-quiet junk: "...", "[Musique]", Amara credits.
+  # whisper-stream -f appends every step rewrite. Prefix/first-two-word overlap
+  # treated mid-phrase corrections as new windows and pasted the draft trail.
+  # Group by the engine's n_new_line (length/step - 1): keep the last non-junk
+  # line of each window, then join committed windows.
+  local nwin=1
+  if [[ "${STREAM_STEP_MS:-0}" -gt 0 ]]; then
+    nwin=$((STREAM_LENGTH_MS / STREAM_STEP_MS - 1))
+  fi
+  if ((nwin < 1)); then
+    nwin=1
+  fi
   tr -d '\r' <"$src" \
     | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
-    | awk '
+    | awk -v nwin="$nwin" '
         function is_junk(s) {
           if (s == "" || s == "..." || s == "…") return 1
           if (s ~ /^\.{2,}$/) return 1
@@ -265,36 +272,17 @@ finalize_stream_text() {
           if (tolower(s) ~ /amara\.org/) return 1
           return 0
         }
-        function norm(s, t) {
-          t = tolower(s)
-          gsub(/[^a-z0-9 ]/, "", t)
-          gsub(/  +/, " ", t)
-          sub(/^ +/, "", t)
-          return t
-        }
-        function first2(s, a, n) {
-          n = split(s, a, / +/)
-          if (n >= 2) return a[1] " " a[2]
-          return s
-        }
-        function is_rev(a, b, na, nb) {
-          na = norm(a); nb = norm(b)
-          if (na == "" || nb == "") return 0
-          if (index(nb, na) || index(na, nb)) return 1
-          if (first2(na) == first2(nb)) return 1
-          return 0
-        }
         function commit() {
-          if (cur == "") return
+          if (last == "") return
           if (acc != "") acc = acc " "
-          acc = acc cur
-          cur = ""
+          acc = acc last
+          last = ""
         }
-        NF == 0 { next }
-        is_junk($0) { next }
-        cur == "" { cur = $0; next }
-        is_rev(cur, $0) { cur = $0; next }
-        { commit(); cur = $0 }
+        {
+          i++
+          if (NF && !is_junk($0)) last = $0
+          if (nwin > 0 && (i % nwin) == 0) commit()
+        }
         END {
           commit()
           print acc
