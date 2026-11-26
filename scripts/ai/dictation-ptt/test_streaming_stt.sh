@@ -150,7 +150,8 @@ stop_started="$SECONDS"
 stop_elapsed=$((SECONDS - stop_started))
 test "$stop_elapsed" -le 2
 "$ROOT/dictation-ptt.sh" status | head -1 | grep -qx idle
-grep -qx "J'essaye de faire des trucs. Le modèle a l'air de couper au bout d'un certain temps. ce que je dis." "$CLIP"
+# 9 fixture lines = one whisper-stream window; keep last non-junk, drop Amara/silence.
+grep -qx "ce que je dis." "$CLIP"
 test ! -f "$XDG_RUNTIME_DIR/batch.log"
 
 # Stream crash after start → critical notify on stop (no silent idle).
