@@ -362,11 +362,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1795465468,
-        "narHash": "sha256-XlczOg91gPRj/odIdXPO67X/KctMYFpN4c6Ll87TVuY=",
+        "lastModified": 1795636625,
+        "narHash": "sha256-A+cmNfwLZ3EoJ9166Fjh2hYzwRTOn+DCcIGinOFM2zA=",
         "ref": "refs/heads/main",
-        "rev": "b18b99df5e67887896fa809eb8e61a1e45344fcb",
-        "revCount": 346,
+        "rev": "86b502f7f8bc23cb96077a8b5e3de3e187586b2b",
+        "revCount": 428,
         "type": "git",
         "url": "ssh://git@github.com/chatondearu/neomind.git"
       },
