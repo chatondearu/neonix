@@ -41,11 +41,11 @@ print_help() {
 neo-vr - Manage WiVRn and WayVR quickly
 
 Usage:
-  neo-vr start          Start wivrn-server and WayVR
+  neo-vr start          Start wivrn-server (WayVR skipped if not on PATH)
   neo-vr restart        Restart both
   neo-vr status         Show WiVRn/WayVR status
   neo-vr logs           Show latest WayVR and WiVRn logs
-  neo-vr wayvr-start    Start WayVR only
+  neo-vr wayvr-start    Start WayVR only (no-op if wayvr is not on PATH)
   neo-vr wayvr-stop     Stop WayVR only
   neo-vr wivrn-start    Start wivrn-server only
   neo-vr wivrn-stop     Stop wivrn-server only
@@ -134,6 +134,11 @@ stop_wivrn_gui() {
 }
 
 start_wayvr() {
+  if ! command -v wayvr >/dev/null; then
+    echo "WayVR skipped: not on PATH (dropped from systemPackages until rustc allows map_or_default)." >&2
+    return 0
+  fi
+
   if is_wayvr_running; then
     echo "WayVR is already running (pid $(<"${WAYVR_PID_FILE}"))."
     return 0
@@ -162,7 +167,9 @@ show_status() {
   fi
   echo
   echo "== WayVR =="
-  if is_wayvr_running; then
+  if ! command -v wayvr >/dev/null; then
+    echo "Not installed (not on PATH)"
+  elif is_wayvr_running; then
     echo "Running (pid $(<"${WAYVR_PID_FILE}"))"
   else
     echo "Not running"
