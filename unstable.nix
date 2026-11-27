@@ -15,14 +15,13 @@
       };
       # cursor-cli: bundled node SIGSEGV after autoPatchelf with patchelf 0.19.2
       # https://github.com/NixOS/nixpkgs/issues/579143
-      patchelf_0_15_2 =
-        unstable-pkgs.patchelf.overrideAttrs (finalAttrs: previousAttrs: {
-          version = "0.15.2";
-          src = unstable-pkgs.fetchurl {
-            url = "https://github.com/NixOS/patchelf/releases/download/${finalAttrs.version}/patchelf-${finalAttrs.version}.tar.bz2";
-            hash = "sha256-F3RfVkFZyOIo/EEtplogSLhGxLa0Igt3y/IkFuAvLXw=";
-          };
-        });
+      patchelf_0_15_2 = unstable-pkgs.patchelf.overrideAttrs (finalAttrs: previousAttrs: {
+        version = "0.15.2";
+        src = unstable-pkgs.fetchurl {
+          url = "https://github.com/NixOS/patchelf/releases/download/${finalAttrs.version}/patchelf-${finalAttrs.version}.tar.bz2";
+          hash = "sha256-F3RfVkFZyOIo/EEtplogSLhGxLa0Igt3y/IkFuAvLXw=";
+        };
+      });
       cursor-cli = unstable-pkgs.cursor-cli.overrideAttrs (old: {
         nativeBuildInputs = [patchelf_0_15_2] ++ (old.nativeBuildInputs or []);
       });
@@ -47,7 +46,18 @@
     inputs.nixpkgs-xr.overlays.default
 
     # aarch64-only patch must not apply on x86_64 (breaks xrizer → wivrn when garnix cache misses).
-    (final: prev: {
+    (final: prev: let
+      unstable-pkgs = import inputs.nixpkgs-unstable {
+        system = prev.stdenv.hostPlatform.system;
+        config = config.nixpkgs.config;
+      };
+    in {
+      # nixpkgs-xr proton-ge-rtsp-bin callPackage needs mkProtonBinDerivation;
+      # 26.05 does not export it. Keep the xr package, supply the helper from unstable.
+      proton-ge-rtsp-bin = final.callPackage "${inputs.nixpkgs-xr}/pkgs/by-name/pr/proton-ge-rtsp-bin/package.nix" {
+        inherit (unstable-pkgs) mkProtonBinDerivation;
+      };
+
       # Quest client (store / APK) is v26.9. nixos-26.05 and our locked
       # nixos-unstable still package 26.6.2; nixpkgs-xr overlays git HEAD
       # onto that recipe. Pin the tagged release so the protocol matches.
