@@ -68,6 +68,15 @@ in
       mainProgram = "cursor";
     };
   }).overrideAttrs (oldAttrs: {
+    # Cursor 3.32 ships @cursor/ripgrep-linux-x64, not @vscode/ripgrep/bin/rg.
+    # buildVscode (vscodeVersion < 1.122) rms that vscode path; stub it so ln can replace it.
+    prePatch =
+      ''
+        mkdir -p resources/app/node_modules/@vscode/ripgrep/bin
+        touch resources/app/node_modules/@vscode/ripgrep/bin/rg
+      ''
+      + (oldAttrs.prePatch or "");
+
     # cursor-agent-exec ships a musl .node; glibc NixOS does not need it (nixpkgs code-cursor).
     autoPatchelfIgnoreMissingDeps =
       (oldAttrs.autoPatchelfIgnoreMissingDeps or [])
