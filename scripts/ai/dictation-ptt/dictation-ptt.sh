@@ -252,7 +252,8 @@ finalize_stream_text() {
   [[ -f "$src" ]] || return 0
   # Inline awk: Nix flakes omit untracked sibling files from the package src,
   # which left stop stuck in transcribing (awk -f missing + set -e).
-  # Same window only on real containment; last rewrite wins (ADR-006).
+  # Same window: shorter line is a token run of the longer (not mid-word
+  # index). Last rewrite wins (ADR-006).
   # shortcut: no --keep-context; it chained outro hallucinations. Upgrade if
   # a French initial-prompt lands in whisper-stream.
   local prog
@@ -310,7 +311,9 @@ function is_rev(a, b, na, nb) {
   na = norm(a)
   nb = norm(b)
   if (na == "" || nb == "") return 0
-  return (index(nb, na) || index(na, nb))
+  if (length(na) <= length(nb))
+    return (index(" " nb " ", " " na " ") > 0)
+  return (index(" " na " ", " " nb " ") > 0)
 }
 function wordkey(w, t) {
   t = fold(w)
