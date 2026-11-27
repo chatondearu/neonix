@@ -116,6 +116,53 @@ grep -qx 'bonjour tout le monde' "$CLIP"
 test ! -f "$XDG_RUNTIME_DIR/batch.log"
 test ! -f "$XDG_RUNTIME_DIR/notify.log"
 
+# F1: 4-token prefix is not a window match; containment keeps the latest rewrite.
+install_stream_fixture() {
+  cat >"$XDG_RUNTIME_DIR/bin/whisper-stream" <<'EOF'
+#!/usr/bin/env bash
+out=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -f) out="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+cat "${XDG_RUNTIME_DIR}/stream-fixture.txt" >"$out"
+sleep 60
+EOF
+  chmod +x "$XDG_RUNTIME_DIR/bin/whisper-stream"
+}
+
+run_stream_fixture() {
+  local expected="$1"
+  rm -f "$CLIP"
+  install_stream_fixture
+  "$ROOT/dictation-ptt.sh" start
+  "$ROOT/dictation-ptt.sh" status | head -1 | grep -qx listening
+  "$ROOT/dictation-ptt.sh" stop
+  "$ROOT/dictation-ptt.sh" status | head -1 | grep -qx idle
+  grep -Fqx "$expected" "$CLIP"
+  test ! -f "$XDG_RUNTIME_DIR/batch.log"
+}
+
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+Il faut que je parte.
+Il faut que je mange avant.
+EOF
+run_stream_fixture "Il faut que je parte. Il faut que je mange avant."
+
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+C'est pour ça que je voulais tester.
+C'est pour ça que ça marche pas.
+EOF
+run_stream_fixture "C'est pour ça que je voulais tester. C'est pour ça que ça marche pas."
+
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+Le chat est sur le tapis merci d
+Le chat est sur le tapis
+EOF
+run_stream_fixture "Le chat est sur le tapis"
+
 # Trailing Whisper junk must not be pasted; SIGINT-deaf stream must die fast.
 rm -f "$CLIP"
 cat >"$XDG_RUNTIME_DIR/bin/whisper-stream" <<'EOF'
