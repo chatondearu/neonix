@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Red-capable loop: start/stop must paste ONCE with the final utterance,
-# not N wl-copy/wtype writes and not concatenated STT rewrites/partials.
+# Paste-once contract: start/stop writes wl-copy + wtype once, never while
+# listening. Same-window lines (real containment) keep the latest rewrite;
+# a shared 4-token prefix is not a window match (ADR-006).
 set -euo pipefail
 ROOT="$(cd -- "$(dirname "$0")" && pwd)"
 export XDG_RUNTIME_DIR="${TMPDIR:-/tmp}/dictation-ptt-paste-$$"
@@ -117,7 +118,7 @@ verdict() {
 
 failed=0
 
-# Same-window prefix rewrites (heuristic stitch already collapses these).
+# Same-window prefix rewrites collapse to the latest line.
 cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
 bonjour
 bonjour tout le
@@ -126,31 +127,28 @@ EOF
 run_session
 verdict prefix "bonjour tout le monde" || failed=1
 
-# Mid-phrase corrections / truncated stems: whisper-stream -f appends each
-# rewrite; consecutive lines do not share a prefix or first-two-words.
-# One window, one final utterance = last non-junk line.
+# Shared 4-word prefix without containment: two windows, both kept.
 cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
-I
-I wan
-wan to
-to diag
-diag nose
-nose why
-why paste
-paste breaks
-breaks here
+Il faut que je parte.
+Il faut que je mange avant.
 EOF
 run_session
-verdict corrections "breaks here" || failed=1
+verdict prefix_collision "Il faut que je parte. Il faut que je mange avant." || failed=1
 
-# Two engine windows (n_new_line=9): last of window 1 + leftover window 2.
-{
-  printf '%s\n' a b c d e f g h
-  printf '%s\n' 'alpha omega'
-  printf '%s\n' 'beta gamma'
-} >"$XDG_RUNTIME_DIR/stream-fixture.txt"
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+C'est pour ça que je voulais tester.
+C'est pour ça que ça marche pas.
+EOF
 run_session
-verdict windows "alpha omega beta gamma" || failed=1
+verdict prefix_collision_longer_first "C'est pour ça que je voulais tester. C'est pour ça que ça marche pas." || failed=1
+
+# Containment: later shorter rewrite wins (not the longer first line).
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+Le chat est sur le tapis merci d
+Le chat est sur le tapis
+EOF
+run_session
+verdict latest_shorter "Le chat est sur le tapis" || failed=1
 
 if [[ "$failed" -ne 0 ]]; then
   echo "LOOP=RED"

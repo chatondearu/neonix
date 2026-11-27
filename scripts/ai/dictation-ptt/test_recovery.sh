@@ -79,4 +79,28 @@ wait "$fake_stt" 2>/dev/null || true
 test ! -f "$STATE_DIR/transcribe.pid"
 test ! -f "$XDG_RUNTIME_DIR/notify.log"
 
+# Dead STREAM/TRANSCRIBE PIDs while state=transcribing: recover to idle, then start.
+# 999999999 is outside pid_max; kill -0 fails without a reuse race.
+plant_dead_pid() {
+  printf '999999999\n' >"$1"
+}
+
+printf 'transcribing\n' >"$STATE_DIR/state"
+plant_dead_pid "$STATE_DIR/stream.pid"
+rm -f "$STATE_DIR/transcribe.pid"
+"$ROOT/dictation-ptt.sh" start
+"$ROOT/dictation-ptt.sh" status | head -1 | grep -qx listening
+test ! -f "$XDG_RUNTIME_DIR/notify.log"
+"$ROOT/dictation-ptt.sh" force-stop
+"$ROOT/dictation-ptt.sh" status | head -1 | grep -qx idle
+
+printf 'transcribing\n' >"$STATE_DIR/state"
+plant_dead_pid "$STATE_DIR/transcribe.pid"
+rm -f "$STATE_DIR/stream.pid"
+"$ROOT/dictation-ptt.sh" toggle
+"$ROOT/dictation-ptt.sh" status | head -1 | grep -qx listening
+test ! -f "$XDG_RUNTIME_DIR/notify.log"
+"$ROOT/dictation-ptt.sh" force-stop
+"$ROOT/dictation-ptt.sh" status | head -1 | grep -qx idle
+
 echo OK

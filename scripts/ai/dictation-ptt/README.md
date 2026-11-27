@@ -258,6 +258,7 @@ bash scripts/ai/dictation-ptt/test_recovery.sh
 bash scripts/ai/dictation-ptt/test_watchers.sh
 bash scripts/ai/dictation-ptt/test_dictation_state.sh
 bash scripts/ai/dictation-ptt/test_streaming_stt.sh
+bash scripts/ai/dictation-ptt/test_paste_once.sh
 ```
 
 ## Failures
