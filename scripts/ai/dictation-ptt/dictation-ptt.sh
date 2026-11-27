@@ -224,7 +224,7 @@ start_stream_session() {
     --step "$STREAM_STEP_MS"
     --length "$STREAM_LENGTH_MS"
     --keep "$STREAM_KEEP_MS"
-    --keep-context
+    --no-fallback
   )
   if [[ -n "${DICTATION_STREAM_CAPTURE:-}" ]]; then
     cmd+=(-c "$DICTATION_STREAM_CAPTURE")
@@ -250,51 +250,136 @@ finalize_stream_text() {
   local src="$STREAM_OUT_FILE"
   [[ -f "$STREAM_SNAPSHOT_FILE" ]] && src="$STREAM_SNAPSHOT_FILE"
   [[ -f "$src" ]] || return 0
-  # whisper-stream -f appends every step rewrite. Prefix/first-two-word overlap
-  # treated mid-phrase corrections as new windows and pasted the draft trail.
-  # Group by the engine's n_new_line (length/step - 1): keep the last non-junk
-  # line of each window, then join committed windows.
-  local nwin=1
-  if [[ "${STREAM_STEP_MS:-0}" -gt 0 ]]; then
-    nwin=$((STREAM_LENGTH_MS / STREAM_STEP_MS - 1))
-  fi
-  if ((nwin < 1)); then
-    nwin=1
-  fi
+  # Inline awk: Nix flakes omit untracked sibling files from the package src,
+  # which left stop stuck in transcribing (awk -f missing + set -e).
+  # shortcut: no --keep-context; it chained outro hallucinations. Upgrade if
+  # a French initial-prompt lands in whisper-stream.
+  local prog
+  prog=$(cat <<'AWK'
+function fold(s, t) {
+  t = tolower(s)
+  gsub(/’/, "'", t)
+  return t
+}
+function is_filler_tok(w, t) {
+  t = fold(w)
+  gsub(/[.,;:!?…«»"()\-]/, "", t)
+  return (t ~ /^(euh|heu+|hum+|hmm+|hm|uh+|um+|pff|bah)$/)
+}
+function is_filler_line(s, n, i, w, keep) {
+  n = split(s, w, / +/)
+  keep = 0
+  for (i = 1; i <= n; i++) {
+    if (w[i] == "" || w[i] == "..." || w[i] == "…") continue
+    if (is_filler_tok(w[i])) continue
+    keep = 1
+    break
+  }
+  return (keep == 0)
+}
+function is_junk(s, t) {
+  if (s == "" || s == "..." || s == "…") return 1
+  if (s ~ /^\.{2,}$/) return 1
+  if (s ~ /^\[[^]]+\]$/) return 1
+  if (s ~ /^\*.*\*$/) return 1
+  t = fold(s)
+  if (t ~ /sous-titres/ || t ~ /amara\.org/) return 1
+  if (t ~ /merci d.avoir regard/) return 1
+  if (t ~ /cette vid[eé]o/) return 1
+  if (t ~ /abonnez-vous/ || t ~ /vous abonner/ || t ~ /abonner . la cha/) return 1
+  if (t ~ /dans la description/) return 1
+  if (t ~ /like and subscribe/ || t ~ /thanks for watching/) return 1
+  if (t ~ /bruit de /) return 1
+  if (t ~ /^[a-z0-9.-]+\.(com|org|net|fr)\.?$/) return 1
+  if (is_filler_line(s)) return 1
+  return 0
+}
+function norm(s, t) {
+  t = fold(s)
+  gsub(/n'/, " ", t)
+  gsub(/[^a-z0-9 ]/, "", t)
+  gsub(/^ne /, "", t)
+  gsub(/ ne /, " ", t)
+  gsub(/  +/, " ", t)
+  sub(/^ +/, "", t)
+  sub(/ +$/, "", t)
+  return t
+}
+function prefixn(s, n, a, k, i, out) {
+  k = split(s, a, / +/)
+  if (k < 1) return ""
+  if (k < n) n = k
+  out = a[1]
+  for (i = 2; i <= n; i++) out = out " " a[i]
+  return out
+}
+function is_rev(a, b, na, nb, p) {
+  na = norm(a)
+  nb = norm(b)
+  if (na == "" || nb == "") return 0
+  if (index(nb, na) || index(na, nb)) return 1
+  p = prefixn(na, 4)
+  if (p != "" && p == prefixn(nb, 4)) return 1
+  return 0
+}
+function wordkey(w, t) {
+  t = fold(w)
+  gsub(/[.,;:!?…«»"()\-]/, "", t)
+  return t
+}
+function scrub(s, n, i, w, prev, out, k) {
+  gsub(/\*[^*]*\*/, " ", s)
+  n = split(s, w, / +/)
+  prev = ""
+  out = ""
+  for (i = 1; i <= n; i++) {
+    if (w[i] == "") continue
+    if (is_filler_tok(w[i])) continue
+    k = wordkey(w[i])
+    if (k != "" && k == prev) continue
+    prev = k
+    if (out != "") out = out " "
+    out = out w[i]
+  }
+  return out
+}
+function commit() {
+  if (cur == "") return
+  if (acc != "") acc = acc " "
+  acc = acc cur
+  cur = ""
+}
+NF == 0 { next }
+is_junk($0) { next }
+cur == "" { cur = $0; next }
+is_rev(cur, $0) { if (length($0) >= length(cur)) cur = $0; next }
+{ commit(); cur = $0 }
+END {
+  commit()
+  print scrub(acc)
+}
+AWK
+)
   tr -d '\r' <"$src" \
     | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
-    | awk -v nwin="$nwin" '
-        function is_junk(s) {
-          if (s == "" || s == "..." || s == "…") return 1
-          if (s ~ /^\.{2,}$/) return 1
-          if (s ~ /^\[[^]]+\]$/) return 1
-          if (s ~ /[Ss]ous-titres/) return 1
-          if (tolower(s) ~ /amara\.org/) return 1
-          return 0
-        }
-        function commit() {
-          if (last == "") return
-          if (acc != "") acc = acc " "
-          acc = acc last
-          last = ""
-        }
-        {
-          i++
-          if (NF && !is_junk($0)) last = $0
-          if (nwin > 0 && (i % nwin) == 0) commit()
-        }
-        END {
-          commit()
-          print acc
-        }
-      '
+    | awk "$prog" || true
+}
+
+worker_pid_alive() {
+  local f="$1" pid=""
+  [[ -f "$f" ]] || return 1
+  pid="$(tr -d '[:space:]' <"$f" || true)"
+  [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null
 }
 
 cmd_start() {
   ensure_state_dir
   if [[ "$(get_state)" == "transcribing" ]]; then
-    notify_err "Transcription en cours."
-    exit 1
+    if worker_pid_alive "$STREAM_PID_FILE" || worker_pid_alive "$TRANSCRIBE_PID_FILE"; then
+      notify_err "Transcription en cours."
+      exit 1
+    fi
+    set_state idle
   fi
   stop_stream_process
   stop_recording_process
@@ -397,7 +482,7 @@ stop_stream_flush_and_paste() {
 
   # Snapshot before kill: shutdown wait used to append silence hallucinations.
   local text
-  text="$(finalize_stream_text)"
+  text="$(finalize_stream_text || true)"
 
   stop_stream_process
 
@@ -569,7 +654,13 @@ cmd_status() {
 cmd_toggle() {
   case "$(get_state)" in
     listening) cmd_stop ;;
-    transcribing) exit 0 ;;
+    transcribing)
+      if worker_pid_alive "$STREAM_PID_FILE" || worker_pid_alive "$TRANSCRIBE_PID_FILE"; then
+        exit 0
+      fi
+      set_state idle
+      with_lock cmd_start
+      ;;
     *) with_lock cmd_start ;;
   esac
 }
