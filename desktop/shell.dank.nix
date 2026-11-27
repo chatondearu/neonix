@@ -6,12 +6,12 @@
 }: {
   # DANK LINUX - https://danklinux.com/docs/dankmaterialshell/nixos
 
-  # Disable the stable dms-shell module (present since nixos-26.05)
+  # Disable the stable dms-shell module (nixos-26.05 still uses this filename)
   disabledModules = ["programs/wayland/dms-shell.nix"];
 
   imports = [
-    # Import the dms-shell module from unstable
-    "${inputs.nixpkgs-unstable}/nixos/modules/programs/wayland/dms-shell.nix"
+    # Unstable renamed the file to dux-shell.nix; programs.dms-shell still aliases
+    "${inputs.nixpkgs-unstable}/nixos/modules/programs/wayland/dux-shell.nix"
     inputs.dms-plugin-registry.nixosModules.default
   ];
 
@@ -42,7 +42,7 @@
     };
 
     # VPN, matugen/cava, and calendar backends are handled by DMS at runtime
-    # (see unstable dms-shell module); khal/matugen/cava stay in systemPackages.
+    # (see unstable dux-shell module); khal/matugen/cava stay in systemPackages.
   };
 
   # Strip trailing whitespace-only lines from .desktop files (SteamVR generates
