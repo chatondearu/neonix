@@ -41,8 +41,7 @@
     # age.secrets.coolify-token (never in the Nix store).
     coolify.enable = true;
     moshiHook = {
-      enable = true;
-      hookTargets = ["cursor"];
+      enable = false;
     };
     systemdUser.conditionUser = "!dms-greeter";
   };
