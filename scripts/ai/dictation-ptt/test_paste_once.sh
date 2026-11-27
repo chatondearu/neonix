@@ -150,6 +150,21 @@ EOF
 run_session
 verdict latest_shorter "Le chat est sur le tapis" || failed=1
 
+# Short French tokens must not match inside a previous word (Ça.→a in avant).
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+Il faut que je mange avant.
+Ça.
+EOF
+run_session
+verdict short_ca "Il faut que je mange avant. Ça." || failed=1
+
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+C'est pour ça que je voulais tester.
+Est.
+EOF
+run_session
+verdict short_est "C'est pour ça que je voulais tester. Est." || failed=1
+
 if [[ "$failed" -ne 0 ]]; then
   echo "LOOP=RED"
   exit 1

@@ -163,6 +163,18 @@ Le chat est sur le tapis
 EOF
 run_stream_fixture "Le chat est sur le tapis"
 
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+Il faut que je mange avant.
+Ça.
+EOF
+run_stream_fixture "Il faut que je mange avant. Ça."
+
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+C'est pour ça que je voulais tester.
+Est.
+EOF
+run_stream_fixture "C'est pour ça que je voulais tester. Est."
+
 # Trailing Whisper junk must not be pasted; SIGINT-deaf stream must die fast.
 rm -f "$CLIP"
 cat >"$XDG_RUNTIME_DIR/bin/whisper-stream" <<'EOF'
