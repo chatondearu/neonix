@@ -4,7 +4,7 @@
   self,
   ...
 }: {
-  # DANK LINUX - https://danklinux.com/docs/dankmaterialshell/nixos
+  # Dux Modular Shell - https://duxlabs.dev/docs/dms/nixos
 
   # Disable the stable dms-shell module (nixos-26.05 still uses this filename)
   disabledModules = ["programs/wayland/dms-shell.nix"];
@@ -13,6 +13,7 @@
     # Unstable renamed the file to dux-shell.nix; programs.dms-shell still aliases
     "${inputs.nixpkgs-unstable}/nixos/modules/programs/wayland/dux-shell.nix"
     inputs.dms-plugin-registry.nixosModules.default
+    inputs.dcal.nixosModules.dank-calendar
   ];
 
   environment.systemPackages = with pkgs; [
@@ -43,6 +44,21 @@
 
     # VPN, matugen/cava, and calendar backends are handled by DMS at runtime
     # (see unstable dux-shell module); khal/matugen/cava stay in systemPackages.
+  };
+
+  # 26.05 ships programs.dsearch; start only in a graphical session.
+  programs.dsearch = {
+    enable = true;
+    systemd = {
+      enable = true;
+      target = "graphical-session.target";
+    };
+  };
+
+  # No 26.05 module; flake option is still programs.dank-calendar.
+  programs.dank-calendar = {
+    enable = true;
+    systemd.enable = true;
   };
 
   # Strip trailing whitespace-only lines from .desktop files (SteamVR generates

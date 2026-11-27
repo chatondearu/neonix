@@ -29,10 +29,10 @@
     in {
       unstable = unstable; # Provides pkgs.unstable for explicit opt-in usage
 
-      # Dank Material Shell stack (paired with niri/quickshell integration)
-      dms-shell = unstable-pkgs.dms-shell;
-      dms-greeter = unstable-pkgs.dms-greeter;
-      dgop = unstable-pkgs.dgop; # System monitoring widgets
+      # Overlay keys stay dms-* / dgop (26.05 option names). Unstable renamed packages.
+      dms-shell = unstable-pkgs.dux-shell or unstable-pkgs.dms-shell;
+      dms-greeter = unstable-pkgs.dux-greeter or unstable-pkgs.dms-greeter;
+      dgop = unstable-pkgs.dux-gop or unstable-pkgs.dgop; # System monitoring widgets
 
       # Niri compositor and related module path in desktop/niri/niri.nix
       niri = unstable-pkgs.niri;

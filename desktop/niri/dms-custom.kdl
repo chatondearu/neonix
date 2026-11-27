@@ -25,3 +25,9 @@ layer-rule {
         xray false
     }
 }
+
+// Float dux-files portal chooser; keep Nautilus tiled/float rules in config.kdl.
+window-rule {
+    match app-id=r#"^dev\.duxlabs\.files$"# title=r#"^(Open|Save|Select|Upload|Export|Import)"#
+    open-floating true
+}

@@ -18,13 +18,21 @@
     quickshell.url = "git+https://git.outfoxxed.me/quickshell/quickshell";
     quickshell.inputs.nixpkgs.follows = "nixpkgs";
 
-    # dms
-    dms.url = "github:AvengeMedia/DankMaterialShell/stable";
+    # dms (Dux Modular Shell; AvengeMedia URLs 301 here)
+    dms.url = "github:duxlabs-dev/dux-shell/stable";
     dms.inputs.nixpkgs.follows = "nixpkgs";
 
     # dms-plugin-registry
-    dms-plugin-registry.url = "github:AvengeMedia/dms-plugin-registry";
+    dms-plugin-registry.url = "github:duxlabs-dev/dux-plugin-registry";
     dms-plugin-registry.inputs.nixpkgs.follows = "nixpkgs";
+
+    # dux-files (flake module; needs unstable Go/Qt, not 26.05)
+    dfiles.url = "github:duxlabs-dev/dux-files";
+    dfiles.inputs.nixpkgs.follows = "nixpkgs-unstable";
+
+    # dux-calendar (no 26.05 NixOS module; flake ships programs.dank-calendar)
+    dcal.url = "github:duxlabs-dev/dux-calendar";
+    dcal.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
     # Affinity v3 (Designer, Photo, Publisher) via Wine
     affinity-nix.url = "github:mrshmllow/affinity-nix";
