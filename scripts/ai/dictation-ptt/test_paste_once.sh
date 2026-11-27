@@ -165,6 +165,28 @@ EOF
 run_session
 verdict short_est "C'est pour ça que je voulais tester. Est." || failed=1
 
+# 1-token infix must not replace a previous sentence that already has that word.
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+C'est pour ça que je voulais tester.
+Ça.
+EOF
+run_session
+verdict infix_ca "C'est pour ça que je voulais tester. Ça." || failed=1
+
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+Le chat est sur le tapis.
+Est.
+EOF
+run_session
+verdict infix_est "Le chat est sur le tapis. Est." || failed=1
+
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+Il a faim.
+Ça.
+EOF
+run_session
+verdict infix_a "Il a faim. Ça." || failed=1
+
 if [[ "$failed" -ne 0 ]]; then
   echo "LOOP=RED"
   exit 1

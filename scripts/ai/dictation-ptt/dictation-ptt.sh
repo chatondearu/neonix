@@ -252,8 +252,8 @@ finalize_stream_text() {
   [[ -f "$src" ]] || return 0
   # Inline awk: Nix flakes omit untracked sibling files from the package src,
   # which left stop stuck in transcribing (awk -f missing + set -e).
-  # Same window: shorter line is a token run of the longer (not mid-word
-  # index). Last rewrite wins (ADR-006).
+  # Same window: 1-token overlap only as prefix; ≥2 tokens may infix.
+  # Last rewrite wins (ADR-006).
   # shortcut: no --keep-context; it chained outro hallucinations. Upgrade if
   # a French initial-prompt lands in whisper-stream.
   local prog
@@ -261,6 +261,7 @@ finalize_stream_text() {
 function fold(s, t) {
   t = tolower(s)
   gsub(/’/, "'", t)
+  gsub(/[çÇ]/, "c", t)
   return t
 }
 function is_filler_tok(w, t) {
@@ -307,13 +308,21 @@ function norm(s, t) {
   sub(/ +$/, "", t)
   return t
 }
+function is_span(short, long, n, pos) {
+  n = split(short, _sp, / +/)
+  if (n < 1) return 0
+  pos = index(" " long " ", " " short " ")
+  if (pos < 1) return 0
+  if (n == 1) return (pos == 1)
+  return 1
+}
 function is_rev(a, b, na, nb) {
   na = norm(a)
   nb = norm(b)
   if (na == "" || nb == "") return 0
   if (length(na) <= length(nb))
-    return (index(" " nb " ", " " na " ") > 0)
-  return (index(" " na " ", " " nb " ") > 0)
+    return is_span(na, nb)
+  return is_span(nb, na)
 }
 function wordkey(w, t) {
   t = fold(w)
