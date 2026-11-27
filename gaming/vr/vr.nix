@@ -17,7 +17,7 @@ in {
   environment.systemPackages = with pkgs; [
     # adb: systemd 258 handles uaccess rules automatically (programs.adb removed in nixos-26.05)
     android-tools
-    wayvr # Stream your desktop to your Quest - nixpkgs-xr
+    # wayvr dropped: nixpkgs-xr tip uses Option::map_or_default (needs rustc 1.93+).
     sidequest # Sideload / extra VR apps for Meta Quest (see Meta developer mode + USB/Wi-Fi)
   ];
 
