@@ -175,6 +175,24 @@ Est.
 EOF
 run_stream_fixture "C'est pour ça que je voulais tester. Est."
 
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+C'est pour ça que je voulais tester.
+Ça.
+EOF
+run_stream_fixture "C'est pour ça que je voulais tester. Ça."
+
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+Le chat est sur le tapis.
+Est.
+EOF
+run_stream_fixture "Le chat est sur le tapis. Est."
+
+cat >"$XDG_RUNTIME_DIR/stream-fixture.txt" <<'EOF'
+Il a faim.
+Ça.
+EOF
+run_stream_fixture "Il a faim. Ça."
+
 # Trailing Whisper junk must not be pasted; SIGINT-deaf stream must die fast.
 rm -f "$CLIP"
 cat >"$XDG_RUNTIME_DIR/bin/whisper-stream" <<'EOF'
