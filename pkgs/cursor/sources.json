@@ -1,6 +1,6 @@
 {
-  "version": "3.29.15",
-  "vscodeVersion": "1.128.0",
-  "source": "https://downloads.cursor.com/production/86776fcb52ca505783155631089b65d646f9b03f/linux/x64/Cursor-3.29.15-x86_64.AppImage",
-  "hash": "sha256-rvFuzyfb6ohiXQbU+UXG0RUsSJ8v7dUDLJeNaW+UF9E="
+  "version": "3.32.4",
+  "vscodeVersion": "1.147.0",
+  "source": "https://downloads.cursor.com/production/0925c4b8226c56947c43f0b555fb98e187a7e029/linux/x64/Cursor-3.32.4-x86_64.AppImage",
+  "hash": "sha256-Sw7U7F4GTBGw30KvzplXJj6kTkgqu4LS9NRoE6Cx+58="
 }
