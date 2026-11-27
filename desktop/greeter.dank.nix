@@ -4,12 +4,12 @@
   inputs,
   ...
 }: {
-  # Disable the stable dms-greeter module (present since nixos-26.05)
+  # Disable the stable dms-greeter module (nixos-26.05 still uses this filename)
   disabledModules = ["services/display-managers/dms-greeter.nix"];
 
   imports = [
-    # Import the dms-greeter module from unstable
-    "${inputs.nixpkgs-unstable}/nixos/modules/services/display-managers/dms-greeter.nix"
+    # Unstable renamed the file to dux-greeter.nix; services.displayManager.dms-greeter still aliases
+    "${inputs.nixpkgs-unstable}/nixos/modules/services/display-managers/dux-greeter.nix"
   ];
 
   services.displayManager.dms-greeter = {
