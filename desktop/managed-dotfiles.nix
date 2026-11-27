@@ -11,7 +11,7 @@
 # | opencode/opencode.json | dev/ai.nix |
 # | agent skills         | dev/aitools.nix → kit nix/maid.nix (flake input, ADR-005) |
 # | .tmux.conf, cda-aitools, cdamux | dev/aitools.nix → ai-dev-kit aitools/templates |
-# | cdamuxd, moshi-hook (systemd)  | ai-dev-kit cda.aitools module |
+# | cdamuxd (systemd)              | ai-dev-kit cda.aitools module |
 # | openvr, openxr, wivrn | gaming/steam.nix, gaming/vr/… |
 #
 # Add new apps here as desktop/<app>.nix + import below.
