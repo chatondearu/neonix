@@ -1,4 +1,8 @@
-{pkgs, lib, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   environment.systemPackages = with pkgs; [
     # Wayland essentials
     xwayland-satellite
@@ -17,8 +21,8 @@
 
     config = {
       niri = {
-        default = [ "gnome" "gtk" ];
-        "org.freedesktop.impl.portal.FileChooser" = "gtk";
+        default = ["gnome" "gtk"];
+        # FileChooser comes from programs.dux-files.portal.preferred (dfiles).
         "org.freedesktop.impl.portal.ScreenCast" = "gnome";
         "org.freedesktop.impl.portal.Screenshot" = "gnome";
       };

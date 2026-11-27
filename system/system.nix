@@ -18,6 +18,9 @@
   # SSD/NVMe TRIM
   services.fstrim.enable = true;
 
+  # DMS doctor optional. No TLP / auto-cpufreq; nvidia.powerManagement is suspend only.
+  services.power-profiles-daemon.enable = true;
+
   hardware = {
     enableRedistributableFirmware = true;
     i2c.enable = true;

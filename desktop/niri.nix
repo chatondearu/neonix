@@ -1,13 +1,17 @@
-{ pkgs, inputs, self, ... }:
-
 {
+  pkgs,
+  inputs,
+  self,
+  ...
+}: {
   # Disable the stable niri module
-  disabledModules = [ "programs/wayland/niri.nix" ];
+  disabledModules = ["programs/wayland/niri.nix"];
 
   imports = [
     # Import the niri module from unstable
     "${inputs.nixpkgs-unstable}/nixos/modules/programs/wayland/niri.nix"
     inputs.nirinit.nixosModules.nirinit
+    inputs.dfiles.nixosModules.dux-files
   ];
 
   # Enable niri compositor
@@ -47,6 +51,7 @@
     papirus-icon-theme
     adwaita-icon-theme
     gnome-themes-extra
+    adw-gtk3 # DMS doctor: GTK3 apps follow the Adwaita/libadwaita theme
 
     # Network management GUI
     networkmanagerapplet
@@ -72,6 +77,25 @@
   # Enable GVFS for network shares
   services.gvfs.enable = true;
   services.gnome.gnome-keyring.enable = true; # secret service
+
+  programs.dux-files = {
+    enable = true;
+    systemd.enable = true;
+    portal = {
+      enable = true;
+      preferred = true;
+      desktop = "niri";
+    };
+  };
+
+  # dux-files desktop entry also claims trash/sftp/smb; nothing else in this repo owns them.
+  xdg.mime.enable = true;
+  xdg.mime.defaultApplications = {
+    "inode/directory" = "dev.duxlabs.files.desktop";
+    "x-scheme-handler/trash" = "dev.duxlabs.files.desktop";
+    "x-scheme-handler/sftp" = "dev.duxlabs.files.desktop";
+    "x-scheme-handler/smb" = "dev.duxlabs.files.desktop";
+  };
 
   # Nirinit configuration - https://github.com/amaanq/nirinit
   services.nirinit.enable = true;
