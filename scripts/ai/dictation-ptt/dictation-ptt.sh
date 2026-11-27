@@ -252,6 +252,7 @@ finalize_stream_text() {
   [[ -f "$src" ]] || return 0
   # Inline awk: Nix flakes omit untracked sibling files from the package src,
   # which left stop stuck in transcribing (awk -f missing + set -e).
+  # Same window only on real containment; last rewrite wins (ADR-006).
   # shortcut: no --keep-context; it chained outro hallucinations. Upgrade if
   # a French initial-prompt lands in whisper-stream.
   local prog
@@ -305,22 +306,11 @@ function norm(s, t) {
   sub(/ +$/, "", t)
   return t
 }
-function prefixn(s, n, a, k, i, out) {
-  k = split(s, a, / +/)
-  if (k < 1) return ""
-  if (k < n) n = k
-  out = a[1]
-  for (i = 2; i <= n; i++) out = out " " a[i]
-  return out
-}
-function is_rev(a, b, na, nb, p) {
+function is_rev(a, b, na, nb) {
   na = norm(a)
   nb = norm(b)
   if (na == "" || nb == "") return 0
-  if (index(nb, na) || index(na, nb)) return 1
-  p = prefixn(na, 4)
-  if (p != "" && p == prefixn(nb, 4)) return 1
-  return 0
+  return (index(nb, na) || index(na, nb))
 }
 function wordkey(w, t) {
   t = fold(w)
@@ -352,7 +342,7 @@ function commit() {
 NF == 0 { next }
 is_junk($0) { next }
 cur == "" { cur = $0; next }
-is_rev(cur, $0) { if (length($0) >= length(cur)) cur = $0; next }
+is_rev(cur, $0) { cur = $0; next }
 { commit(); cur = $0 }
 END {
   commit()
