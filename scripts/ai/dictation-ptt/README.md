@@ -1,6 +1,6 @@
 # dictation-ptt
 
-Local dictation (hold or toggle): capture starts on push, a **local streaming** ASR (`whisper-stream`) consumes PCM **while** the key is held; release stops the stream and pastes the last non-junk rewrite of each stream window at focus (`Ctrl+Shift+V` via `wtype`). No cloud STT, no live overlay or live clipboard of partials.
+Local dictation (hold or toggle): capture starts on push, a **local streaming** ASR (`whisper-stream`) consumes PCM **while** the key is held; release stops the stream and pastes the last decoded step at focus (`Ctrl+Shift+V` via `wtype`). No cloud STT, no live overlay or live clipboard of partials.
 
 WAV captures (for silence / max-duration watchers) go under `/tmp/dictation-ptt-$UID/` (not the small `XDG_RUNTIME_DIR` tmpfs) so long sessions cannot fill the session runtime.
 
@@ -171,7 +171,7 @@ State and lock files: `$XDG_RUNTIME_DIR/dictation-ptt/` (runtime). Audio cache: 
 
 | Backend | Port / binary | Service | Role |
 |---------|---------------|---------|------|
-| **whisper-stream** (ggml-small) | local `whisper-stream` | model via `whisper-cpp-models` | **Default PTT path** — decodes while held; on release paste last `-f` line per window ([[foam/decisions/ADR-006-ptt-streaming-whisper-stream\|ADR-006]]) |
+| **whisper-stream** (ggml-small) | local `whisper-stream` | model via `whisper-cpp-models` | **Default PTT path** — decodes while held; on release paste last `-f` step ([[foam/decisions/ADR-006-ptt-streaming-whisper-stream\|ADR-006]]) |
 | **Parakeet** TDT 0.6B v3 (ONNX, CPU) | `10310` | `parakeet-asr` | Legacy batch — opt-in via `DICTATION_STT=parakeet` |
 | **whisper.cpp** large-v3-turbo (CUDA) | `10311` | `whisper-cpp-asr` | Legacy batch HTTP `/inference` |
 | **Wyoming** faster-whisper | `10300` | `wyoming-faster-whisper-english` | Legacy batch (decode after `AudioStop`) |
@@ -186,7 +186,7 @@ All HTTP listeners are localhost-only (`127.0.0.1` or restricted via `IPAddressA
 
 | Value | Behavior |
 |-------|----------|
-| `auto` | **Streaming**: start `whisper-stream` with capture; stop pastes last `-f` line per window (no batch POST) |
+| `auto` | **Streaming**: start `whisper-stream` with capture; stop pastes last decoded step (no batch POST) |
 | `stream` | Same as `auto` (explicit) |
 | `parakeet` | Force Parakeet OpenAI HTTP (`http://127.0.0.1:10310/v1`) after release |
 | `whisper` | Force whisper.cpp OpenAI HTTP (`http://127.0.0.1:10311`) after release |
@@ -198,7 +198,7 @@ Override batch URLs if needed: `DICTATION_PARAKEET_URL`, `DICTATION_WHISPER_URL`
 
 ## Latency expectations
 
-Target: release → paste uses text already decoded in prior steps (not a full-utterance file upload). `whisper-stream` resets its audio buffer every `--length/--step` cycle (~4.5 s with the defaults); stop keeps the last non-junk `-f` line of each cycle (not every step rewrite) and joins those windows. It does not decode residual PCM on SIGINT — the last in-flight step may be short. Stop snapshots `-f` at key-up and SIGKILLs after ~0.3s if the process ignores SIGINT. Trailing Whisper junk (`...`, `[Musique]`, Amara credits) is skipped.
+Target: release → paste uses text already decoded in prior steps (not a full-utterance file upload). `whisper-stream` resets its audio buffer every `--length/--step` cycle (~4.5 s with the defaults); stop stitches those windows (revisions collapse, new windows append). It does not decode residual PCM on SIGINT — the last in-flight step may be short. Stop snapshots `-f` at key-up and SIGKILLs after ~0.3s if the process ignores SIGINT. Whisper junk (Amara, YouTube outros, `*Bruit…*`) and fillers (`euh`/`hum`, doubled words) are skipped. `--keep-context` is off so a hallucinated outro does not poison the next window.
 
 | Backend | While held | On release |
 |---------|------------|------------|
@@ -258,7 +258,6 @@ bash scripts/ai/dictation-ptt/test_recovery.sh
 bash scripts/ai/dictation-ptt/test_watchers.sh
 bash scripts/ai/dictation-ptt/test_dictation_state.sh
 bash scripts/ai/dictation-ptt/test_streaming_stt.sh
-bash scripts/ai/dictation-ptt/test_paste_once.sh
 ```
 
 ## Failures
