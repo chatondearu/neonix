@@ -71,9 +71,8 @@
     __GL_SYNC_TO_VBLANK = "0"; # Better for VR, disable for desktop if tearing occurs
 
     PROTON_ENABLE_NVAPI = "1";
-    # dxvk-nvapi: integer 100-99999 as major*100+minor (two-digit minor).
-    # 595.112.07 → 59511 (595.11). 59511207 is rejected (>99999).
-    DXVK_NVAPI_DRIVER_VERSION = "59511";
+    # dxvk-nvapi: 100-99999 as major*100+min(minor,99). 595.112.07 auto-detects 59599.
+    DXVK_NVAPI_DRIVER_VERSION = "59599";
 
     # ADDED REQUIRED FOR SCREEN SHARING (Nvidia + Wayland)
     GBM_BACKEND = "nvidia-drm";
