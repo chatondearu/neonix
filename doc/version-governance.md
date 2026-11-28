@@ -5,6 +5,7 @@ This document defines how versions are managed to balance stability and feature 
 ## Current policy
 
 - Stable base: `nixos-26.05` (`nixpkgs` input).
+- NVIDIA proprietary driver is pinned in `system/gpu.nix` (`mkDriver` 595.112.07, `open = false`). Bumping it is a deliberate PR: it invalidates Steam Fossilize/vkd3d shader caches. Do not pin the whole nixpkgs input for this.
 - Targeted unstable surface:
   - `niri`
   - `dms-shell`
