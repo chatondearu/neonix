@@ -10,6 +10,13 @@ META=$(curl -fsSL \
   https://api.github.com/repos/achetronic/parakeet/releases/latest)
 
 VERSION=$(jq -r '.tag_name' <<< "$META" | sed 's/^v//')
+case "$VERSION" in
+  0.4.*) ;;
+  *)
+    echo "Refusing $VERSION: pin 0.4.x until nixpkgs onnxruntime exposes ORT API 25." >&2
+    exit 1
+    ;;
+esac
 CURRENT=$(jq -r '.version' sources.json 2>/dev/null || echo "")
 CURRENT_HASH=$(jq -r '.hash // empty' sources.json 2>/dev/null || echo "")
 

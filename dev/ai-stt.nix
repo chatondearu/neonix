@@ -18,12 +18,12 @@ in {
       Type = "simple";
       User = "chaton";
       Group = "users";
-      # -long-audio: chunk clips above the model single-pass limit (toggle can leave long takes).
-      ExecStart = "${parakeetAsr}/bin/parakeet -port 10310 -gpu cpu -models /hdd/parakeet -long-audio";
+      # v0.4.0: last release that loads nixpkgs onnxruntime (ORT API 24).
+      # v0.5+ requests API 25; -gpu/-long-audio do not exist on this binary.
+      ExecStart = "${parakeetAsr}/bin/parakeet -port 10310 -models /hdd/parakeet";
       Restart = "on-failure";
       RestartSec = 5;
       Environment = [
-        "PARAKEET_GPU=cpu"
         "HOME=/home/chaton"
         "ONNXRUNTIME_LIB=${parakeetAsr}/lib/libonnxruntime.so"
       ];

@@ -5,6 +5,8 @@
   autoPatchelfHook,
   onnxruntime,
 }: let
+  # Pin the binary whose ELF requests ORT API 24 (nixpkgs onnxruntime 1.24.4).
+  # v0.5+ requests API 25; the Microsoft 1.25.1 tarball 404s from this network.
   sourcesJson = lib.importJSON ./sources.json;
   version = sourcesJson.version;
   parakeetSrc = fetchurl {
